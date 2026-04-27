@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { LoginPage } from "./components/LoginPage";
 import { RegisterPage } from "./components/RegisterPage";
@@ -17,39 +18,45 @@ import { createTask, getTasks } from "./services/taskService";
 import { pushNotificationService } from "./services/pushNotificationService";
 import { TaskResponse } from "./types/task";
 
-export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
-  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
+// Wrapper components that handle auth state and routing
+function UserLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [activeView, setActiveView] = useState<"schedule" | "stats">(
-    "schedule"
+    location.pathname === "/dashboard" ? "stats" : "schedule"
   );
-  const [adminView, setAdminView] = useState<"stats" | "users">("stats");
+  const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
-  const [defaultTaskStartDate, setDefaultTaskStartDate] = useState<
-    string | undefined
-  >();
+  const [defaultTaskStartDate, setDefaultTaskStartDate] = useState<string | undefined>();
   const [editingTask, setEditingTask] = useState<Task | undefined>();
   const [conflictWarning, setConflictWarning] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  // Initialize with current date and 7 day range (3 before, current, 3 after)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const initialStart = new Date(today);
+  initialStart.setDate(initialStart.getDate() - 3);
+  const initialEnd = new Date(today);
+  initialEnd.setDate(initialEnd.getDate() + 3);
+
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    start: initialStart,
+    end: initialEnd,
+  });
+
   // Load tasks when component mounts
   useEffect(() => {
-    if (isAuthenticated) {
-      loadTasks();
-      initializePushNotifications();
-    }
-  }, [isAuthenticated]);
+    loadTasks();
+    initializePushNotifications();
+  }, []);
 
   // Initialize push notifications
   const initializePushNotifications = async () => {
     try {
-      // Check if user is already subscribed
       const isSubscribed = await pushNotificationService.isSubscribed();
       
       if (!isSubscribed && Notification.permission === 'default') {
-        // Show a subtle prompt to enable notifications
         console.log('Push notifications available but not enabled');
       }
     } catch (error) {
@@ -61,11 +68,9 @@ export default function App() {
     try {
       const response = await getTasks();
       const uiTasks = response.map((task: TaskResponse) => {
-        // Backend returns time, display as-is (no timezone conversion)
         const startDate = new Date(task.startTime || task.createdAt);
         const deadline = new Date(task.deadline);
 
-        // Format to YYYY-MM-DDTHH:mm (display as-is)
         const formatDate = (date: Date) => {
           return date.getFullYear() + '-' + 
                  String(date.getMonth() + 1).padStart(2, '0') + '-' +
@@ -91,19 +96,6 @@ export default function App() {
     }
   };
 
-  // Initialize with current date and 7 day range (3 before, current, 3 after)
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const initialStart = new Date(today);
-  initialStart.setDate(initialStart.getDate() - 3);
-  const initialEnd = new Date(today);
-  initialEnd.setDate(initialEnd.getDate() + 3);
-
-  const [selectedDateRange, setSelectedDateRange] = useState({
-    start: initialStart,
-    end: initialEnd,
-  });
-
   // Check if a task overlaps with existing tasks
   const checkTaskOverlap = (
     newTask: Omit<Task, "id"> | Task,
@@ -118,7 +110,6 @@ export default function App() {
       const existingStart = new Date(task.startDate).getTime();
       const existingEnd = new Date(task.deadline).getTime();
 
-      // Check if time ranges overlap
       return newStart < existingEnd && newEnd > existingStart;
     });
 
@@ -126,10 +117,8 @@ export default function App() {
   };
 
   const handleSaveTask = async (taskData: Omit<Task, "id"> | Task) => {
-    // Check if this is an UPDATE (has id) or CREATE (no id)
     const isUpdate = "id" in taskData;
 
-    // Check for overlapping tasks first
     if (isUpdate) {
       const overlapping = checkTaskOverlap(taskData, taskData.id);
       if (overlapping.length > 0) {
@@ -154,12 +143,9 @@ export default function App() {
 
     try {
       if (isUpdate) {
-        // UPDATE: TaskFormDialog already called updateTask API
-        // Just update the local state with the backend response
         setTasks(tasks.map(t => t.id === taskData.id ? taskData as Task : t));
         setConflictWarning("");
       } else {
-        // CREATE: Call API and reload tasks
         const startDate = new Date(taskData.startDate);
         const deadline = new Date(taskData.deadline);
         
@@ -172,8 +158,6 @@ export default function App() {
         };
 
         await createTask(apiTask);
-        
-        // Reload all tasks to get the latest data
         await loadTasks();
         setConflictWarning("");
       }
@@ -191,40 +175,19 @@ export default function App() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    // Remove task from local state
     setTasks(tasks.filter(t => t.id !== taskId));
   };
 
-  const handleLogin = (isAdminUser: boolean) => {
-    setIsAuthenticated(true);
-    setIsAdmin(isAdminUser);
-    setShowRegister(false);
-  };
-
-  const handleRegister = () => {
-    setIsAuthenticated(true);
-    setIsAdmin(false);
-    setShowRegister(false);
-  };
-
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setIsAdmin(false);
-    setShowRegister(false);
-    setActiveView("schedule");
-    setAdminView("stats");
-    setIsAIChatOpen(false);
-    setTasks([]);
+    navigate("/login");
   };
 
   const handleCalendarClick = (date: Date, hour: number) => {
     if (activeView !== "schedule") return;
 
-    // Create datetime string for the clicked position
     const clickedDateTime = new Date(date);
     clickedDateTime.setHours(hour, 0, 0, 0);
 
-    // Format for datetime-local input
     const year = clickedDateTime.getFullYear();
     const month = String(clickedDateTime.getMonth() + 1).padStart(2, "0");
     const day = String(clickedDateTime.getDate()).padStart(2, "0");
@@ -270,63 +233,29 @@ export default function App() {
     setSelectedDateRange({ start, end });
   };
 
-  // Show login/register pages if not authenticated
-  if (!isAuthenticated) {
-    if (showRegister) {
-      return (
-        <RegisterPage
-          onRegister={handleRegister}
-          onSwitchToLogin={() => setShowRegister(false)}
-        />
-      );
+  const handleNavigation = (view: "schedule" | "stats") => {
+    setActiveView(view);
+    if (view === "schedule") {
+      navigate("/schedule");
+    } else {
+      navigate("/dashboard");
     }
-    return (
-      <LoginPage
-        onLogin={handleLogin}
-        onSwitchToRegister={() => setShowRegister(true)}
-      />
-    );
-  }
+  };
 
-  // Admin View
-  if (isAdmin) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex">
-        {/* Admin Sidebar */}
-        <AdminSidebar
-          activeView={adminView}
-          onViewChange={setAdminView}
-          onLogout={handleLogout}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-auto">
-          {adminView === "stats" ? <AdminStatsView /> : <AdminUsersView />}
-        </div>
-      </div>
-    );
-  }
-
-  // User View
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
       <TeachSidebar
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleNavigation}
         onNewTask={handleNewTaskClick}
         onLogout={handleLogout}
       />
 
-      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Header */}
         <ScheduleHeader onOpenAIChat={() => setIsAIChatOpen(true)} />
 
-        {/* Content Area */}
         <div className="flex-1 overflow-auto">
           <div className="flex gap-6 p-6 h-full">
-            {/* Main Content - Switch between Stats and Schedule */}
             <div className="flex-1 min-w-0">
               {activeView === "stats" ? (
                 <DashboardView />
@@ -341,7 +270,6 @@ export default function App() {
               )}
             </div>
 
-            {/* Right Panel - Hide when AI Chat is open */}
             <AnimatePresence mode="wait">
               {!isAIChatOpen && (
                 <motion.div
@@ -358,7 +286,6 @@ export default function App() {
                 </motion.div>
               )}
 
-              {/* AI Chat Panel - Slide in from right */}
               {isAIChatOpen && (
                 <motion.div
                   key="ai-chat"
@@ -376,7 +303,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Task Form Dialog */}
       <TaskFormDialog
         open={isTaskFormOpen}
         onClose={() => {
@@ -392,5 +318,89 @@ export default function App() {
         conflictWarning={conflictWarning}
       />
     </div>
+  );
+}
+
+function AdminLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [adminView, setAdminView] = useState<"stats" | "users">(
+    location.pathname === "/admin/users" ? "users" : "stats"
+  );
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
+  const handleNavigation = (view: "stats" | "users") => {
+    setAdminView(view);
+    if (view === "stats") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/admin/users");
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex">
+      <AdminSidebar
+        activeView={adminView}
+        onViewChange={handleNavigation}
+        onLogout={handleLogout}
+      />
+
+      <div className="flex-1 flex flex-col min-w-0 overflow-auto">
+        {adminView === "stats" ? <AdminStatsView /> : <AdminUsersView />}
+      </div>
+    </div>
+  );
+}
+
+function LoginWrapper() {
+  const navigate = useNavigate();
+
+  const handleLogin = (isAdminUser: boolean) => {
+    if (isAdminUser) {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/schedule");
+    }
+  };
+
+  const handleSwitchToRegister = () => {
+    navigate("/register");
+  };
+
+  return <LoginPage onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} />;
+}
+
+function RegisterWrapper() {
+  const navigate = useNavigate();
+
+  const handleRegister = () => {
+    navigate("/schedule");
+  };
+
+  const handleSwitchToLogin = () => {
+    navigate("/login");
+  };
+
+  return <RegisterPage onRegister={handleRegister} onSwitchToLogin={handleSwitchToLogin} />;
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginWrapper />} />
+        <Route path="/register" element={<RegisterWrapper />} />
+        <Route path="/schedule" element={<UserLayout />} />
+        <Route path="/dashboard" element={<UserLayout />} />
+        <Route path="/admin/dashboard" element={<AdminLayout />} />
+        <Route path="/admin/users" element={<AdminLayout />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
