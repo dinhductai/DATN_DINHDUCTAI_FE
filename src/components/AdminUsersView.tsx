@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card } from './ui/card'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ChevronLeft, ChevronRight, Edit, Trash2, Plus, Search } from 'lucide-react'
-import { User, UserFormDialog } from './UserFormDialog'
-import { ConfirmDialog } from './ConfirmDialog'
-import { userService } from '../services/userService'
+import { User, UserFormDialog } from '@/components/UserFormDialog'
+import { ConfirmDialog } from '@/components/ConfirmDialog'
+import { userService } from '@/services/userService'
 
 export function AdminUsersView() {
   const [currentPage, setCurrentPage] = useState(1)

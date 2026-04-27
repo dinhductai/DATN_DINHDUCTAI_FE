@@ -1,10 +1,10 @@
 import { ChevronLeft, ChevronRight, Clock, CheckCircle, XCircle } from 'lucide-react'
-import { Card } from './ui/card'
-import { Button } from './ui/button'
+import { Card } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { useState, useEffect } from 'react'
-import { taskService } from '../services/taskService'
-import type { TaskResponse } from '../types/task'
-import { TaskSearchPanel } from './TaskSearchPanel'
+import { taskService } from '@/services/taskService'
+import type { TaskResponse } from '@/types/task'
+import { TaskSearchPanel } from '@/components/TaskSearchPanel'
 
 interface RightPanelProps {
   selectedDateRange: { start: Date; end: Date }

@@ -1,6 +1,9 @@
 // Push Notification Service
 // Hỗ trợ Web Push Notifications theo đặc tả W3C và backend Task Service
 
+import { API_ENDPOINTS } from '@/lib/api';
+import { tokenStorage } from '@/lib/auth';
+
 interface PushSubscriptionData {
   endpoint: string;
   p256dh: string;
@@ -16,7 +19,17 @@ interface SubscriptionRequest {
 class PushNotificationService {
   // VAPID Public Key từ backend (cần cập nhật từ config BE)
   private vapidPublicKey = 'YOUR_VAPID_PUBLIC_KEY_HERE';
-  private isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+  private get isSupported() {
+    return typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window;
+  }
+
+  private getHeaders = () => {
+    const token = tokenStorage.getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    };
+  };
 
   /**
    * Yêu cầu quyền hiển thị thông báo từ user
@@ -118,18 +131,15 @@ class PushNotificationService {
    */
   private async removeSubscriptionFromServer(): Promise<void> {
     try {
-      const token = localStorage.getItem('token');
+      const token = tokenStorage.getToken();
       if (!token) {
         console.warn('[Push Notification] No token found for unsubscribe request');
         return;
       }
 
-      const response = await fetch('/api/notifications/unsubscribe', {
+      const response = await fetch(API_ENDPOINTS.PUSH_UNSUBSCRIBE, {
         method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+        headers: this.getHeaders()
       });
 
       if (!response.ok) {
@@ -159,19 +169,16 @@ class PushNotificationService {
       console.log('[Push Notification] Sending subscription to backend...');
       console.log('[Push Notification] Endpoint:', subscriptionData.endpoint);
 
-      const token = localStorage.getItem('token');
+      const token = tokenStorage.getToken();
       console.log('[Push Notification] Token from localStorage:', token ? `${token.substring(0, 20)}...` : 'NOT FOUND');
       
       if (!token) {
         throw new Error('No authentication token found');
       }
 
-      const response = await fetch('/api/notifications/subscribe', {
+      const response = await fetch(API_ENDPOINTS.PUSH_SUBSCRIBE, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: this.getHeaders(),
         body: JSON.stringify(subscriptionData)
       });
 

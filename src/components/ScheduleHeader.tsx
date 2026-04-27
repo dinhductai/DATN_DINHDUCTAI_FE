@@ -1,9 +1,9 @@
 import { Search, Sparkles, Bell, MessageSquare, ChevronDown } from 'lucide-react'
-import { Input } from './ui/input'
-import { Button } from './ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
-import { ImageWithFallback } from './figma/ImageWithFallback'
-import { pushNotificationService } from '../services/pushNotificationService'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { ImageWithFallback } from '@/components/figma/ImageWithFallback'
+import { pushNotificationService } from '@/services/pushNotificationService'
 import { useState, useEffect } from 'react'
 
 interface ScheduleHeaderProps {

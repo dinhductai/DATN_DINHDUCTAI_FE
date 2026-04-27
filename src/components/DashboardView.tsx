@@ -1,8 +1,8 @@
-import { Card } from './ui/card'
+import { Card } from '@/components/ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts'
 import { CheckCircle, Clock, Circle, TrendingUp, Calendar } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse } from '../services/taskService'
+import { taskService } from '@/services/taskService'
 
 export function DashboardView() {
   const [completionRate, setCompletionRate] = useState<number>(0)

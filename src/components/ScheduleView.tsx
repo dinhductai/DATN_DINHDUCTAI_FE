@@ -1,8 +1,8 @@
 import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2 } from 'lucide-react'
-import { Button } from './ui/button'
-import { Card } from './ui/card'
-import { Task } from './TaskFormDialog'
-import { PriorityLevel, TaskStatus } from '../types/task'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Task } from '@/components/TaskFormDialog'
+import { PriorityLevel, TaskStatus } from '@/types/task'
 
 interface ScheduleViewProps {
   tasks: Task[]

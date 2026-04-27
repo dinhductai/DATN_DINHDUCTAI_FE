@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Card } from './ui/card'
-import { Input } from './ui/input'
+import { Card } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { Search, Calendar, Clock } from 'lucide-react'
-import { searchTasksByTitle } from '../services/taskService'
-import { TaskResponse } from '../types/task'
+import { searchTasksByTitle } from '@/services/taskService'
+import { TaskResponse } from '@/types/task'
 
 export function TaskSearchPanel() {
   const [searchTitle, setSearchTitle] = useState('')

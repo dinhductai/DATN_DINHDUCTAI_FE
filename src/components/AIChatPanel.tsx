@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { X, Send, Sparkles } from "lucide-react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
-import { getConversationHistory, sendMessage, getConversationId } from '../services/chatService';
-import { ConversationMessage } from '../types/chat';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { getConversationHistory, sendMessage, getConversationId } from '@/services/chatService';
+import { ConversationMessage } from '@/types/chat';
 
 interface AIChatPanelProps {
   onClose: () => void;

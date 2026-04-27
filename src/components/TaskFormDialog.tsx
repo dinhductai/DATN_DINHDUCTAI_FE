@@ -1,16 +1,16 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
-import { Textarea } from './ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Alert, AlertDescription } from './ui/alert'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, Trash2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { updateTask, deleteTask } from '../services/taskService'
+import { updateTask, deleteTask } from '@/services/taskService'
 import { toast } from 'sonner'
 
-import { PriorityLevel, TaskStatus, TaskCreationRequest, TaskResponse } from '../types/task'
+import { PriorityLevel, TaskStatus, TaskCreationRequest, TaskResponse } from '@/types/task'
 
 // Mapping between backend and frontend task interfaces
 export interface Task {

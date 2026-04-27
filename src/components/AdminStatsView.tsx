@@ -1,9 +1,9 @@
-import { Card } from './ui/card'
+import { Card } from '@/components/ui/card'
 import { Users, UserPlus, Activity, Briefcase } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useEffect, useState } from 'react'
-import { userService } from '../services/userService'
-import { taskService, DailyCompletedTasksResponse, TaskPriorityCountResponse } from '../services/taskService'
+import { userService } from '@/services/userService'
+import { taskService } from '@/services/taskService'
 
 export function AdminStatsView() {
   const [totalUsers, setTotalUsers] = useState<number>(0)

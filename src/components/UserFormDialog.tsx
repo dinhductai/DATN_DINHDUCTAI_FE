@@ -1,9 +1,9 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog'
-import { Button } from './ui/button'
-import { Input } from './ui/input'
-import { Label } from './ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useState, useEffect } from 'react'
-import { userService } from '../services/userService'
+import { userService } from '@/services/userService'
 import { toast } from 'sonner'
 
 export interface User {
