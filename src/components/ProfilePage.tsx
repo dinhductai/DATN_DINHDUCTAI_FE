@@ -134,17 +134,20 @@ export function ProfilePage() {
         <div className="grid gap-6">
           {/* Profile Card */}
           <Card className="overflow-hidden">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 pb-16">
-              <CardTitle className="text-white">Personal Account</CardTitle>
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 pb-32">
+              <CardTitle className="text-white text-center">Personal Account</CardTitle>
             </CardHeader>
-            <CardContent className="relative -mt-12">
+            <CardContent className="relative -mt-24">
               {/* Avatar */}
-              <div className="relative w-24 h-24 mx-auto mb-4">
-                <Avatar className="w-24 h-24 border-4 border-white shadow-lg">
+              <div className="relative mx-auto mb-6 flex justify-center">
+                <Avatar 
+                  className="!w-64 !h-64 border-4 border-white shadow-lg"
+                  style={{ width: '256px', height: '256px' }}
+                >
                   {user.profile ? (
-                    <ImageWithFallback src={user.profile} alt={user.userName} />
+                    <ImageWithFallback src={user.profile} alt={user.userName} className="!w-64 !h-64" />
                   ) : null}
-                  <AvatarFallback className="text-2xl bg-blue-100 text-blue-700">
+                  <AvatarFallback className="text-6xl bg-blue-100 text-blue-700">
                     {getInitials(user.userName)}
                   </AvatarFallback>
                 </Avatar>
@@ -200,10 +203,11 @@ export function ProfilePage() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200">
+              <div className="flex gap-4 mt-8 pt-6 border-t border-gray-200 justify-center">
                 <Button
                   onClick={() => setIsUpdateDialogOpen(true)}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700"
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700 px-6"
                 >
                   <Edit2 className="w-4 h-4 mr-2" />
                   Update
@@ -211,7 +215,8 @@ export function ProfilePage() {
                 <Button
                   onClick={() => setIsDeleteDialogOpen(true)}
                   variant="destructive"
-                  className="flex-1 bg-red-600 hover:bg-red-700"
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 px-6"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete
