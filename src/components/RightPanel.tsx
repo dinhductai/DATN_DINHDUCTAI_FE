@@ -4,7 +4,6 @@ import { Button } from './ui/button'
 import { useState, useEffect } from 'react'
 import { taskService } from '../services/taskService'
 import type { TaskResponse } from '../types/task'
-import { TaskSearchPanel } from './TaskSearchPanel'
 
 interface RightPanelProps {
   selectedDateRange: { start: Date; end: Date }
@@ -163,9 +162,6 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
 
   return (
     <div className="w-80 space-y-4 flex-shrink-0">
-      {/* Task Search Panel */}
-      <TaskSearchPanel />
-
       {/* Calendar Card */}
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
