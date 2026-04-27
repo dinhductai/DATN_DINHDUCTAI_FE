@@ -22,8 +22,9 @@ import { TaskResponse } from "./types/task";
 function UserLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [activeView, setActiveView] = useState<"schedule" | "stats">(
-    location.pathname === "/dashboard" ? "stats" : "schedule"
+  const [activeView, setActiveView] = useState<"schedule" | "stats" | "notifications">(
+    location.pathname === "/dashboard" ? "stats" : 
+    location.pathname === "/notifications" ? "notifications" : "schedule"
   );
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
@@ -233,12 +234,14 @@ function UserLayout() {
     setSelectedDateRange({ start, end });
   };
 
-  const handleNavigation = (view: "schedule" | "stats") => {
+  const handleNavigation = (view: "schedule" | "stats" | "notifications") => {
     setActiveView(view);
     if (view === "schedule") {
       navigate("/schedule");
-    } else {
+    } else if (view === "stats") {
       navigate("/dashboard");
+    } else {
+      navigate("/notifications");
     }
   };
 
@@ -259,6 +262,8 @@ function UserLayout() {
             <div className="flex-1 min-w-0">
               {activeView === "stats" ? (
                 <DashboardView />
+              ) : activeView === "notifications" ? (
+                <PushNotificationSettings />
               ) : (
                 <ScheduleView
                   tasks={tasks}
@@ -396,6 +401,7 @@ export default function App() {
         <Route path="/register" element={<RegisterWrapper />} />
         <Route path="/schedule" element={<UserLayout />} />
         <Route path="/dashboard" element={<UserLayout />} />
+        <Route path="/notifications" element={<UserLayout />} />
         <Route path="/admin/dashboard" element={<AdminLayout />} />
         <Route path="/admin/users" element={<AdminLayout />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
