@@ -14,6 +14,7 @@ import { RightPanel } from "./components/RightPanel";
 import { AIChatPanel } from "./components/AIChatPanel";
 import { TaskFormDialog, Task } from "./components/TaskFormDialog";
 import { PushNotificationSettings } from "./components/PushNotificationSettings";
+import { ProfilePage } from "./components/ProfilePage";
 import { createTask, getTasks } from "./services/taskService";
 import { pushNotificationService } from "./services/pushNotificationService";
 import { TaskResponse } from "./types/task";
@@ -33,6 +34,9 @@ function UserLayout() {
   const [conflictWarning, setConflictWarning] = useState<string>("");
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  // Check if we're on the profile page
+  const isProfilePage = location.pathname === "/profile";
+
   // Initialize with current date and 7 day range (3 before, current, 3 after)
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -48,9 +52,11 @@ function UserLayout() {
 
   // Load tasks when component mounts
   useEffect(() => {
-    loadTasks();
-    initializePushNotifications();
-  }, []);
+    if (!isProfilePage) {
+      loadTasks();
+      initializePushNotifications();
+    }
+  }, [isProfilePage]);
 
   // Initialize push notifications
   const initializePushNotifications = async () => {
@@ -245,6 +251,11 @@ function UserLayout() {
     }
   };
 
+  // If on profile page, render only the profile page without sidebar/header
+  if (isProfilePage) {
+    return <ProfilePage />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <TeachSidebar
@@ -402,6 +413,7 @@ export default function App() {
         <Route path="/schedule" element={<UserLayout />} />
         <Route path="/dashboard" element={<UserLayout />} />
         <Route path="/notifications" element={<UserLayout />} />
+        <Route path="/profile" element={<UserLayout />} />
         <Route path="/admin/dashboard" element={<AdminLayout />} />
         <Route path="/admin/users" element={<AdminLayout />} />
         <Route path="/" element={<Navigate to="/login" replace />} />

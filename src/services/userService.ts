@@ -1,6 +1,37 @@
 // services/userService.ts
 
 export const userService = {
+  // Lấy thông tin user hiện tại
+  getMe: async (): Promise<any> => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('[API] Fetching current user, token:', token ? 'present' : 'missing');
+      
+      const response = await fetch('/api/users/me', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('[API] Get me response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Get me error:', response.status, errorText);
+        throw new Error(`Failed to fetch current user: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('[API] Get me data:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+      throw error;
+    }
+  },
+
   // Tạo user mới
   createUser: async (request: { userName: string; password: string; email: string }): Promise<any> => {
     try {

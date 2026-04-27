@@ -8,12 +8,14 @@ import { useState, useEffect } from 'react'
 import { searchTasksByTitle } from '../services/taskService'
 import { TaskResponse } from '../types/task'
 import { SearchResultsOverlay } from './SearchResultsOverlay'
+import { useNavigate } from 'react-router-dom'
 
 interface ScheduleHeaderProps {
   onOpenAIChat: () => void
 }
 
 export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
+  const navigate = useNavigate()
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -148,7 +150,10 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
               <MessageSquare className="w-5 h-5" />
             </Button>
 
-            <Avatar className="w-9 h-9 cursor-pointer">
+            <Avatar 
+              className="w-9 h-9 cursor-pointer hover:ring-2 hover:ring-blue-200 transition-all"
+              onClick={() => navigate('/profile')}
+            >
               <ImageWithFallback 
                 src="https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdHxlbnwxfHx8fDE3NjAwNDEwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
                 alt="User"
