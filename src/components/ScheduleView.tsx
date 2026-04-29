@@ -147,8 +147,29 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
     return { day, dayTasks, positions, isToday }
   })
 
-  // Minutes elapsed since midnight for the current-time indicator
+  // Find the task running right now (if any)
+  const todayEntry = tasksByDay.find(e => e.isToday)
+  const currentTask = todayEntry
+    ? todayEntry.dayTasks.reduce<Task | null>((best, t, i) => {
+        const pos = todayEntry.positions[i]
+        if (!pos) return best
+        // task is "running" if its start is at or before now
+        const taskStart = new Date(t.startDate).getTime()
+        if (taskStart > now.getTime()) return best
+        // pick the one with the latest start (most recently started)
+        if (!best) return t
+        return taskStart > new Date(best.startDate).getTime() ? t : best
+      }, null)
+    : null
   const currentTop = (now.getHours() * 60 + now.getMinutes()) * PX_PER_MINUTE
+
+  // Current time label
+  const currentTimeLabel = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const STATUS_LABELS: Record<string, string> = {
+    TODO: 'To Do',
+    IN_PROGRESS: 'In Progress',
+    DONE: 'Done',
+  }
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -174,11 +195,12 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
   return (
     <div className="flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6 flex-shrink-0">
-        <div>
+      {/* Header row: My Schedule (1/4) | Task info (3/4) */}
+      <div className="flex items-center mb-6 gap-6">
+        {/* Left: My Schedule + date range */}
+        <div className="w-1/4 flex-shrink-0">
           <h1 className="text-2xl font-semibold mb-1">My Schedule</h1>
-          <div className="flex items-center space-x-2 text-gray-500">
+          <div className="flex items-center space-x-1 text-gray-500">
             <Button
               variant="ghost"
               size="icon"
@@ -200,11 +222,69 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
             </Button>
           </div>
         </div>
-        <div />
+
+        {/* Right: task info (3/4) */}
+        <div className="flex-1 min-w-0">
+          {currentTask ? (
+            <div className={`flex items-start gap-4 rounded-2xl px-6 py-4 border-l-8 ${
+              currentTask.priority === 'HIGH' ? 'bg-red-50 border-red-400' :
+              currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400' :
+              'bg-green-50 border-green-400'
+            }`}>
+              {/* Status icon */}
+              <div className="flex-shrink-0 mt-0.5">
+                {currentTask.status === 'DONE' ? (
+                  <CheckCircle2 className="w-5 h-5 text-green-600" />
+                ) : currentTask.status === 'IN_PROGRESS' ? (
+                  <Clock className="w-5 h-5 text-blue-600" />
+                ) : (
+                  <Circle className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+              <div className="flex flex-col min-w-0 flex-1">
+                {/* Time + badges row */}
+                <div className="flex items-center gap-3 flex-wrap mb-1">
+                  <span className="text-base font-bold text-gray-500 mr-1">{currentTimeLabel}</span>
+                  <span className={`text-sm px-3 py-1 rounded-full font-semibold ${
+                    currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
+                    currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+                    'bg-green-100 text-green-700'
+                  }`}>
+                    {currentTask.priority}
+                  </span>
+                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${
+                    currentTask.status === 'DONE' ? 'bg-green-100 text-green-700' :
+                    currentTask.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                    'bg-gray-100 text-gray-600'
+                  }`}>
+                    {STATUS_LABELS[currentTask.status]}
+                  </span>
+                </div>
+                {/* Title */}
+                <div className="text-xl font-bold text-gray-900 truncate mb-1">{currentTask.title}</div>
+                {/* Description */}
+                {currentTask.description && (
+                  <div className="text-sm text-gray-600 mb-1">{currentTask.description}</div>
+                )}
+                {/* Time range */}
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-400">
+                  <Clock className="w-4 h-4" />
+                  {new Date(currentTask.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                  <span>→</span>
+                  {new Date(currentTask.deadline).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 text-base text-gray-400">
+              <div className="w-3 h-3 rounded-full bg-gray-300" />
+              <span>{currentTimeLabel} — No active task</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/*
-        ── Time grid ───────────────────────────────────────────────────────────
+      {/* ── Time grid ───────────────────────────────────────────────────────────
         Layout: [80px time axis] | [flex-1 day columns × N]
         Total time area: 24 h × 60 px/h = 1440 px.
         Each day column is position:relative so its events (position:absolute) are
