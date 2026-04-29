@@ -19,6 +19,11 @@ import { createTask, getTasks } from "./services/taskService";
 import { pushNotificationService } from "./services/pushNotificationService";
 import { TaskResponse } from "./types/task";
 
+// Profile page component that renders without sidebar
+function ProfileWrapper() {
+  return <ProfilePage />;
+}
+
 // Wrapper components that handle auth state and routing
 function UserLayout() {
   const navigate = useNavigate();
@@ -413,7 +418,7 @@ export default function App() {
         <Route path="/schedule" element={<UserLayout />} />
         <Route path="/dashboard" element={<UserLayout />} />
         <Route path="/notifications" element={<UserLayout />} />
-        <Route path="/profile" element={<UserLayout />} />
+        <Route path="/profile" element={<ProfileWrapper />} />
         <Route path="/admin/dashboard" element={<AdminLayout />} />
         <Route path="/admin/users" element={<AdminLayout />} />
         <Route path="/" element={<Navigate to="/login" replace />} />
