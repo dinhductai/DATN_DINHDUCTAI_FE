@@ -1709,6 +1709,10 @@
     line-height: 1;
   }
 
+  .leading-snug {
+    line-height: 1.375;
+  }
+
   .font-bold {
     --tw-font-weight: var(--font-weight-bold);
     font-weight: var(--font-weight-bold);
