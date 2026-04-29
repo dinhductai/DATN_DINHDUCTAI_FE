@@ -382,7 +382,8 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 const duration  = pos.duration
                 const showTitle = duration >= MIN_EVENT_SHOW_TITLE
                 const showDesc  = duration > 60
-                const smallText = duration < 45
+                const tinyText  = duration < 45
+                const vTinyText = duration <= 35
                 const StatusIcon = getStatusIcon(task.status)
                 const bgClass = getPriorityColor(task.priority)
 
@@ -401,16 +402,33 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                     }}
                     onClick={(e) => { e.stopPropagation(); onTaskClick(task) }}
                   >
-                    {showTitle && pos.height >= 26 ? (
-                      <div className="h-full flex items-center justify-between gap-1 px-2">
-                        <span className={`${smallText ? 'text-[8px]' : 'text-[11px]'} font-semibold truncate leading-tight text-white flex-1 min-w-0`}>
-                          {task.title}
-                        </span>
-                        <StatusIcon className={`${smallText ? 'w-2 h-2' : 'w-3 h-3'} flex-shrink-0 opacity-80 text-white`} />
-                        <span className={`${smallText ? 'text-[7px]' : 'text-[10px]'} opacity-80 text-white flex-shrink-0`}>
-                          {formatTime(task.startDate)} - {formatTime(task.deadline)}
-                        </span>
-                      </div>
+                    {showTitle ? (
+                      showDesc ? (
+                        <div className="h-full flex flex-col justify-center px-2 py-1 gap-0.5">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-[11px] font-semibold truncate leading-tight text-white flex-1 min-w-0">
+                              {task.title}
+                            </span>
+                            <StatusIcon className="w-3 h-3 flex-shrink-0 opacity-80 text-white" />
+                          </div>
+                          <span className="text-[9px] truncate leading-tight text-white opacity-80">
+                            {task.description || 'No description'}
+                          </span>
+                          <span className="text-[9px] opacity-80 text-white flex-shrink-0">
+                            {formatTime(task.startDate)} - {formatTime(task.deadline)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="h-full flex items-center justify-between gap-1 px-2">
+                          <span className={`${vTinyText ? 'text-[6px]' : tinyText ? 'text-[8px]' : 'text-[11px]'} font-semibold truncate leading-tight text-white flex-1 min-w-0`}>
+                            {task.title}
+                          </span>
+                          <StatusIcon className="w-3 h-3 flex-shrink-0 opacity-80 text-white" />
+                          <span className={`${vTinyText ? 'text-[5px]' : tinyText ? 'text-[7px]' : 'text-[10px]'} opacity-80 text-white flex-shrink-0`}>
+                            {formatTime(task.startDate)} - {formatTime(task.deadline)}
+                          </span>
+                        </div>
+                      )
                     ) : (
                       /* Tiny event — color bar only */
                       <div className="w-full h-full" />
