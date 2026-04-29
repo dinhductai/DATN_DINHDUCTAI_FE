@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2 } from 'lucide-react'
 import { Button } from './ui/button'
 import { Task } from './TaskFormDialog'
@@ -22,6 +23,7 @@ interface TaskPosition {
 interface ScheduleViewProps {
   tasks: Task[]
   selectedDateRange: { start: Date; end: Date }
+  currentDate?: Date            // defaults to now; lets parent control it in tests
   onDateRangeChange: (direction: 'prev' | 'next') => void
   onCalendarClick: (date: Date, hour: number) => void
   onTaskClick: (task: Task) => void
@@ -101,10 +103,23 @@ function resolveOverlaps(taskList: Task[], day: Date): TaskPosition[] {
   })
 }
 
+// ─── Hook ────────────────────────────────────────────────────────────────────────
+
+/** Returns the current Date, updated every 30 seconds so the time indicator re-renders. */
+function useCurrentTime(): Date {
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 30_000)
+    return () => clearInterval(id)
+  }, [])
+  return now
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCalendarClick, onTaskClick }: ScheduleViewProps) {
-  
+export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRangeChange, onCalendarClick, onTaskClick }: ScheduleViewProps) {
+  const now = useCurrentTime()
+
   // ── Derived data per day ──────────────────────────────────────────────────
   const daysDiff    = Math.ceil((selectedDateRange.end.getTime() - selectedDateRange.start.getTime()) / (1000 * 60 * 60 * 24))
   const numberOfDays = Math.min(Math.max(daysDiff, 3), 15)
@@ -116,9 +131,11 @@ export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCa
   })
 
   // Group tasks by the day they fall on so overlap resolution is per-column
+  const todayStr = now.toDateString()
   const tasksByDay = days.map(day => {
     const dayStart = new Date(day); dayStart.setHours(0, 0, 0, 0)
     const dayEnd   = new Date(day); dayEnd.setHours(23, 59, 59, 999)
+    const isToday  = day.toDateString() === todayStr
 
     const dayTasks = tasks.filter(task => {
       const s = new Date(task.startDate)
@@ -127,8 +144,11 @@ export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCa
     })
 
     const positions = resolveOverlaps(dayTasks, day)
-    return { day, dayTasks, positions }
+    return { day, dayTasks, positions, isToday }
   })
+
+  // Minutes elapsed since midnight for the current-time indicator
+  const currentTop = (now.getHours() * 60 + now.getMinutes()) * PX_PER_MINUTE
 
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -180,10 +200,7 @@ export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCa
             </Button>
           </div>
         </div>
-        <div className="text-sm text-gray-500">
-          (GMT +06:00) Public Time
-          <ChevronRight className="w-4 h-4 inline ml-1" />
-        </div>
+        <div />
       </div>
 
       {/*
@@ -214,7 +231,7 @@ export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCa
         </div>
 
         {/* ── Day columns ───────────────────────────────────────── */}
-        {tasksByDay.map(({ day, dayTasks, positions }, dayIdx) => (
+        {tasksByDay.map(({ day, dayTasks, positions, isToday }, dayIdx) => (
           <div
             key={dayIdx}
             className="flex-1 relative border-r border-gray-200 last:border-r-0"
@@ -252,6 +269,34 @@ export function ScheduleView({ tasks, selectedDateRange, onDateRangeChange, onCa
                   />
                 ))}
               </div>
+
+              {/* Current-time indicator — only on today's column */}
+              {isToday && (
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    top: currentTop,
+                    left: 0,
+                    right: 0,
+                    height: 2,
+                    backgroundColor: '#3b82f6',
+                    zIndex: 50,
+                  }}
+                >
+                  {/* Blue dot on the left edge */}
+                  <div
+                    className="absolute"
+                    style={{
+                      left: -4,
+                      top: -3,
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      backgroundColor: '#3b82f6',
+                    }}
+                  />
+                </div>
+              )}
 
               {/* Events */}
               {dayTasks.map((task, taskIdx) => {
