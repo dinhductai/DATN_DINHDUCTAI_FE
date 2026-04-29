@@ -8,7 +8,7 @@ import { PriorityLevel, TaskStatus } from '../types/task'
 const PX_PER_MINUTE = 1   // 1px per minute  →  1 hour = 60px
 const HOUR_HEIGHT   = 60  // px per hour (must match grid lines in JSX)
 const DAY_HEADER_HEIGHT = 56 // px — sticky header height per day column
-const MIN_EVENT_SHOW_TITLE = 15 // minutes — below this, no title displayed
+const MIN_EVENT_SHOW_TITLE = 30 // minutes — below this, no title displayed
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TaskPosition {
@@ -226,13 +226,13 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
         {/* Right: task info (3/4) */}
         <div className="flex-1 min-w-0">
           {currentTask ? (
-            <div className={`flex items-start gap-4 rounded-2xl px-6 py-4 border-l-8 ${
+            <div className={`flex items-start gap-6 rounded-2xl px-10 py-8 border-l-8 ${
               currentTask.priority === 'HIGH' ? 'bg-red-50 border-red-400' :
               currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400' :
               'bg-green-50 border-green-400'
             }`}>
               {/* Status icon */}
-              <div className="flex-shrink-0 mt-0.5">
+              <div className="flex-shrink-0 mt-1">
                 {currentTask.status === 'DONE' ? (
                   <CheckCircle2 className="w-5 h-5 text-green-600" />
                 ) : currentTask.status === 'IN_PROGRESS' ? (
@@ -241,10 +241,10 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                   <Circle className="w-5 h-5 text-gray-400" />
                 )}
               </div>
-              <div className="flex flex-col min-w-0 flex-1">
-                {/* Time + badges row */}
-                <div className="flex items-center gap-3 flex-wrap mb-1">
-                  <span className="text-base font-bold text-gray-500 mr-1">{currentTimeLabel}</span>
+              <div className="flex flex-col min-w-0 flex-1 gap-3">
+                {/* Line 1: time + badges */}
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-base font-bold text-gray-500">{currentTimeLabel}</span>
                   <span className={`text-sm px-3 py-1 rounded-full font-semibold ${
                     currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
                     currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
@@ -260,18 +260,14 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                     {STATUS_LABELS[currentTask.status]}
                   </span>
                 </div>
-                {/* Title */}
-                <div className="text-xl font-bold text-gray-900 truncate mb-1">{currentTask.title}</div>
-                {/* Description */}
-                {currentTask.description && (
-                  <div className="text-sm text-gray-600 mb-1">{currentTask.description}</div>
-                )}
-                {/* Time range */}
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-400">
-                  <Clock className="w-4 h-4" />
-                  {new Date(currentTask.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                  <span>→</span>
-                  {new Date(currentTask.deadline).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                {/* Line 2: title + time range */}
+                <div className="flex items-center gap-4 flex-wrap">
+                  <span className="text-2xl font-bold text-gray-900 truncate">{currentTask.title}</span>
+                  <span className="text-sm font-medium text-gray-400 flex-shrink-0">
+                    {new Date(currentTask.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {' → '}
+                    {new Date(currentTask.deadline).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                  </span>
                 </div>
               </div>
             </div>
@@ -314,7 +310,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
         {tasksByDay.map(({ day, dayTasks, positions, isToday }, dayIdx) => (
           <div
             key={dayIdx}
-            className="flex-1 relative border-r border-gray-200 last:border-r-0"
+            className="flex-1 relative border-r border-gray-200 last:border-r-0 px-1"
           >
             {/* Day header — sticky at the top */}
             <div
@@ -384,8 +380,9 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 if (!pos || pos.height < 1) return null
 
                 const duration  = pos.duration
-                const showTitle = duration > MIN_EVENT_SHOW_TITLE
+                const showTitle = duration >= MIN_EVENT_SHOW_TITLE
                 const showDesc  = duration > 60
+                const smallText = duration < 45
                 const StatusIcon = getStatusIcon(task.status)
                 const bgClass = getPriorityColor(task.priority)
 
@@ -394,32 +391,25 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                     key={task.id}
                     className={`absolute overflow-hidden cursor-pointer hover:opacity-80 transition-opacity rounded-sm ${bgClass}`}
                     style={{
-                      top:    `${pos.top}px`,
-                      height: `${pos.height}px`,
+                      top:    `${pos.top + 2}px`,
+                      height: `${Math.max(pos.height - 4, 1)}px`,
                       left:   `${pos.left}%`,
-                      width:  `${pos.width}%`,
+                      width:  `calc(${pos.width}% - 8px)`,
+                      marginLeft: '4px',
+                      marginRight: '4px',
                       zIndex: 10,
                     }}
                     onClick={(e) => { e.stopPropagation(); onTaskClick(task) }}
                   >
-                    {showTitle ? (
-                      <div className="p-1 h-full flex flex-col">
-                        <div className="flex items-start justify-between gap-0.5">
-                          <span className="text-[11px] font-semibold truncate leading-tight text-white">
-                            {task.title}
-                          </span>
-                          <StatusIcon className="w-3 h-3 flex-shrink-0 opacity-80 text-white" />
-                        </div>
-                        {pos.height >= 36 && (
-                          <span className="text-[10px] opacity-80 text-white mt-0.5 truncate block">
-                            {formatTime(task.startDate)}
-                          </span>
-                        )}
-                        {showDesc && pos.height >= 52 && (
-                          <div className="text-[10px] opacity-70 mt-0.5 leading-snug text-white line-clamp-2 overflow-hidden">
-                            {task.description}
-                          </div>
-                        )}
+                    {showTitle && pos.height >= 26 ? (
+                      <div className="h-full flex items-center justify-between gap-1 px-2">
+                        <span className={`${smallText ? 'text-[8px]' : 'text-[11px]'} font-semibold truncate leading-tight text-white flex-1 min-w-0`}>
+                          {task.title}
+                        </span>
+                        <StatusIcon className={`${smallText ? 'w-2 h-2' : 'w-3 h-3'} flex-shrink-0 opacity-80 text-white`} />
+                        <span className={`${smallText ? 'text-[7px]' : 'text-[10px]'} opacity-80 text-white flex-shrink-0`}>
+                          {formatTime(task.startDate)} - {formatTime(task.deadline)}
+                        </span>
                       </div>
                     ) : (
                       /* Tiny event — color bar only */
