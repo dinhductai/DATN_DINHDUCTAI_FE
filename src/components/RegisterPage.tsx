@@ -3,6 +3,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Eye, EyeOff, Upload } from 'lucide-react'
+import { register } from '../services/authService'
 
 interface RegisterPageProps {
   onRegister: () => void
@@ -14,25 +15,66 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [profile, setProfile] = useState<File | null>(null)
+  const [profile, setProfile] = useState<string>('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setProfile(e.target.files[0])
+      const file = e.target.files[0]
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setProfile(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
-    // Check if all fields are "123"
-    if (username === '123' && email === '123' && password === '123' && profile) {
+    setError('')
+
+    if (!username.trim()) {
+      setError('Username is required')
+      return
+    }
+
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+
+    if (!password.trim()) {
+      setError('Password is required')
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      return
+    }
+
+    setIsLoading(true)
+
+    const requestBody = {
+      userName: username.trim(),
+      email: email.trim(),
+      password: password,
+      profile: profile || 'https://example.com/default-avatar.jpg'
+    }
+
+    console.log('Registration request:', requestBody)
+    console.log('Profile data length:', profile ? profile.length : 0)
+
+    try {
+      await register(requestBody)
+      console.log('Registration successful')
       onRegister()
-    } else if (!profile) {
-      setError('Please upload a profile picture')
-    } else {
-      setError('All fields must be "123" to register')
+    } catch (err) {
+      console.error('Registration catch error:', err)
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -130,7 +172,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
                 >
                   <Upload className="w-5 h-5 mr-2 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    {profile ? profile.name : 'Choose a file'}
+                    {profile ? 'Image selected' : 'Choose a file'}
                   </span>
                 </label>
               </div>
@@ -139,8 +181,9 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             <Button
               type="submit"
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
+              disabled={isLoading}
             >
-              Create Account
+              {isLoading ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
