@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Send, Sparkles } from "lucide-react";
+import { X, Send, Sparkles, CheckCircle, AlertCircle, Clock } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { getConversationHistory, sendMessage, getConversationId } from '../services/chatService';
-import { ConversationMessage } from '../types/chat';
+import { ChatAIResponse, ConversationMessage } from '../types/chat';
 
 interface AIChatPanelProps {
   onClose: () => void;
@@ -69,20 +69,34 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
     setIsLoading(true);
 
     try {
-      const response = await sendMessage(inputMessage, currentConversationId);
-      
-      const aiMessage: ConversationMessage = {
-        chatId: Date.now() + 1,
-        conversationId: response.conversationId,
-        role: 'ASSISTANT',
-        content: response.chatAIResponses,
-        createAt: new Date().toISOString(),
-        userId: 0
-      };
-      setMessages(prev => [...prev, aiMessage]);
-      
-      if (!currentConversationId) {
+      const response: ChatAIResponse = await sendMessage(inputMessage, currentConversationId);
+
+      if (!currentConversationId && response.conversationId) {
         setCurrentConversationId(response.conversationId);
+      }
+
+      if (response.structured) {
+        setMessages(prev => [
+          ...prev,
+          {
+            chatId: Date.now() + 1,
+            conversationId: response.conversationId,
+            role: 'ASSISTANT',
+            content: JSON.stringify(response),
+            createAt: new Date().toISOString(),
+            userId: 0
+          }
+        ]);
+      } else {
+        const aiMessage: ConversationMessage = {
+          chatId: Date.now() + 1,
+          conversationId: response.conversationId,
+          role: 'ASSISTANT',
+          content: response.message,
+          createAt: new Date().toISOString(),
+          userId: 0
+        };
+        setMessages(prev => [...prev, aiMessage]);
       }
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -164,10 +178,113 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                         <div className="w-7 h-7 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center flex-shrink-0 mt-1">
                           <Sparkles className="w-3.5 h-3.5 text-white" />
                         </div>
-                        <div className="bg-gray-100 rounded-lg p-3">
-                          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-                            {message.content}
-                          </p>
+                        <div className="bg-gray-100 rounded-lg p-3 space-y-3 min-w-0">
+                          {(() => {
+                            let parsed: ChatAIResponse | null = null;
+                            try {
+                              if (message.content.trim().startsWith('{')) {
+                                parsed = JSON.parse(message.content) as ChatAIResponse;
+                              }
+                            } catch { /* not JSON, treat as plain text */ }
+
+                            if (!parsed) {
+                              return (
+                                <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+                                  {message.content}
+                                </p>
+                              );
+                            }
+
+                            return (
+                              <>
+                                <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+                                  {parsed.message}
+                                </p>
+
+                                {parsed.summary && (
+                                  <div className="flex flex-wrap gap-2 text-xs">
+                                    <span className="px-2 py-1 bg-gray-200 rounded-md">
+                                      Tổng: {parsed.summary.totalTasks}
+                                    </span>
+                                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-md">
+                                      <Clock className="inline w-3 h-3 mr-1" />
+                                      Đang làm: {parsed.summary.pendingTasks}
+                                    </span>
+                                    {parsed.summary.overdueTasks > 0 && (
+                                      <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md">
+                                        <AlertCircle className="inline w-3 h-3 mr-1" />
+                                        Quá hạn: {parsed.summary.overdueTasks}
+                                      </span>
+                                    )}
+                                    <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md">
+                                      <CheckCircle className="inline w-3 h-3 mr-1" />
+                                      Hoàn thành: {parsed.summary.completedToday}
+                                    </span>
+                                  </div>
+                                )}
+
+                                {parsed.tasks && parsed.tasks.length > 0 && (
+                                  <div className="space-y-2">
+                                    {parsed.tasks.map((task, idx) => (
+                                      <div key={idx} className="text-xs bg-white border border-gray-200 rounded-lg p-2">
+                                        <div className="flex items-center gap-1 font-medium text-gray-800">
+                                          <span>{task.emoji}</span>
+                                          <span>{task.title}</span>
+                                          <span className={`ml-1 px-1.5 py-0.5 rounded text-white text-[10px] ${
+                                            task.priority === 'HIGH' ? 'bg-red-500' :
+                                            task.priority === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'
+                                          }`}>
+                                            {task.priority}
+                                          </span>
+                                        </div>
+                                        {task.deadline && (
+                                          <p className="text-gray-500 mt-0.5">
+                                            <Clock className="inline w-3 h-3 mr-1" />
+                                            {task.deadline}
+                                          </p>
+                                        )}
+                                        {task.reason && (
+                                          <p className="text-gray-400 mt-0.5 italic">{task.reason}</p>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {parsed.recommendations && parsed.recommendations.length > 0 && (
+                                  <div>
+                                    <p className="text-xs font-semibold text-gray-600 mb-1">Ưu tiên:</p>
+                                    {parsed.recommendations
+                                      .sort((a, b) => a.order - b.order)
+                                      .map((rec, idx) => (
+                                        <div key={idx} className="text-xs text-gray-700 flex items-start gap-1">
+                                          <span className="font-bold">{rec.order}.</span>
+                                          <span className="font-medium">{rec.taskTitle}</span>
+                                          {rec.reason && <span className="text-gray-500">— {rec.reason}</span>}
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+
+                                {parsed.motivation && (
+                                  <div className="text-xs italic text-center text-purple-700 bg-purple-50 rounded p-2">
+                                    {parsed.motivation}
+                                  </div>
+                                )}
+
+                                {parsed.followUp && (
+                                  <button
+                                    className="text-xs text-blue-600 hover:underline"
+                                    onClick={() => {
+                                      setInputMessage(parsed!.followUp!);
+                                    }}
+                                  >
+                                    💬 {parsed.followUp}
+                                  </button>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     )}

@@ -1,13 +1,14 @@
 import { ChatAIResponse, ConversationPage } from '../types/chat';
 
 const API_URL = '/api/ai';
+const RICH_API_URL = '/api/ai/rich';
 
 export const getConversationHistory = async (page = 0, size = 10): Promise<ConversationPage> => {
   try {
     const token = localStorage.getItem('token');
     console.log('[API] Fetching conversation history, page:', page, 'size:', size, 'token:', token ? 'present' : 'missing');
     
-    const response = await fetch(`${API_URL}?page=${page}&size=${size}`, {
+    const response = await fetch(`${API_URL}/history?page=${page}&size=${size}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -31,24 +32,26 @@ export const getConversationHistory = async (page = 0, size = 10): Promise<Conve
 };
 
 export const sendMessage = async (
-  message: string, 
+  message: string,
   conversationId?: string
 ): Promise<ChatAIResponse> => {
   try {
     const token = localStorage.getItem('token');
     console.log('[API] Sending message, conversationId:', conversationId || 'new', 'token:', token ? 'present' : 'missing');
-    
-    const params = new URLSearchParams();
-    params.append('message', message);
+
+    const body = new URLSearchParams();
+    body.append('message', message);
     if (conversationId) {
-      params.append('conversationId', conversationId);
+      body.append('conversationId', conversationId);
     }
 
-    const response = await fetch(`${API_URL}?${params.toString()}`, {
+    const response = await fetch(RICH_API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`
-      }
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
     });
 
     console.log('[API] Send message response status:', response.status, response.statusText);
@@ -59,13 +62,9 @@ export const sendMessage = async (
       throw new Error(`Failed to send message: ${response.status} ${errorText}`);
     }
 
-    const data = await response.json();
+    const data: ChatAIResponse = await response.json();
     console.log('[API] Send message data:', data);
-    // Parse AI response với \n newline handling
-    return {
-      ...data,
-      chatAIResponses: data.chatAIResponses ? data.chatAIResponses.replace(/\\n/g, '\n') : ''
-    };
+    return data;
   } catch (error) {
     console.error('Error sending message:', error);
     throw error;
