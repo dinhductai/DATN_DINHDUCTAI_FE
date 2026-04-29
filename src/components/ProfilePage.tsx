@@ -29,6 +29,16 @@ export function ProfilePage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [darkMode, setDarkMode] = useState(false)
   const [language, setLanguage] = useState('ENG')
+  const [bannerIndex, setBannerIndex] = useState(0)
+
+  const banners = ['/banner1.jpg', '/banner2.jpg']
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBannerIndex(prev => (prev + 1) % banners.length)
+    }, 30000)
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     const fakeUser: UserProfile = {
@@ -167,36 +177,63 @@ export function ProfilePage() {
 
       <div className="px-6 py-8" style={{ maxWidth: '1100px', marginLeft: 'auto', marginRight: 'auto' }}>
         {/* Cover Banner */}
-        <div className="bg-gradient-to-r from-black via-red-900 to-red-600 rounded-t-2xl h-32 relative" />
+        <div
+          className="rounded-t-2xl overflow-hidden relative"
+          style={{ height: '160px' }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              width: `${banners.length * 100}%`,
+              height: '100%',
+              transform: `translateX(-${bannerIndex * (100 / banners.length)}%)`,
+              transition: 'transform 0.8s ease-in-out',
+            }}
+          >
+            {banners.map((banner, index) => (
+              <div
+                key={index}
+                style={{
+                  width: `${100 / banners.length}%`,
+                  height: '100%',
+                  backgroundImage: `url(${banner})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  flexShrink: 0,
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
         {/* Profile Section */}
-        <div className="bg-white px-8 pb-8 rounded-b-2xl shadow-sm">
-          <div className="flex items-end gap-4 -mt-16 mb-6">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-white p-1 shadow-lg">
-                <img 
-                  src={user.profile || ''} 
-                  alt={user.userName} 
-                  className="w-full h-full rounded-xl object-cover" 
+        <div className="bg-white rounded-b-2xl shadow-sm" style={{ padding: '0 32px 32px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '16px', marginTop: '-64px', marginBottom: '24px' }}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <div style={{ width: '128px', height: '128px', borderRadius: '16px', background: 'white', padding: '4px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
+                <img
+                  src={user.profile || ''}
+                  alt={user.userName}
+                  style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }}
                 />
               </div>
-              <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg">
-                <span className="text-lg">✓</span>
+              <div style={{ position: 'absolute', bottom: '-8px', right: '-8px', width: '36px', height: '36px', background: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 10px rgba(0,0,0,0.2)', fontSize: '16px' }}>
+                ✓
               </div>
             </div>
-            <div className="pb-2">
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-2xl">{user.userName}</h1>
-                <span className="text-sm text-blue-600 flex items-center gap-1">
-                  <User className="w-3 h-3" />
+            <div style={{ paddingBottom: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', margin: 0 }}>{user.userName}</h1>
+                <span style={{ fontSize: '0.875rem', color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <User style={{ width: '12px', height: '12px' }} />
                   Personal Account
                 </span>
-                <span className="text-sm text-green-600 flex items-center gap-1">
-                  <span className="w-1 h-1 bg-green-600 rounded-full" />
+                <span style={{ fontSize: '0.875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ width: '6px', height: '6px', background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
                   Verified
                 </span>
               </div>
-              <p className="text-gray-500">{user.email}</p>
+              <p style={{ color: '#6b7280', margin: 0 }}>{user.email}</p>
             </div>
           </div>
         </div>
