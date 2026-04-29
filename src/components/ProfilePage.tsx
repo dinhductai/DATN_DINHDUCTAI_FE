@@ -263,14 +263,14 @@ export function ProfilePage() {
                 <h2 className="text-xl">Account Information</h2>
                 <button
                   onClick={() => setIsUpdateDialogOpen(true)}
-                  className="text-blue-600 hover:text-blue-700 text-sm flex items-center gap-1"
+                  className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1 transition-colors"
                 >
                   <span>✎</span>
                   Edit
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                   <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
                     <User className="w-5 h-5" />
                   </div>
@@ -279,7 +279,7 @@ export function ProfilePage() {
                     <p className="text-gray-900">{user.userName}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                   <div className="w-10 h-10 bg-purple-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
                     <Mail className="w-5 h-5" />
                   </div>
@@ -288,7 +288,7 @@ export function ProfilePage() {
                     <p className="text-gray-900">{user.email}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                   <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
                     <ImageIcon className="w-5 h-5" />
                   </div>
@@ -297,7 +297,7 @@ export function ProfilePage() {
                     <p className="text-gray-900">{user.profile ? 'Uploaded' : 'Not set'}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
+                <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
                   <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
                     <Calendar className="w-5 h-5" />
                   </div>
@@ -314,37 +314,61 @@ export function ProfilePage() {
               <h2 className="text-xl mb-6">Settings & Preferences</h2>
               <div className="space-y-3">
                 <div>
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors group"
-                  >
-                    <div className="w-10 h-10 bg-orange-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                      <Bell className="w-5 h-5" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
+                    <div style={{ width: '40px', height: '40px', background: '#f97316', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                      <Bell style={{ width: '20px', height: '20px' }} />
                     </div>
-                    <div className="flex-1 text-left">
-                      <p className="text-gray-900">Notifications</p>
-                      <p className="text-sm text-gray-500">Enable</p>
-                    </div>
-                    <ChevronRight className={`w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-transform ${showNotifications ? 'rotate-90' : ''}`} />
-                  </button>
+                    <button
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Notifications</p>
+                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                        {notificationsEnabled ? 'Enabled' : 'Disabled'}
+                      </p>
+                    </button>
+                    <button
+                      onClick={() => setShowNotifications(!showNotifications)}
+                      style={{ padding: '4px', borderRadius: '6px', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                    >
+                      <ChevronRight style={{ width: '20px', height: '20px', color: '#9ca3af', transition: 'transform 0.2s', transform: showNotifications ? 'rotate(90deg)' : 'rotate(0deg)' }} />
+                    </button>
+                  </div>
 
                   {showNotifications && (
-                    <div className="mt-3 ml-14 p-4 bg-gray-50 rounded-xl">
-                      <div className="flex items-center justify-between">
+                    <div style={{ marginTop: '8px', marginLeft: '56px', padding: '16px', background: '#f9fafb', borderRadius: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <p className="text-gray-900">Enable Notifications</p>
-                          <p className="text-sm text-gray-500">Receive alerts and updates</p>
+                          <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Push Notifications</p>
+                          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Browser push notifications</p>
                         </div>
                         <button
                           onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            notificationsEnabled ? 'bg-blue-600' : 'bg-gray-300'
-                          }`}
+                          style={{
+                            position: 'relative',
+                            height: '28px',
+                            width: '52px',
+                            borderRadius: '14px',
+                            background: notificationsEnabled ? '#2563eb' : '#d1d5db',
+                            transition: 'background 0.2s',
+                            border: 'none',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                            padding: 0,
+                          }}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            style={{
+                              position: 'absolute',
+                              top: '3px',
+                              left: notificationsEnabled ? '27px' : '3px',
+                              height: '22px',
+                              width: '22px',
+                              borderRadius: '50%',
+                              background: 'white',
+                              transition: 'left 0.2s',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                            }}
                           />
                         </button>
                       </div>
@@ -353,68 +377,107 @@ export function ProfilePage() {
                 </div>
 
                 <div>
-                  <button
-                    onClick={() => setShowSystemSettings(!showSystemSettings)}
-                    className="w-full flex items-center gap-4 p-4 hover:bg-gray-50 rounded-xl transition-colors group"
-                  >
-                    <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white flex-shrink-0">
-                      <Settings className="w-5 h-5" />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
+                    <div style={{ width: '40px', height: '40px', background: '#22c55e', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
+                      <Settings style={{ width: '20px', height: '20px' }} />
                     </div>
-                    <div className="flex-1 text-left">
-                      <p className="text-gray-900">System Settings</p>
-                      <p className="text-sm text-gray-500">Dark mode, {language}</p>
-                    </div>
-                    <ChevronRight className={`w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-transform ${showSystemSettings ? 'rotate-90' : ''}`} />
-                  </button>
+                    <button
+                      onClick={() => setShowSystemSettings(!showSystemSettings)}
+                      style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>System Settings</p>
+                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{language}</p>
+                    </button>
+                    <button
+                      onClick={() => setShowSystemSettings(!showSystemSettings)}
+                      style={{ padding: '4px', borderRadius: '6px', background: 'none', border: 'none', cursor: 'pointer', flexShrink: 0 }}
+                    >
+                      <ChevronRight style={{ width: '20px', height: '20px', color: '#9ca3af', transition: 'transform 0.2s', transform: showSystemSettings ? 'rotate(90deg)' : 'rotate(0deg)' }} />
+                    </button>
+                  </div>
 
                   {showSystemSettings && (
-                    <div className="mt-3 ml-14 p-4 bg-gray-50 rounded-xl space-y-4">
+                    <div style={{ marginTop: '12px', marginLeft: '56px', padding: '16px', background: '#f9fafb', borderRadius: '12px' }}>
                       {/* Dark Mode Toggle */}
-                      <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-                        <div className="flex items-center gap-3">
-                          {darkMode ? <Moon className="w-5 h-5 text-gray-700" /> : <Sun className="w-5 h-5 text-gray-700" />}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          {darkMode
+                            ? <Moon style={{ width: '20px', height: '20px', color: '#374151' }} />
+                            : <Sun style={{ width: '20px', height: '20px', color: '#374151' }} />
+                          }
                           <div>
-                            <p className="text-gray-900">Dark Mode</p>
-                            <p className="text-sm text-gray-500">Toggle dark/light theme</p>
+                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Dark Mode</p>
+                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Toggle dark/light theme</p>
                           </div>
                         </div>
                         <button
                           onClick={() => setDarkMode(!darkMode)}
-                          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                            darkMode ? 'bg-blue-600' : 'bg-gray-300'
-                          }`}
+                          style={{
+                            position: 'relative',
+                            height: '28px',
+                            width: '52px',
+                            borderRadius: '14px',
+                            background: darkMode ? '#2563eb' : '#d1d5db',
+                            transition: 'background 0.2s',
+                            border: 'none',
+                            cursor: 'pointer',
+                            flexShrink: 0,
+                            padding: 0,
+                          }}
                         >
                           <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                              darkMode ? 'translate-x-6' : 'translate-x-1'
-                            }`}
+                            style={{
+                              position: 'absolute',
+                              top: '3px',
+                              left: darkMode ? '27px' : '3px',
+                              height: '22px',
+                              width: '22px',
+                              borderRadius: '50%',
+                              background: 'white',
+                              transition: 'left 0.2s',
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                            }}
                           />
                         </button>
                       </div>
 
                       {/* Language Toggle */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <Globe className="w-5 h-5 text-gray-700" />
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                          <Globe style={{ width: '20px', height: '20px', color: '#374151' }} />
                           <div>
-                            <p className="text-gray-900">Language</p>
-                            <p className="text-sm text-gray-500">Select your language</p>
+                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Language</p>
+                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Select your language</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2 bg-white rounded-lg p-1 border border-gray-200">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '8px', padding: '4px', border: '1px solid #e5e7eb' }}>
                           <button
                             onClick={() => setLanguage('VIE')}
-                            className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                              language === 'VIE' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              transition: 'all 0.15s',
+                              background: language === 'VIE' ? '#2563eb' : 'transparent',
+                              color: language === 'VIE' ? 'white' : '#4b5563',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
                           >
                             VIE
                           </button>
                           <button
                             onClick={() => setLanguage('ENG')}
-                            className={`px-3 py-1.5 rounded-md text-sm transition-colors ${
-                              language === 'ENG' ? 'bg-blue-600 text-white' : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              transition: 'all 0.15s',
+                              background: language === 'ENG' ? '#2563eb' : 'transparent',
+                              color: language === 'ENG' ? 'white' : '#4b5563',
+                              border: 'none',
+                              cursor: 'pointer',
+                            }}
                           >
                             ENG
                           </button>
