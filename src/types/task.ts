@@ -34,11 +34,10 @@ export interface TaskResponse {
   taskId: number;
   title: string;
   description: string;
-  startTime: string; // ISO date string
-  deadline: string; // ISO date string
+  deadline: string; // ISO date string (UTC)
   status: TaskStatus;
   priority: PriorityLevel;
-  createdAt: string; // ISO date string
+  createdAt: string; // ISO date string — this IS startTime (BE naming inconsistency)
   completedAt: string | null; // ISO date string
   userId: number;
   isEvent?: boolean;

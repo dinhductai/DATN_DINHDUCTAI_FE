@@ -80,25 +80,15 @@ function UserLayout() {
     try {
       const response = await getTasks();
       const uiTasks = response.map((task: TaskResponse) => {
-        const startDate = new Date(task.startTime || task.createdAt);
-        const deadline = new Date(task.deadline);
-
-        const formatDate = (date: Date) => {
-          return date.getFullYear() + '-' + 
-                 String(date.getMonth() + 1).padStart(2, '0') + '-' +
-                 String(date.getDate()).padStart(2, '0') + 'T' +
-                 String(date.getHours()).padStart(2, '0') + ':' +
-                 String(date.getMinutes()).padStart(2, '0');
-        };
-        
         return {
           id: task.taskId.toString(),
           title: task.title,
           description: task.description,
-          startDate: formatDate(startDate),
-          deadline: formatDate(deadline),
+          startDate: task.createdAt,
+          deadline: task.deadline,
           priority: task.priority,
-          status: task.status
+          status: task.status,
+          isEvent: task.isEvent,
         };
       });
       setTasks(uiTasks);

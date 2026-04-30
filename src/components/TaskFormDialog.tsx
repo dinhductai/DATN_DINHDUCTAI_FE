@@ -32,7 +32,8 @@ export const mapTaskResponseToTask = (response: TaskResponse): Task => ({
   startDate: response.createdAt,
   deadline: response.deadline,
   priority: response.priority,
-  status: response.status
+  status: response.status,
+  isEvent: response.isEvent,
 })
 
 export const mapTaskToCreationRequest = (task: Omit<Task, 'id'>): TaskCreationRequest => ({

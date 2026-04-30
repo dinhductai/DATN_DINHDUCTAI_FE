@@ -39,8 +39,8 @@ interface ScheduleViewProps {
  * assign a column index to each event.  Overlapping events share the total
  * column count; non-overlapping events reuse column space.
  */
-function resolveOverlaps(taskList: Task[], day: Date): TaskPosition[] {
-  if (!taskList.length) return []
+function resolveOverlaps(taskList: Task[], day: Date): Map<number, TaskPosition> {
+  if (!taskList.length) return new Map()
 
   // Build (startMin, endMin) pairs clamped to this day
   const events = taskList.map(t => {
@@ -78,29 +78,29 @@ function resolveOverlaps(taskList: Task[], day: Date): TaskPosition[] {
   }
 
   const totalCols = columns.length
+  const result = new Map<number, TaskPosition>()
 
-  // Build positions
-  return events.map(ev => {
-    // Find which column this event is in
+  for (const ev of events) {
     let colIndex = 0
     for (let i = 0; i < columns.length; i++) {
       if (columns[i].includes(ev)) { colIndex = i; break }
     }
 
-    const colCount = totalCols
-    const pctWidth = 100 / colCount
+    const pctWidth = 100 / totalCols
     const left     = colIndex * pctWidth
     const width    = pctWidth - 0.5 // tiny gap between overlapping events
 
-    return {
+    result.set(ev.task.id, {
       top:      ev.start * PX_PER_MINUTE,
       height:   Math.max(4, (ev.end - ev.start) * PX_PER_MINUTE),
       duration: ev.end - ev.start,
       left,
       width,
       index: colIndex,
-    }
-  })
+    })
+  }
+
+  return result
 }
 
 // ─── Hook ────────────────────────────────────────────────────────────────────────
@@ -150,8 +150,8 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
   // Find the task running right now (if any)
   const todayEntry = tasksByDay.find(e => e.isToday)
   const currentTask = todayEntry
-    ? todayEntry.dayTasks.reduce<Task | null>((best, t, i) => {
-        const pos = todayEntry.positions[i]
+    ? todayEntry.dayTasks.reduce<Task | null>((best, t) => {
+        const pos = todayEntry.positions.get(t.id)
         if (!pos) return best
         // task is "running" if its start is at or before now
         const taskStart = new Date(t.startDate).getTime()
@@ -375,8 +375,8 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
               )}
 
               {/* Events */}
-              {dayTasks.map((task, taskIdx) => {
-                const pos = positions[taskIdx]
+              {dayTasks.map((task) => {
+                const pos = positions.get(task.id)
                 if (!pos || pos.height < 1) return null
 
                 const duration  = pos.duration
