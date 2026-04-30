@@ -305,21 +305,21 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent
-        className="sm:max-w-[560px] !p-0 !pt-0"
-        style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}
+        className="!p-0 !pt-0"
+        style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden', maxWidth: '560px', width: '100%' }}
       >
           {/* Fixed top section */}
           <div className="px-6 pb-0 shrink-0">
-            <DialogHeader className="pb-0">
-              <DialogTitle className="flex items-center gap-3">
-                {isEditMode ? 'Edit Task' : 'Create New Task'}
+            <DialogHeader className="pb-0 flex flex-row items-center gap-4">
+              <div className="flex items-center">
+                <h2 className="text-lg leading-none font-semibold">{isEditMode ? 'Edit Task' : isEvent ? 'Create New Event' : 'Create New Task'}</h2>
                 {!isEditMode && (
                   <>
                     <button
                       type="button"
                       onClick={handleToggleEvent}
                       title={isEvent ? 'Switch to normal task' : 'Convert to event'}
-                      className={`p-1.5 rounded-md border-2 transition-all duration-200 cursor-pointer ${
+                      className={`ml-4 p-1.5 rounded-md border-2 transition-all duration-200 cursor-pointer ${
                         isEvent
                           ? 'border-blue-500 bg-blue-50 text-blue-600 hover:bg-blue-100'
                           : 'border-dashed border-gray-300 text-gray-400 hover:border-blue-400 hover:text-blue-500'
@@ -327,12 +327,16 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     >
                       <CalendarDays className="w-4 h-4" />
                     </button>
-                    <span className="text-xs font-medium text-blue-600 border border-blue-200 bg-blue-50 rounded-full px-2 py-0.5">
+                    <span className={`ml-2 text-xs font-medium border rounded-full px-2 py-0.5 transition-colors duration-200 ${
+                      isEvent
+                        ? 'text-blue-600 border-blue-200 bg-blue-50'
+                        : 'text-gray-400 border-gray-200 bg-gray-50'
+                    }`}>
                       Event Mode
                     </span>
                   </>
                 )}
-              </DialogTitle>
+              </div>
             </DialogHeader>
           </div>
 
@@ -353,7 +357,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               <Label htmlFor="title">Title *</Label>
               <Input
                 id="title"
-                placeholder="Enter task title"
+                placeholder={isEvent ? 'Enter event title' : 'Enter task title'}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -365,7 +369,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Enter task description"
+                placeholder={isEvent ? 'Enter event description' : 'Enter task description'}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
