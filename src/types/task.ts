@@ -20,6 +20,27 @@ export interface EventCreationRequest {
   startTime?: string; // ISO date string
 }
 
+export interface EventUpdateRequest {
+  eventDescription?: string;
+  linkEvent?: string;
+  location?: string;
+  isOnline?: boolean;
+  reminderMinutesBefore?: number;
+  invitedEmails?: string[];
+}
+
+export interface TaskUpdateRequest {
+  title?: string;
+  description?: string;
+  deadline?: string;
+  createdAt?: string;
+  completedAt?: string | null;
+  priority?: PriorityLevel;
+  status?: TaskStatus;
+  eventId?: number;
+  eventUpdateRequest?: EventUpdateRequest;
+}
+
 export interface TaskCreationRequest {
   title: string;
   description: string;

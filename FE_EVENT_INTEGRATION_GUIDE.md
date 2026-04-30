@@ -137,14 +137,19 @@ Response `201 Created`:
 - `invitedEmails` = danh sách email được mời (không cần thêm email người tạo, hệ thống tự xử lý)
 - `reminderMinutesBefore` = số phút trước khi event bắt đầu để gửi email reminder (mặc định: 30)
 
-### 4.3 Cập nhật Event
+### 4.3 Cập nhật Task / Event
 
 **PUT** `/api/tasks/{taskId}`
 
 ```json
 {
   "title": "Họp đầu năm mới 2026 - Chuẩn bị (cập nhật)",
+  "description": "Mô tả đã được cập nhật",
+  "deadline": "2026-05-01T14:50:00+07:00",
+  "createdAt": "2026-05-01T14:00:00+07:00",
+  "completedAt": null,
   "priority": "MEDIUM",
+  "status": "IN_PROGRESS",
   "eventId": 5,
   "eventUpdateRequest": {
     "eventDescription": "Họp đầu năm mới 2026 - Tổng kết năm cũ",
@@ -161,9 +166,13 @@ Response `201 Created`:
 ```
 
 **Lưu ý:**
-- Khi thay đổi `reminderMinutesBefore`, hệ thống tự tính lại thời điểm gửi reminder trong Redis
+- `createdAt` = thời gian bắt đầu task/event (startTime). Khi thay đổi, hệ thống tự tính lại lịch reminder trong Redis
+- `completedAt` = thời gian hoàn thành. Nếu gửi `null` hoặc không gửi → để trống
+- Khi `status = DONE` và không gửi `completedAt` → tự động set = thời điểm hiện tại
+- Khi `status != DONE` và gửi `completedAt = null` → xóa thời gian hoàn thành
+- Khi thay đổi `reminderMinutesBefore` hoặc `createdAt`, hệ thống tự tính lại thời điểm gửi reminder trong Redis
 - Khi thay đổi `invitedEmails`, hệ thống gửi message đến email-service để cập nhật danh sách lời mời
-- Nếu eventId không thuộc về task này → trả về lỗi
+- Nếu `eventId` không thuộc về task này → trả về lỗi
 
 ### 4.4 Xóa Event (xóa task + event)
 
@@ -188,7 +197,21 @@ Hoặc xóa task kèm event cụ thể:
 | `isEvent` | Boolean | Không | `true` = tạo kèm event |
 | `eventCreationRequest` | Object | Có khi `isEvent=true` | Thông tin chi tiết event |
 
-### 5.2 EventCreationRequest
+### 5.2 TaskUpdateRequest
+
+| Trường | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `title` | String | Không | Tiêu đề task |
+| `description` | String | Không | Mô tả task |
+| `deadline` | String (ISO 8601 OffsetDateTime) | Không | Thời hạn task |
+| `createdAt` | String (ISO 8601 OffsetDateTime) | Không | Thời gian bắt đầu task/event (startTime). Thay đổi sẽ cập nhật lại lịch reminder |
+| `completedAt` | String (ISO 8601 OffsetDateTime) | Không | Thời gian hoàn thành. `null` = chưa hoàn thành |
+| `priority` | Enum: `HIGH`, `MEDIUM`, `LOW` | Không | Độ ưu tiên |
+| `status` | Enum: `TODO`, `IN_PROGRESS`, `DONE` | Không | Trạng thái. Khi = `DONE` và `completedAt` không gửi → tự set thời gian hiện tại |
+| `eventId` | Long | Không | ID event cần cập nhật (bắt buộc kèm `eventUpdateRequest`) |
+| `eventUpdateRequest` | Object | Không | Thông tin event cần cập nhật |
+
+### 5.3 EventCreationRequest
 
 | Trường | Kiểu | Bắt buộc | Mô tả |
 |---|---|---|---|
@@ -200,7 +223,18 @@ Hoặc xóa task kèm event cụ thể:
 | `invitedEmails` | List\<String\> | Không | Danh sách email được mời tham gia |
 | `startTime` | String (ISO 8601 OffsetDateTime) | Không | Thời gian bắt đầu event |
 
-### 5.3 TaskResponse
+### 5.4 EventUpdateRequest
+
+| Trường | Kiểu | Bắt buộc | Mô tả |
+|---|---|---|---|
+| `eventDescription` | String | Không | Mô tả / nội dung sự kiện |
+| `linkEvent` | String | Không | Đường link cuộc họp online |
+| `location` | String | Không | Địa điểm nếu là event offline |
+| `isOnline` | Boolean | Không | `true` = online, `false` = offline |
+| `reminderMinutesBefore` | Integer | Không | Số phút trước khi gửi email reminder. Thay đổi sẽ cập nhật lại lịch Redis |
+| `invitedEmails` | List\<String\> | Không | Danh sách email mới. Hệ thống sẽ replace toàn bộ danh sách cũ |
+
+### 5.5 TaskResponse
 
 | Trường | Kiểu | Mô tả |
 |---|---|---|
@@ -267,5 +301,6 @@ Tạo event ──> Email Service lưu invitedEmails ──> Redis lưu reminder
 - [ ] Hiển thị trường `isEvent` và `eventId` trong TaskResponse
 - [ ] Trang chi tiết task/event: gọi `GET /api/tasks/{taskId}` để lấy thông tin đầy đủ
 - [ ] Trang danh sách: `GET /api/tasks` trả về `isEvent` để phân biệt task/event
+- [ ] Form cập nhật: hỗ trợ đầy đủ `createdAt` (startTime), `completedAt`, `description`, `deadline`, `status`
 - [ ] Form cập nhật: hỗ trợ cập nhật event fields kèm `eventId`
 - [ ] Nút xóa: gọi `DELETE /api/tasks/{taskId}?eventId={eventId}` nếu là event

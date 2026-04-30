@@ -10,18 +10,18 @@ import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../services/taskService'
 import { toast } from 'sonner'
 
-import { PriorityLevel, TaskStatus, TaskCreationRequest, TaskResponse, EventCreationRequest } from '../types/task'
+import { PriorityLevel, TaskStatus, TaskCreationRequest, TaskResponse, EventCreationRequest, EventUpdateRequest } from '../types/task'
 
 export interface Task {
   id: string
   title: string
   description: string
-  startDate: string // ISO string
-  deadline: string // ISO string
+  startDate: string // ISO string (= createdAt from BE, which is actually startTime)
+  deadline: string  // ISO string
   priority: PriorityLevel
   status: TaskStatus
-  // Event fields (populated when the task was created as an event)
   isEvent?: boolean
+  eventId?: number | null
   eventCreationRequest?: EventCreationRequest
 }
 
@@ -34,6 +34,7 @@ export const mapTaskResponseToTask = (response: TaskResponse): Task => ({
   priority: response.priority,
   status: response.status,
   isEvent: response.isEvent,
+  eventId: response.eventId,
 })
 
 export const mapTaskToCreationRequest = (task: Omit<Task, 'id'>): TaskCreationRequest => ({
@@ -82,6 +83,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
   useEffect(() => {
     if (editingTask) {
+      console.log('[TaskFormDialog] editingTask loaded:', { id: editingTask.id, isEvent: editingTask.isEvent, eventId: editingTask.eventId })
       setTitle(editingTask.title)
       setDescription(editingTask.description)
 
@@ -99,9 +101,8 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       setDeadline(formatForInput(editingTask.deadline))
       setPriority(editingTask.priority)
       setStatus(editingTask.status)
-      // Event fields are not restored from editingTask here; edit-mode event updates are
-      // out of scope for this phase.
-      setIsEvent(false)
+      // Populate event fields when editing an event (blank defaults — BE accepts partial updates)
+      setIsEvent(!!editingTask.isEvent)
       setEventDescription('')
       setLinkEvent('')
       setLocation('')
@@ -203,15 +204,31 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       const startTimeISO = new Date(startDate).toISOString()
 
       if (isEditMode && editingTask) {
-        const response = await updateTask(Number(editingTask.id), {
+        const updatePayload: Parameters<typeof updateTask>[1] = {
           title,
           description,
+          createdAt: new Date(startDate).toISOString(),
           deadline: deadlineISO,
           priority,
-          status
-        })
+          status,
+        }
 
-        toast.success('Task updated successfully')
+        if (isEvent && editingTask.eventId != null) {
+          const nonEmptyEmails = invitedEmails.filter((e) => e.trim() !== '')
+          const eventUpd: EventUpdateRequest = {
+            ...(eventDescription.trim() && { eventDescription: eventDescription.trim() }),
+            isOnline,
+            ...(isOnline ? (linkEvent.trim() && { linkEvent: linkEvent.trim() }) : (location.trim() && { location: location.trim() })),
+            reminderMinutesBefore,
+            ...(nonEmptyEmails.length > 0 && { invitedEmails: nonEmptyEmails }),
+          }
+          updatePayload.eventId = editingTask.eventId
+          updatePayload.eventUpdateRequest = eventUpd
+        }
+
+        const response = await updateTask(Number(editingTask.id), updatePayload)
+
+        toast.success(isEvent ? 'Event updated successfully' : 'Task updated successfully')
 
         const updatedTask: Task = {
           id: response.taskId.toString(),
@@ -220,13 +237,14 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
           startDate: response.createdAt,
           deadline: response.deadline,
           priority: response.priority,
-          status: response.status
+          status: response.status,
+          isEvent: response.isEvent,
+          eventId: response.eventId,
         }
 
         onSaveTask(updatedTask)
       } else {
         if (isEvent) {
-          // Build event creation request
           const nonEmptyEmails = invitedEmails.filter((e) => e.trim() !== '')
           const eventReq: EventCreationRequest = {
             eventDescription: eventDescription.trim(),
@@ -238,25 +256,16 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             startTime: startTimeISO
           }
 
-          const payload: TaskCreationRequest = {
-            title,
-            description,
-            startTime: startTimeISO,
-            deadline: deadlineISO,
-            priority,
-            isEvent: true,
-            eventCreationRequest: eventReq
-          }
-
-          // Delegate to parent so it calls the service with the extended payload
           onSaveTask({
             title,
             description,
-            startDate: startDate,
-            deadline,
+            startDate: startTimeISO,
+            deadline: deadlineISO,
             priority,
-            status: TaskStatus.TODO
-          } as Omit<Task, 'id'>)
+            status: TaskStatus.TODO,
+            isEvent: true,
+            eventCreationRequest: eventReq,
+          })
         } else {
           // Normal task creation — existing flow
           onSaveTask({
@@ -289,8 +298,8 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
     setIsDeleting(true)
     try {
-      await deleteTask(Number(editingTask.id))
-      toast.success('Task deleted successfully')
+      await deleteTask(Number(editingTask.id), editingTask.eventId ?? undefined)
+      toast.success(isEvent ? 'Event deleted successfully' : 'Task deleted successfully')
       onDeleteTask(editingTask.id)
       resetForm()
       onClose()
@@ -312,7 +321,11 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
           <div className="px-6 pb-0 shrink-0">
             <DialogHeader className="pb-0 flex flex-row items-center gap-4">
               <div className="flex items-center">
-                <h2 className="text-lg leading-none font-semibold">{isEditMode ? 'Edit Task' : isEvent ? 'Create New Event' : 'Create New Task'}</h2>
+                <h2 className="text-lg leading-none font-semibold">
+                  {isEditMode
+                    ? (isEvent ? 'Edit Event' : 'Edit Task')
+                    : (isEvent ? 'Create New Event' : 'Create New Task')}
+                </h2>
                 {!isEditMode && (
                   <>
                     <button
@@ -466,8 +479,8 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               )}
             </div>
 
-            {/* ── Event fields — only visible when isEvent = true ── */}
-            {isEvent && (
+            {/* ── Event fields — create mode (isEvent toggle ON) ── */}
+            {!isEditMode && isEvent && (
               <div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50/40 p-4">
                 <p className="text-sm font-medium text-blue-700">Event Details</p>
 
@@ -585,6 +598,116 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                       ? ' Click "Add email" to invite others.'
                       : ' Emails are sent event reminders automatically.'}
                   </p>
+                </div>
+              </div>
+            )}
+
+            {/* ── Event fields — edit mode (task is an event) ── */}
+            {isEditMode && isEvent && (
+              <div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50/40 p-4">
+                <p className="text-sm font-medium text-blue-700">Event Details</p>
+                <p className="text-xs text-gray-500 -mt-2">Leave fields blank to keep existing values.</p>
+
+                {/* eventDescription */}
+                <div className="space-y-2">
+                  <Label htmlFor="editEventDesc">Event Description</Label>
+                  <Textarea
+                    id="editEventDesc"
+                    placeholder="Update event description…"
+                    value={eventDescription}
+                    onChange={(e) => setEventDescription(e.target.value)}
+                    rows={2}
+                  />
+                </div>
+
+                {/* isOnline toggle */}
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsOnline(!isOnline)}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                      isOnline ? 'bg-blue-600' : 'bg-gray-300'
+                    }`}
+                  >
+                    <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isOnline ? 'translate-x-6' : 'translate-x-1'}`} />
+                  </button>
+                  <Label className="cursor-pointer select-none">
+                    {isOnline ? 'Online event' : 'Offline event'}
+                  </Label>
+                </div>
+
+                {isOnline ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="editLinkEvent">Meeting Link</Label>
+                    <Input
+                      id="editLinkEvent"
+                      type="url"
+                      placeholder="https://meet.google.com/…"
+                      value={linkEvent}
+                      onChange={(e) => setLinkEvent(e.target.value)}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <Label htmlFor="editLocation">Location</Label>
+                    <Input
+                      id="editLocation"
+                      placeholder="Enter venue or address"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </div>
+                )}
+
+                {/* reminderMinutesBefore */}
+                <div className="space-y-2">
+                  <Label htmlFor="editReminder">Reminder (minutes before)</Label>
+                  <Input
+                    id="editReminder"
+                    type="number"
+                    min={5}
+                    max={1440}
+                    value={reminderMinutesBefore}
+                    onChange={(e) => setReminderMinutesBefore(Number(e.target.value))}
+                  />
+                </div>
+
+                {/* invitedEmails */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label>Invited Emails</Label>
+                    <button
+                      type="button"
+                      onClick={handleAddEmailField}
+                      className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add email
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {invitedEmails.map((email, index) => (
+                      <div key={index} className="flex items-center gap-2">
+                        <Input
+                          type="email"
+                          placeholder={`Email ${index + 1}`}
+                          value={email}
+                          onChange={(e) => handleEmailChange(index, e.target.value)}
+                          className="flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEmailField(index)}
+                          className="text-gray-400 hover:text-red-500 transition-colors cursor-pointer flex-shrink-0"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    {invitedEmails.length === 0 && (
+                      <p className="text-xs text-gray-400 italic">No emails added — existing invites will be kept.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

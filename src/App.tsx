@@ -12,7 +12,7 @@ import { AdminStatsView } from "./components/AdminStatsView";
 import { AdminUsersView } from "./components/AdminUsersView";
 import { RightPanel } from "./components/RightPanel";
 import { AIChatPanel } from "./components/AIChatPanel";
-import { TaskFormDialog, Task } from "./components/TaskFormDialog";
+import { TaskFormDialog, Task, mapTaskResponseToTask } from "./components/TaskFormDialog";
 import { PushNotificationSettings } from "./components/PushNotificationSettings";
 import { ProfilePage } from "./components/ProfilePage";
 import { createTask, getTasks } from "./services/taskService";
@@ -79,18 +79,7 @@ function UserLayout() {
   const loadTasks = async () => {
     try {
       const response = await getTasks();
-      const uiTasks = response.map((task: TaskResponse) => {
-        return {
-          id: task.taskId.toString(),
-          title: task.title,
-          description: task.description,
-          startDate: task.createdAt,
-          deadline: task.deadline,
-          priority: task.priority,
-          status: task.status,
-          isEvent: task.isEvent,
-        };
-      });
+      const uiTasks = response.map((task: TaskResponse) => mapTaskResponseToTask(task));
       setTasks(uiTasks);
     } catch (error) {
       console.error('Failed to load tasks:', error);

@@ -1,4 +1,4 @@
-import { TaskCreationRequest, TaskResponse } from '../types/task';
+import { TaskCreationRequest, TaskResponse, TaskUpdateRequest } from '../types/task';
 
 const API_URL = '/api/tasks';
 
@@ -22,13 +22,7 @@ export const createTask = async (task: TaskCreationRequest): Promise<TaskRespons
 };
 
 // Update full task (PUT /api/tasks/{taskId})
-export const updateTask = async (taskId: number, task: {
-  title: string;
-  description: string;
-  deadline: string; // OffsetDateTime as ISO string
-  priority: string;
-  status: string;
-}): Promise<TaskResponse> => {
+export const updateTask = async (taskId: number, task: TaskUpdateRequest): Promise<TaskResponse> => {
   const token = localStorage.getItem('token');
   console.log('[API] Updating task', taskId, 'token:', token ? 'present' : 'missing');
   
@@ -54,11 +48,11 @@ export const updateTask = async (taskId: number, task: {
   return data;
 };
 
-export const deleteTask = async (taskId: number): Promise<void> => {
+export const deleteTask = async (taskId: number, eventId?: number): Promise<void> => {
   const token = localStorage.getItem('token');
   console.log('[API] Deleting task', taskId, 'token:', token ? 'present' : 'missing');
-  
-  const response = await fetch(`${API_URL}/${taskId}`, {
+  const url = eventId != null ? `${API_URL}/${taskId}?eventId=${eventId}` : `${API_URL}/${taskId}`;
+  const response = await fetch(url, {
     method: 'DELETE',
     headers: {
       'Authorization': `Bearer ${token}`
