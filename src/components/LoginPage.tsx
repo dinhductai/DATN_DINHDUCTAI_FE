@@ -25,8 +25,9 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
     try {
       const response = await login({ email, password })
       if (response.authenticated) {
-        // Store token in localStorage
+        // Store token and email in localStorage
         localStorage.setItem('token', response.token)
+        localStorage.setItem('email', email)
         // For now, we'll assume admin status based on email
         const isAdmin = email.includes('admin')
         onLogin(isAdmin)

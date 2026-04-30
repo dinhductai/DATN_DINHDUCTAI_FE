@@ -10,12 +10,24 @@ export enum TaskStatus {
   DONE = 'DONE'
 }
 
+export interface EventCreationRequest {
+  eventDescription?: string;
+  linkEvent?: string;
+  location?: string;
+  isOnline?: boolean;
+  reminderMinutesBefore?: number;
+  invitedEmails?: string[];
+  startTime?: string; // ISO date string
+}
+
 export interface TaskCreationRequest {
   title: string;
   description: string;
   startTime: string; // ISO date string
   deadline: string; // ISO date string
   priority: PriorityLevel;
+  isEvent?: boolean;
+  eventCreationRequest?: EventCreationRequest;
 }
 
 export interface TaskResponse {
@@ -29,4 +41,6 @@ export interface TaskResponse {
   createdAt: string; // ISO date string
   completedAt: string | null; // ISO date string
   userId: number;
+  isEvent?: boolean;
+  eventId?: number | null;
 }

@@ -17,7 +17,7 @@ import { PushNotificationSettings } from "./components/PushNotificationSettings"
 import { ProfilePage } from "./components/ProfilePage";
 import { createTask, getTasks } from "./services/taskService";
 import { pushNotificationService } from "./services/pushNotificationService";
-import { TaskResponse } from "./types/task";
+import { TaskResponse, TaskCreationRequest } from "./types/task";
 
 // Profile page component that renders without sidebar
 function ProfileWrapper() {
@@ -160,14 +160,23 @@ function UserLayout() {
       } else {
         const startDate = new Date(taskData.startDate);
         const deadline = new Date(taskData.deadline);
-        
-        const apiTask = {
+
+        const apiTask: TaskCreationRequest = {
           title: taskData.title,
           description: taskData.description,
           startTime: startDate.toISOString(),
           deadline: deadline.toISOString(),
           priority: taskData.priority
         };
+
+        // Forward event payload if the task was created as an event
+        if (taskData.isEvent && taskData.eventCreationRequest) {
+          apiTask.isEvent = true;
+          apiTask.eventCreationRequest = {
+            ...taskData.eventCreationRequest,
+            startTime: startDate.toISOString()
+          };
+        }
 
         await createTask(apiTask);
         await loadTasks();
