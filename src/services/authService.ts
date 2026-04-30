@@ -47,6 +47,7 @@ export const register = async (credentials: RegisterRequest): Promise<RegisterRe
   try {
     const response = await fetch('/api/users/register', {
       method: 'POST',
+      credentials: 'omit',
       headers: {
         'Content-Type': 'application/json',
       },

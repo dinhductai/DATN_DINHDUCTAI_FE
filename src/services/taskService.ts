@@ -50,8 +50,8 @@ export const updateTask = async (taskId: number, task: TaskUpdateRequest): Promi
 
 export const deleteTask = async (taskId: number, eventId?: number): Promise<void> => {
   const token = localStorage.getItem('token');
-  console.log('[API] Deleting task', taskId, 'eventId:', eventId ?? 'none', '→', url)
   const url = eventId != null ? `${API_URL}/${taskId}?eventId=${eventId}` : `${API_URL}/${taskId}`;
+  console.log('[API] Deleting task', taskId, 'eventId:', eventId ?? 'none', '→', url);
   const response = await fetch(url, {
     method: 'DELETE',
     headers: {

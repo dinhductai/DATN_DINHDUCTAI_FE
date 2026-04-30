@@ -16,7 +16,7 @@ import { TaskFormDialog, Task, mapTaskResponseToTask } from "./components/TaskFo
 import { PushNotificationSettings } from "./components/PushNotificationSettings";
 import { ProfilePage } from "./components/ProfilePage";
 import { createTask, getTasks } from "./services/taskService";
-import { pushNotificationService } from "./services/pushNotificationService";
+// import { pushNotificationService } from "./services/pushNotificationService";
 import { TaskResponse, TaskCreationRequest } from "./types/task";
 
 // Profile page component that renders without sidebar
@@ -59,22 +59,21 @@ function UserLayout() {
   useEffect(() => {
     if (!isProfilePage) {
       loadTasks();
-      initializePushNotifications();
+      // initializePushNotifications();
     }
   }, [isProfilePage]);
 
-  // Initialize push notifications
-  const initializePushNotifications = async () => {
-    try {
-      const isSubscribed = await pushNotificationService.isSubscribed();
-      
-      if (!isSubscribed && Notification.permission === 'default') {
-        console.log('Push notifications available but not enabled');
-      }
-    } catch (error) {
-      console.error('Error initializing push notifications:', error);
-    }
-  };
+  // Push notifications disabled
+  // const initializePushNotifications = async () => {
+  //   try {
+  //     const isSubscribed = await pushNotificationService.isSubscribed();
+  //     if (!isSubscribed && Notification.permission === 'default') {
+  //       console.log('Push notifications available but not enabled');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error initializing push notifications:', error);
+  //   }
+  // };
 
   const loadTasks = async () => {
     try {
@@ -387,7 +386,7 @@ function RegisterWrapper() {
   const navigate = useNavigate();
 
   const handleRegister = () => {
-    navigate("/schedule");
+    navigate("/login");
   };
 
   const handleSwitchToLogin = () => {
