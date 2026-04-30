@@ -35,12 +35,14 @@ interface RegisterRequest {
   userName: string;
   password: string;
   email: string;
-  profile: string;
 }
 
 interface RegisterResponse {
-  message: string;
-  userId?: number;
+  userId: number;
+  userName: string;
+  email: string;
+  profile: string | null;
+  roles: string[];
 }
 
 export const register = async (credentials: RegisterRequest): Promise<RegisterResponse> => {
@@ -55,7 +57,6 @@ export const register = async (credentials: RegisterRequest): Promise<RegisterRe
     });
 
     console.log('Register response status:', response.status);
-    console.log('Register response headers:', response.headers);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -67,6 +68,37 @@ export const register = async (credentials: RegisterRequest): Promise<RegisterRe
     return data;
   } catch (error) {
     console.error('Registration error:', error);
+    throw error;
+  }
+};
+
+interface UploadProfileResponse {
+  url: string;
+}
+
+export const uploadProfile = async (userId: number, file: File): Promise<UploadProfileResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`/api/users/upload-profile/${userId}`, {
+      method: 'POST',
+      credentials: 'omit',
+      body: formData,
+    });
+
+    console.log('Upload profile response status:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Upload profile error response:', errorText);
+      throw new Error(errorText || 'Profile upload failed');
+    }
+
+    const url = await response.text();
+    return { url };
+  } catch (error) {
+    console.error('Upload profile error:', error);
     throw error;
   }
 };

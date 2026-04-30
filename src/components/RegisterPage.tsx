@@ -3,7 +3,7 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Eye, EyeOff, Upload } from 'lucide-react'
-import { register } from '../services/authService'
+import { register, uploadProfile } from '../services/authService'
 
 interface RegisterPageProps {
   onRegister: () => void
@@ -15,16 +15,20 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [profile, setProfile] = useState<string>('')
+  const [profileFile, setProfileFile] = useState<File | null>(null)
+  const [profilePreview, setProfilePreview] = useState<string>('')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState('')
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
+      setProfileFile(file)
+      
       const reader = new FileReader()
       reader.onloadend = () => {
-        setProfile(reader.result as string)
+        setProfilePreview(reader.result as string)
       }
       reader.readAsDataURL(file)
     }
@@ -55,26 +59,38 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     }
 
     setIsLoading(true)
+    setUploadProgress('Creating account...')
 
     const requestBody = {
       userName: username.trim(),
       email: email.trim(),
       password: password,
-      profile: profile || 'https://example.com/default-avatar.jpg'
     }
 
     console.log('Registration request:', requestBody)
-    console.log('Profile data length:', profile ? profile.length : 0)
 
     try {
-      await register(requestBody)
-      console.log('Registration successful')
+      const response = await register(requestBody)
+      console.log('Registration successful, userId:', response.userId)
+
+      if (profileFile) {
+        setUploadProgress('Uploading profile picture...')
+        try {
+          const uploadResult = await uploadProfile(response.userId, profileFile)
+          console.log('Profile uploaded:', uploadResult.url)
+        } catch (uploadErr) {
+          console.warn('Profile upload failed, but account was created:', uploadErr)
+        }
+      }
+
+      console.log('Registration and profile upload complete')
       onRegister()
     } catch (err) {
       console.error('Registration catch error:', err)
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
     } finally {
       setIsLoading(false)
+      setUploadProgress('')
     }
   }
 
@@ -156,7 +172,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="profile">Profile Picture</Label>
+              <Label htmlFor="profile">Profile Picture (Optional)</Label>
               <div className="relative">
                 <Input
                   id="profile"
@@ -164,7 +180,6 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
                   accept="image/*"
                   onChange={handleFileChange}
                   className="hidden"
-                  required
                 />
                 <label
                   htmlFor="profile"
@@ -172,11 +187,29 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
                 >
                   <Upload className="w-5 h-5 mr-2 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    {profile ? 'Image selected' : 'Choose a file'}
+                    {profilePreview ? 'Image selected' : 'Choose a file'}
                   </span>
                 </label>
               </div>
+              {profilePreview && (
+                <div className="mt-2 flex items-center space-x-3">
+                  <img
+                    src={profilePreview}
+                    alt="Profile preview"
+                    className="w-12 h-12 rounded-full object-cover"
+                  />
+                  <span className="text-sm text-gray-500">
+                    {profileFile?.name} ({(profileFile?.size || 0 / 1024).toFixed(1)} KB)
+                  </span>
+                </div>
+              )}
             </div>
+
+            {uploadProgress && (
+              <div className="text-sm text-blue-600 text-center">
+                {uploadProgress}
+              </div>
+            )}
 
             <Button
               type="submit"
