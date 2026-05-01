@@ -1,6 +1,8 @@
 import { BarChart3, Users, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback } from './ui/avatar'
 import { ImageWithFallback } from './figma/ImageWithFallback'
+import { ConfirmDialog } from './ConfirmDialog'
+import { useState } from 'react'
 
 interface AdminSidebarProps {
   activeView: 'stats' | 'users'
@@ -9,6 +11,7 @@ interface AdminSidebarProps {
 }
 
 export function AdminSidebar({ activeView, onViewChange, onLogout }: AdminSidebarProps) {
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const menuItems = [
     { icon: BarChart3, label: 'Thống kê', view: 'stats' as const },
     { icon: Users, label: 'Người dùng', view: 'users' as const },
@@ -65,14 +68,24 @@ export function AdminSidebar({ activeView, onViewChange, onLogout }: AdminSideba
 
       {/* Logout */}
       <div className="px-3 pb-6 border-t pt-4">
-        <button 
-          onClick={onLogout}
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
           className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg w-full"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm">Đăng xuất</span>
         </button>
       </div>
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất không?"
+        onConfirm={onLogout}
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        destructive
+      />
     </div>
   )
 }

@@ -74,6 +74,15 @@ export function DashboardView() {
     { name: 'Chưa bắt đầu', value: 0, color: '#ef4444' },
   ]
 
+  const translateDayName = (dayName: string): string => {
+    const map: Record<string, string> = {
+      'Monday': 'T2', 'Tuesday': 'T3', 'Wednesday': 'T4',
+      'Thursday': 'T5', 'Friday': 'T6', 'Saturday': 'T7', 'Sunday': 'CN',
+      'Mon': 'T2', 'Tue': 'T3', 'Wed': 'T4', 'Thu': 'T5', 'Fri': 'T6', 'Sat': 'T7', 'Sun': 'CN',
+    }
+    return map[dayName] || dayName
+  }
+
   // Workload data for bar chart (tasks per day)
   const workloadData = weeklyDistribution && Array.isArray(weeklyDistribution)
     ? weeklyDistribution.map(item => ({
@@ -83,15 +92,6 @@ export function DashboardView() {
     : []
 
   const totalTasks = taskCompletionData.reduce((sum, item) => sum + item.value, 0)
-
-  const translateDayName = (dayName: string): string => {
-    const map: Record<string, string> = {
-      'Monday': 'T2', 'Tuesday': 'T3', 'Wednesday': 'T4',
-      'Thursday': 'T5', 'Friday': 'T6', 'Saturday': 'T7', 'Sunday': 'CN',
-      'Mon': 'T2', 'Tue': 'T3', 'Wed': 'T4', 'Thu': 'T5', 'Fri': 'T6', 'Sat': 'T7', 'Sun': 'CN',
-    }
-    return map[dayName] || dayName
-  }
 
   if (loading) {
     return (
@@ -302,6 +302,40 @@ export function DashboardView() {
             </div>
           ))}
         </div>
+      </Card>
+
+      {/* Monthly Events Bar Chart */}
+      <Card className="p-6">
+        <div className="mb-4">
+          <h3 className="font-semibold mb-1">Tổng sự kiện theo tháng</h3>
+          <p className="text-sm text-gray-500">12 tháng gần đây</p>
+        </div>
+
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={[
+            { month: 'Thg 6', events: 12 },
+            { month: 'Thg 7', events: 19 },
+            { month: 'Thg 8', events: 15 },
+            { month: 'Thg 9', events: 22 },
+            { month: 'Thg 10', events: 28 },
+            { month: 'Thg 11', events: 24 },
+            { month: 'Thg 12', events: 31 },
+            { month: 'Thg 1', events: 18 },
+            { month: 'Thg 2', events: 25 },
+            { month: 'Thg 3', events: 33 },
+            { month: 'Thg 4', events: 27 },
+            { month: 'Thg 5', events: 30 },
+          ]}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey="month" />
+            <YAxis allowDecimals={false} />
+            <Tooltip
+              contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
+              labelStyle={{ color: '#374151' }}
+            />
+            <Bar dataKey="events" fill="#8b5cf6" radius={[8, 8, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </Card>
     </div>
   )

@@ -1,6 +1,7 @@
 import { Calendar, BarChart3, LogOut, Plus, Pin, CalendarDays } from 'lucide-react'
 import { Button } from './ui/button'
 import { useState } from 'react'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface TeachSidebarProps {
   activeView: 'schedule' | 'stats' | 'notifications'
@@ -11,6 +12,7 @@ interface TeachSidebarProps {
 
 export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: TeachSidebarProps) {
   const [isPinned, setIsPinned] = useState(true)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   
   const menuItems = [
     { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
@@ -74,14 +76,24 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
 
       {/* Logout */}
       <div className="px-3 pb-6 border-t pt-4">
-        <button 
-          onClick={onLogout}
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
           className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg w-full"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm">Đăng xuất</span>
         </button>
       </div>
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất không?"
+        onConfirm={onLogout}
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        destructive
+      />
     </div>
   )
 }

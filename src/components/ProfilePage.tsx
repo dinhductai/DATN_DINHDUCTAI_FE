@@ -8,6 +8,7 @@ import { Button } from './ui/button'
 import { userService } from '../services/userService'
 import { UpdateProfileDialog } from './UpdateProfileDialog'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
+import { ConfirmDialog } from './ConfirmDialog'
 
 interface UserProfile {
   userId: number
@@ -71,6 +72,13 @@ export function ProfilePage() {
 
   const handleUpdateSuccess = () => {
     loadUserProfile()
+  }
+
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    navigate('/login')
   }
 
   const handleDeleteSuccess = () => {
@@ -158,7 +166,7 @@ export function ProfilePage() {
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
             </button>
             <button 
-              onClick={handleDeleteSuccess}
+              onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <LogOut className="w-4 h-4" />
@@ -224,10 +232,6 @@ export function ProfilePage() {
             <div style={{ paddingBottom: '8px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
                 <h1 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', margin: 0 }}>{user.userName}</h1>
-                <span style={{ fontSize: '0.875rem', color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                  <User style={{ width: '12px', height: '12px' }} />
-                  Tài khoản cá nhân
-                </span>
                 <span style={{ fontSize: '0.875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '6px', height: '6px', background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
                   Đã xác minh
@@ -521,6 +525,16 @@ export function ProfilePage() {
         onOpenChange={setIsDeleteDialogOpen}
         userId={user.userId}
         onSuccess={handleDeleteSuccess}
+      />
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất không?"
+        onConfirm={handleLogout}
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        destructive
       />
     </div>
   )

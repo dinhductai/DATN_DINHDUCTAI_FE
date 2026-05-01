@@ -182,29 +182,50 @@ export function UpdateProfileDialog({
                   {getInitials(userName || 'U')}
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 p-1.5 bg-blue-600 rounded-full border-2 border-white">
+              <label
+                htmlFor="profile-upload"
+                className="absolute -bottom-1 -right-1 p-1.5 bg-blue-600 rounded-full border-2 border-white cursor-pointer hover:bg-blue-700 transition-colors"
+              >
                 <Camera className="w-3.5 h-3.5 text-white" />
-              </div>
+              </label>
             </div>
           </div>
 
-          {/* Profile Picture URL */}
+          {/* Profile Picture Upload */}
           <div className="space-y-2">
-            <Label htmlFor="profile">URL ảnh đại diện</Label>
-            <Input
-              id="profile"
-              type="url"
-              placeholder="https://example.com/photo.jpg"
-              value={profile}
+            <Label htmlFor="profile-upload">Ảnh đại diện</Label>
+            <input
+              id="profile-upload"
+              type="file"
+              accept="image/*"
+              className="hidden"
               onChange={(e) => {
-                setProfile(e.target.value)
-                setErrors(prev => ({ ...prev, profile: undefined }))
+                const file = e.target.files?.[0]
+                if (file) {
+                  const reader = new FileReader()
+                  reader.onloadend = () => {
+                    setProfile(reader.result as string)
+                  }
+                  reader.readAsDataURL(file)
+                }
               }}
-              className={errors.profile ? 'border-red-500' : ''}
             />
-            {errors.profile && (
-              <p className="text-sm text-red-500">{errors.profile}</p>
-            )}
+            <div className="relative">
+              <Input
+                type="text"
+                readOnly
+                placeholder="Chọn ảnh từ máy..."
+                value={profile ? 'Đã chọn ảnh' : ''}
+                className="pr-10 cursor-pointer"
+                onClick={() => document.getElementById('profile-upload')?.click()}
+              />
+              <label
+                htmlFor="profile-upload"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <Camera className="w-4 h-4" />
+              </label>
+            </div>
           </div>
 
           {/* Account Name */}

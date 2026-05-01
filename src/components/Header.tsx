@@ -4,9 +4,12 @@ import { Button } from './ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu'
 import { useNavigate } from 'react-router-dom'
+import { ConfirmDialog } from './ConfirmDialog'
+import { useState } from 'react'
 
 export function Header() {
   const navigate = useNavigate()
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -54,16 +57,26 @@ export function Header() {
                 Hồ sơ của tôi
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => {
-                localStorage.removeItem('token')
-                navigate('/login')
-              }} className="cursor-pointer text-red-600 focus:text-red-600">
+              <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} className="cursor-pointer text-red-600 focus:text-red-600">
                 Đăng xuất
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
+      <ConfirmDialog
+        open={showLogoutConfirm}
+        onOpenChange={setShowLogoutConfirm}
+        title="Đăng xuất"
+        description="Bạn có chắc chắn muốn đăng xuất không?"
+        onConfirm={() => {
+          localStorage.removeItem('token')
+          navigate('/login')
+        }}
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        destructive
+      />
     </div>
   )
 }
