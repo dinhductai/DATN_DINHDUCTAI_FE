@@ -1,4 +1,4 @@
-import { Calendar, BarChart3, LogOut, Plus, Pin, Bell } from 'lucide-react'
+import { Calendar, BarChart3, LogOut, Plus, Pin, CalendarDays } from 'lucide-react'
 import { Button } from './ui/button'
 import { useState } from 'react'
 
@@ -15,7 +15,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
   const menuItems = [
     { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
     { icon: BarChart3, label: 'Bảng điều khiển', view: 'stats' as const },
-    { icon: Bell, label: 'Thông báo', view: 'notifications' as const },
+    { icon: CalendarDays, label: 'Sự kiện', view: 'notifications' as const },
   ]
 
   return (
@@ -25,9 +25,9 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">SS</span>
+              <span className="text-white font-bold text-sm">TD</span>
             </div>
-            <span className="font-semibold text-gray-900">Smart Schedule</span>
+            <span className="font-semibold text-gray-900">TechDreams Schedule</span>
           </div>
           <button
             onClick={() => setIsPinned(!isPinned)}

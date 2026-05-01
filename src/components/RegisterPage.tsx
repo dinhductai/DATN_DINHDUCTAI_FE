@@ -100,7 +100,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-semibold mb-2">Tạo tài khoản</h1>
-            <p className="text-gray-500">Đăng ký để bắt đầu với Smart Schedule</p>
+            <p className="text-gray-500">Đăng ký để bắt đầu với TechDreams Schedule</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">

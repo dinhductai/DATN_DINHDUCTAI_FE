@@ -1,4 +1,4 @@
-import { Search, Sparkles, Bell, MessageSquare, ChevronDown, X } from 'lucide-react'
+import { Search, Sparkles, Bell, ChevronDown, X } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
@@ -144,10 +144,6 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
               {isSubscribed && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full"></div>
               )}
-            </Button>
-
-            <Button variant="ghost" size="icon" className="text-gray-600 hover:bg-gray-50">
-              <MessageSquare className="w-5 h-5" />
             </Button>
 
             <Avatar 

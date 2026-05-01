@@ -9,6 +9,7 @@ import { AlertCircle, Trash2, CalendarDays, Plus, X } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { updateTask, deleteTask } from '../services/taskService'
 import { toast } from 'sonner'
+import { ConfirmDialog } from './ConfirmDialog'
 
 import { PriorityLevel, TaskStatus, TaskCreationRequest, TaskResponse, EventCreationRequest, EventUpdateRequest } from '../types/task'
 
@@ -78,6 +79,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
   // ── UI state ─────────────────────────────────────────────────
   const [isDeleting, setIsDeleting] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const isEditMode = !!editingTask
 
@@ -291,11 +293,6 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
   const handleDelete = async () => {
     if (!editingTask || !onDeleteTask) return
-
-    if (!confirm('Bạn có chắc muốn xóa công việc này?')) {
-      return
-    }
-
     setIsDeleting(true)
     try {
       await deleteTask(Number(editingTask.id), editingTask.eventId ?? undefined)
@@ -308,6 +305,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       toast.error(error.message || 'Lưu công việc thất bại')
     } finally {
       setIsDeleting(false)
+      setShowDeleteConfirm(false)
     }
   }
 
@@ -716,38 +714,51 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
         {/* ── Footer — always visible at bottom ── */}
         <div className="px-6 pt-3 pb-6 border-t shrink-0">
-          {isEditMode && (
-            <Button
-              type="button"
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting || isSaving}
-              className="mr-auto"
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? 'Đang xóa...' : 'Xóa'}
-            </Button>
-          )}
-          <div className="flex justify-end gap-2 mt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSaving || isDeleting}
-            >
-              Hủy
-            </Button>
-            <Button
-              type="submit"
-              form="task-form"
-              className="bg-blue-600 hover:bg-blue-700"
-              disabled={isSaving || isDeleting}
-            >
-              {isSaving ? 'Đang lưu...' : isEditMode ? 'Cập nhật công việc' : isEvent ? 'Tạo sự kiện' : 'Tạo công việc'}
-            </Button>
+          <div className="flex items-center justify-between gap-2">
+            {isEditMode && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting || isSaving}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Xóa
+              </Button>
+            )}
+            <div className="flex items-center gap-2 ml-auto">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSaving || isDeleting}
+              >
+                Hủy
+              </Button>
+              <Button
+                type="submit"
+                form="task-form"
+                className="bg-blue-600 hover:bg-blue-700"
+                disabled={isSaving || isDeleting}
+              >
+                {isSaving ? 'Đang lưu...' : isEditMode ? 'Cập nhật công việc' : isEvent ? 'Tạo sự kiện' : 'Tạo công việc'}
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title={isEvent ? 'Xóa sự kiện?' : 'Xóa công việc?'}
+        description={isEvent ? 'Bạn có chắc muốn xóa sự kiện này? Hành động này không thể hoàn tác.' : 'Bạn có chắc muốn xóa công việc này? Hành động này không thể hoàn tác.'}
+        onConfirm={handleDelete}
+        confirmText="Đồng ý"
+        cancelText="Hủy"
+        destructive
+        isLoading={isDeleting}
+      />
     </Dialog>
   )
 }
