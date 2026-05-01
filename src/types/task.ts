@@ -33,7 +33,7 @@ export interface TaskUpdateRequest {
   title?: string;
   description?: string;
   deadline?: string;
-  createdAt?: string;
+  startTime?: string;
   completedAt?: string | null;
   priority?: PriorityLevel;
   status?: TaskStatus;
@@ -58,7 +58,8 @@ export interface TaskResponse {
   deadline: string; // ISO date string (UTC)
   status: TaskStatus;
   priority: PriorityLevel;
-  createdAt: string; // ISO date string — this IS startTime (BE naming inconsistency)
+  startTime: string; // ISO date string — thời gian bắt đầu task (trường mới của BE)
+  createdAt: string; // ISO date string — kept for backward compat, same as startTime
   completedAt: string | null; // ISO date string
   userId: number;
   isEvent?: boolean;
