@@ -33,7 +33,7 @@ export const userService = {
   },
 
   // Tạo user mới
-  createUser: async (request: { userName: string; password: string; email: string }): Promise<any> => {
+  createUser: async (request: { userName: string; password: string; email: string; profile?: string }): Promise<any> => {
     try {
       const token = localStorage.getItem('token');
       console.log('[API] Creating new user, token:', token ? 'present' : 'missing');

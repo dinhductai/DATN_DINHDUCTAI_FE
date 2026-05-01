@@ -23,9 +23,9 @@ export function AdminSidebar({ activeView, onViewChange, onLogout }: AdminSideba
       <div className="p-6">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SS</span>
+            <span className="text-white font-bold text-sm">TS</span>
           </div>
-          <span className="font-semibold text-gray-900">Smart Schedule</span>
+          <span className="font-semibold text-gray-900">TechDreams Schedule</span>
         </div>
       </div>
 
