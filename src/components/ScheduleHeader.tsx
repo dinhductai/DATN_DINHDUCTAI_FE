@@ -1,4 +1,4 @@
-import { Search, Sparkles, Bell, ChevronDown, X } from 'lucide-react'
+import { Search, Sparkles, Bell, ChevronDown, X, Calendar, Clock } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
@@ -7,14 +7,14 @@ import { pushNotificationService } from '../services/pushNotificationService'
 import { useState, useEffect } from 'react'
 import { searchTasksByTitle } from '../services/taskService'
 import { TaskResponse } from '../types/task'
-import { SearchResultsOverlay } from './SearchResultsOverlay'
 import { useNavigate } from 'react-router-dom'
 
 interface ScheduleHeaderProps {
   onOpenAIChat: () => void
+  onTaskClick?: (task: TaskResponse) => void
 }
 
-export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
+export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProps) {
   const navigate = useNavigate()
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,6 +93,41 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
     setSearchResults([])
   }
 
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':   return 'bg-red-100 text-red-700 border-red-200'
+      case 'MEDIUM': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+      case 'LOW':    return 'bg-green-100 text-green-700 border-green-200'
+      default:       return 'bg-gray-100 text-gray-700 border-gray-200'
+    }
+  }
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':   return 'Cao'
+      case 'MEDIUM': return 'Trung bình'
+      case 'LOW':    return 'Thấp'
+      default:       return priority
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'TODO':        return 'Cần làm'
+      case 'IN_PROGRESS': return 'Đang làm'
+      case 'DONE':       return 'Hoàn thành'
+      default:           return status
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'DONE':        return 'bg-green-50 text-green-700'
+      case 'IN_PROGRESS': return 'bg-blue-50 text-blue-700'
+      default:            return 'bg-gray-50 text-gray-600'
+    }
+  }
+
   return (
     <>
       <div className="bg-white border-b border-gray-200 px-6 py-4">
@@ -104,7 +139,7 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
               placeholder="Tìm kiếm công việc..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => searchQuery && setShowResults(true)}
+              onFocus={() => searchQuery.trim() && setShowResults(true)}
               className="pl-10 pr-10 bg-gray-50 border-gray-200 rounded-lg"
             />
             {searchQuery && (
@@ -118,6 +153,52 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
             {isSearching && (
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              </div>
+            )}
+
+            {/* Inline Search Dropdown */}
+            {showResults && searchQuery.trim().length > 0 && (
+              <div className="absolute top-full left-0 w-96 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+                {searchResults.length === 0 ? (
+                  <div className="p-4 text-center text-sm text-gray-500">
+                    {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy công việc phù hợp'}
+                  </div>
+                ) : (
+                  <>
+                    <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                      Tìm thấy {searchResults.length} công việc
+                    </div>
+                    {searchResults.map((task) => (
+                      <div
+                        key={task.taskId}
+                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
+                        onClick={() => {
+                          onTaskClick?.(task)
+                          handleCloseSearch()
+                        }}
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-medium text-gray-900 text-sm">{task.title}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded border shrink-0 ${getPriorityColor(task.priority)}`}>
+                            {getPriorityLabel(task.priority)}
+                          </span>
+                        </div>
+                        {task.description && (
+                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{task.description}</p>
+                        )}
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                          <span className="flex items-center gap-0.5">
+                            <Clock className="w-3 h-3" />
+                            {new Date(task.deadline).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })}
+                          </span>
+                          <span className={`px-1.5 py-0.5 rounded text-xs ${getStatusColor(task.status)}`}>
+                            {getStatusLabel(task.status)}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -160,15 +241,6 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
           </div>
         </div>
       </div>
-
-      {/* Search Results Overlay */}
-      <SearchResultsOverlay
-        isOpen={showResults && searchQuery.trim().length > 0}
-        onClose={handleCloseSearch}
-        searchResults={searchResults}
-        isSearching={isSearching}
-        searchQuery={searchQuery}
-      />
     </>
   )
 }

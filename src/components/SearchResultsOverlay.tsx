@@ -84,7 +84,7 @@ export function SearchResultsOverlay({
       />
       
       {/* Results Panel */}
-      <div className="relative w-full max-w-2xl mx-4 bg-white rounded-2xl shadow-2xl max-h-[70vh] overflow-hidden">
+      <div className="relative max-w-2xl w-auto mx-4 bg-white rounded-2xl shadow-2xl max-h-[70vh] overflow-hidden">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-3">
