@@ -10,7 +10,6 @@ export function TaskSearchPanel() {
   const [searchResults, setSearchResults] = useState<TaskResponse[]>([])
   const [isSearching, setIsSearching] = useState(false)
 
-  // Debounce search
   useEffect(() => {
     if (!searchTitle.trim()) {
       setSearchResults([])
@@ -19,7 +18,7 @@ export function TaskSearchPanel() {
 
     const timer = setTimeout(() => {
       handleSearch(searchTitle)
-    }, 500) // Wait 500ms after user stops typing
+    }, 500)
 
     return () => clearTimeout(timer)
   }, [searchTitle])
@@ -35,7 +34,7 @@ export function TaskSearchPanel() {
       const results = await searchTasksByTitle(title)
       setSearchResults(results)
     } catch (error) {
-      console.error('Error searching tasks:', error)
+      console.error('Lỗi tìm kiếm công việc:', error)
       setSearchResults([])
     } finally {
       setIsSearching(false)
@@ -44,13 +43,22 @@ export function TaskSearchPanel() {
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return date.toLocaleDateString('vi-VN', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     })
+  }
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':   return 'Cao'
+      case 'MEDIUM': return 'Trung bình'
+      case 'LOW':    return 'Thấp'
+      default:       return priority
+    }
   }
 
   const getPriorityColor = (priority: string) => {
@@ -66,6 +74,26 @@ export function TaskSearchPanel() {
     }
   }
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'TODO':        return 'Cần làm'
+      case 'IN_PROGRESS': return 'Đang làm'
+      case 'DONE':        return 'Hoàn thành'
+      default:            return status
+    }
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'DONE':
+        return 'bg-green-50 text-green-700 border border-green-200'
+      case 'IN_PROGRESS':
+        return 'bg-blue-50 text-blue-700 border border-blue-200'
+      default:
+        return 'bg-gray-50 text-gray-700 border border-gray-200'
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Search Input */}
@@ -74,7 +102,7 @@ export function TaskSearchPanel() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
-            placeholder="Search tasks by title..."
+            placeholder="Tìm kiếm công việc theo tiêu đề..."
             value={searchTitle}
             onChange={(e) => setSearchTitle(e.target.value)}
             className="pl-10"
@@ -93,13 +121,13 @@ export function TaskSearchPanel() {
           {searchResults.length === 0 ? (
             <Card className="p-6">
               <p className="text-center text-gray-500">
-                {isSearching ? 'Searching...' : 'No tasks found matching your search'}
+                {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy công việc phù hợp với tìm kiếm'}
               </p>
             </Card>
           ) : (
             <>
               <div className="text-sm text-gray-600 px-1">
-                Found {searchResults.length} task{searchResults.length !== 1 ? 's' : ''}
+                Tìm thấy {searchResults.length} công việc
               </div>
               {searchResults.map((task) => (
                 <Card key={task.taskId} className="p-4 hover:shadow-md transition-shadow">
@@ -108,7 +136,7 @@ export function TaskSearchPanel() {
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-semibold text-lg flex-1">{task.title}</h3>
                       <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
+                        {getPriorityLabel(task.priority)}
                       </span>
                     </div>
 
@@ -122,7 +150,7 @@ export function TaskSearchPanel() {
                     {/* Deadline */}
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <Calendar className="w-4 h-4" />
-                      <span>Deadline:</span>
+                      <span>Hạn chót:</span>
                       <span className="font-medium text-gray-700">
                         {formatDate(task.deadline)}
                       </span>
@@ -130,14 +158,8 @@ export function TaskSearchPanel() {
 
                     {/* Status */}
                     <div className="flex items-center gap-2">
-                      <div className={`px-2 py-1 rounded text-xs font-medium ${
-                        task.status === 'DONE' 
-                          ? 'bg-green-50 text-green-700 border border-green-200' 
-                          : task.status === 'IN_PROGRESS'
-                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                          : 'bg-gray-50 text-gray-700 border border-gray-200'
-                      }`}>
-                        {task.status.replace('_', ' ')}
+                      <div className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(task.status)}`}>
+                        {getStatusLabel(task.status)}
                       </div>
                     </div>
                   </div>

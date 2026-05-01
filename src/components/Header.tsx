@@ -12,9 +12,9 @@ export function Header() {
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-gray-900">Bảng điều khiển</h1>
           <Button variant="ghost" className="text-blue-600 hover:text-blue-700">
-            + Add New Widgets
+            + Thêm widget mới
           </Button>
         </div>
 
@@ -23,7 +23,7 @@ export function Header() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search anything..."
+              placeholder="Tìm kiếm..."
               className="pl-10 w-64 bg-gray-50 border-0"
             />
           </div>
@@ -51,14 +51,14 @@ export function Header() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
                 <User className="w-4 h-4 mr-2" />
-                My Profile
+                Hồ sơ của tôi
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => {
                 localStorage.removeItem('token')
                 navigate('/login')
               }} className="cursor-pointer text-red-600 focus:text-red-600">
-                Logout
+                Đăng xuất
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

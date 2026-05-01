@@ -26,8 +26,8 @@ export function ConfirmDialog({
   onConfirm,
   title,
   description,
-  confirmText = 'OK',
-  cancelText = 'Cancel',
+  confirmText = 'Đồng ý',
+  cancelText = 'Hủy',
   variant = 'default'
 }: ConfirmDialogProps) {
   return (

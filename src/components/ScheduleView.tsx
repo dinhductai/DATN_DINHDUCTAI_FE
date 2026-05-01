@@ -13,11 +13,11 @@ const MIN_EVENT_SHOW_TITLE = 30 // minutes — below this, no title displayed
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TaskPosition {
   top: number       // px from top of day column
-  height: number    // px
-  duration: number  // minutes
-  left: number      // % offset within column (for overlap)
-  width: number     // % width of column (for overlap)
-  index: number     // column index among overlapping events (0, 1, 2…)
+  height: number   // px
+  duration: number // minutes
+  left: number     // % offset within column (for overlap)
+  width: number    // % width of column (for overlap)
+  index: number    // column index among overlapping events (0, 1, 2…)
 }
 
 interface ScheduleViewProps {
@@ -164,14 +164,20 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
   const currentTop = (now.getHours() * 60 + now.getMinutes()) * PX_PER_MINUTE
 
   // Current time label
-  const currentTimeLabel = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+  const currentTimeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   const STATUS_LABELS: Record<string, string> = {
-    TODO: 'To Do',
-    IN_PROGRESS: 'In Progress',
-    DONE: 'Done',
+    TODO: 'Cần làm',
+    IN_PROGRESS: 'Đang làm',
+    DONE: 'Hoàn thành',
   }
 
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const PRIORITY_LABELS: Record<string, string> = {
+    HIGH: 'Cao',
+    MEDIUM: 'Trung bình',
+    LOW: 'Thấp',
+  }
+
+  const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
 
   const getPriorityColor = (priority: PriorityLevel) => {
     switch (priority) {
@@ -185,21 +191,21 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
     switch (status) {
       case TaskStatus.TODO:        return Circle
       case TaskStatus.IN_PROGRESS: return Clock
-      case TaskStatus.DONE:         return CheckCircle2
+      case TaskStatus.DONE:        return CheckCircle2
       default:                     return Circle
     }
   }
 
   const formatTime = (dateStr: string) =>
-    new Date(dateStr).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+    new Date(dateStr).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
 
   return (
     <div className="flex flex-col">
-      {/* Header row: My Schedule (1/4) | Task info (3/4) */}
+      {/* Header row: Lịch trình của tôi (1/4) | Task info (3/4) */}
       <div className="flex items-center mb-6 gap-6">
-        {/* Left: My Schedule + date range */}
+        {/* Left: Lịch trình của tôi + date range */}
         <div className="w-1/4 flex-shrink-0">
-          <h1 className="text-2xl font-semibold mb-1">My Schedule</h1>
+          <h1 className="text-2xl font-semibold mb-1">Lịch trình của tôi</h1>
           <div className="flex items-center space-x-1 text-gray-500">
             <Button
               variant="ghost"
@@ -210,7 +216,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <span className="text-sm">
-              {selectedDateRange.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {selectedDateRange.end.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              {selectedDateRange.start.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })} - {selectedDateRange.end.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' })}
             </span>
             <Button
               variant="ghost"
@@ -250,7 +256,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                     currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-green-100 text-green-700'
                   }`}>
-                    {currentTask.priority}
+                    {PRIORITY_LABELS[currentTask.priority]}
                   </span>
                   <span className={`text-sm px-3 py-1 rounded-full font-medium ${
                     currentTask.status === 'DONE' ? 'bg-green-100 text-green-700' :
@@ -264,9 +270,9 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 <div className="flex items-center gap-4 flex-wrap">
                   <span className="text-2xl font-bold text-gray-900 truncate">{currentTask.title}</span>
                   <span className="text-sm font-medium text-gray-400 flex-shrink-0">
-                    {new Date(currentTask.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {new Date(currentTask.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                     {' → '}
-                    {new Date(currentTask.deadline).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {new Date(currentTask.deadline).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
               </div>
@@ -274,7 +280,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
           ) : (
             <div className="flex items-center gap-3 text-base text-gray-400">
               <div className="w-3 h-3 rounded-full bg-gray-300" />
-              <span>{currentTimeLabel} — No active task</span>
+              <span>{currentTimeLabel} — Không có công việc đang hoạt động</span>
             </div>
           )}
         </div>
@@ -412,7 +418,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                             <StatusIcon className="w-3 h-3 flex-shrink-0 opacity-80 text-white" />
                           </div>
                           <span className="text-[9px] truncate leading-tight text-white opacity-80">
-                            {task.description || 'No description'}
+                            {task.description || 'Không có mô tả'}
                           </span>
                           <span className="text-[9px] opacity-80 text-white flex-shrink-0">
                             {formatTime(task.startDate)} - {formatTime(task.deadline)}

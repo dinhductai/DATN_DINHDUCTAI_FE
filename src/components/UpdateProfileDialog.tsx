@@ -70,29 +70,29 @@ export function UpdateProfileDialog({
     const newErrors: FormErrors = {}
 
     if (!userName.trim()) {
-      newErrors.userName = 'Account name is required'
+      newErrors.userName = 'Tên tài khoản là bắt buộc'
     } else if (userName.length < 2) {
-      newErrors.userName = 'Account name must be at least 2 characters'
+      newErrors.userName = 'Tên tài khoản phải có ít nhất 2 ký tự'
     }
 
     if (!email.trim()) {
-      newErrors.email = 'Email is required'
+      newErrors.email = 'Email là bắt buộc'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Please enter a valid email address'
+      newErrors.email = 'Vui lòng nhập địa chỉ email hợp lệ'
     }
 
     if (password) {
       if (password.length < 6) {
-        newErrors.password = 'Password must be at least 6 characters'
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự'
       }
 
       if (password !== confirmPassword) {
-        newErrors.confirmPassword = 'Passwords do not match'
+        newErrors.confirmPassword = 'Mật khẩu không khớp'
       }
     }
 
     if (confirmPassword && !password) {
-      newErrors.password = 'Please enter a password'
+      newErrors.password = 'Vui lòng nhập mật khẩu'
     }
 
     setErrors(newErrors)
@@ -133,10 +133,10 @@ export function UpdateProfileDialog({
       onOpenChange(false)
     } catch (error: any) {
       console.error('Failed to update profile:', error)
-      const errorMessage = error?.message || 'Failed to update profile. Please try again.'
+      const errorMessage = error?.message || 'Cập nhật hồ sơ thất bại. Vui lòng thử lại.'
       
       if (errorMessage.includes('email')) {
-        setErrors({ email: 'This email is already in use' })
+        setErrors({ email: 'Email này đã được sử dụng' })
       } else {
         setSubmitError(errorMessage)
       }
@@ -158,9 +158,9 @@ export function UpdateProfileDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Update Profile</DialogTitle>
+          <DialogTitle>Cập nhật hồ sơ</DialogTitle>
           <DialogDescription>
-            Update your account information below.
+            Cập nhật thông tin tài khoản của bạn bên dưới.
           </DialogDescription>
         </DialogHeader>
 
@@ -190,7 +190,7 @@ export function UpdateProfileDialog({
 
           {/* Profile Picture URL */}
           <div className="space-y-2">
-            <Label htmlFor="profile">Profile Picture URL</Label>
+            <Label htmlFor="profile">URL ảnh đại diện</Label>
             <Input
               id="profile"
               type="url"
@@ -209,11 +209,11 @@ export function UpdateProfileDialog({
 
           {/* Account Name */}
           <div className="space-y-2">
-            <Label htmlFor="userName">Account Name</Label>
+            <Label htmlFor="userName">Tên tài khoản</Label>
             <Input
               id="userName"
               type="text"
-              placeholder="Enter your account name"
+              placeholder="Nhập tên tài khoản của bạn"
               value={userName}
               onChange={(e) => {
                 setUserName(e.target.value)
@@ -228,11 +228,11 @@ export function UpdateProfileDialog({
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">Địa chỉ email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
+              placeholder="Nhập email của bạn"
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value)
@@ -247,12 +247,12 @@ export function UpdateProfileDialog({
 
           {/* Password */}
           <div className="space-y-2">
-            <Label htmlFor="password">New Password (optional)</Label>
+            <Label htmlFor="password">Mật khẩu mới (tùy chọn)</Label>
             <div className="relative">
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
-                placeholder="Enter new password"
+                placeholder="Nhập mật khẩu mới"
                 value={password}
                 onChange={(e) => {
                   setPassword(e.target.value)
@@ -279,12 +279,12 @@ export function UpdateProfileDialog({
 
           {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Xác nhận mật khẩu</Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
-                placeholder="Confirm your password"
+                placeholder="Xác nhận mật khẩu của bạn"
                 value={confirmPassword}
                 onChange={(e) => {
                   setConfirmPassword(e.target.value)
@@ -316,7 +316,7 @@ export function UpdateProfileDialog({
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -326,10 +326,10 @@ export function UpdateProfileDialog({
               {isSubmitting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Updating...
+                  Đang cập nhật...
                 </>
               ) : (
-                'Update'
+                'Cập nhật'
               )}
             </Button>
           </DialogFooter>

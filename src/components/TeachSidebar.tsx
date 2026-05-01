@@ -13,9 +13,9 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
   const [isPinned, setIsPinned] = useState(true)
   
   const menuItems = [
-    { icon: Calendar, label: 'Schedule', view: 'schedule' as const },
-    { icon: BarChart3, label: 'Dashboard', view: 'stats' as const },
-    { icon: Bell, label: 'Notifications', view: 'notifications' as const },
+    { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
+    { icon: BarChart3, label: 'Bảng điều khiển', view: 'stats' as const },
+    { icon: Bell, label: 'Thông báo', view: 'notifications' as const },
   ]
 
   return (
@@ -68,7 +68,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
           className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-6"
         >
           <Plus className="w-5 h-5 mr-2" />
-          New Task
+          Tạo công việc
         </Button>
       </div>
 
@@ -79,7 +79,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
           className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg w-full"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-sm">Logout</span>
+          <span className="text-sm">Đăng xuất</span>
         </button>
       </div>
     </div>

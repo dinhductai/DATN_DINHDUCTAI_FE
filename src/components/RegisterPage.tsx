@@ -39,27 +39,27 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     setError('')
 
     if (!username.trim()) {
-      setError('Username is required')
+      setError('Tên người dùng là bắt buộc')
       return
     }
 
     if (!email.trim()) {
-      setError('Email is required')
+      setError('Email là bắt buộc')
       return
     }
 
     if (!password.trim()) {
-      setError('Password is required')
+      setError('Mật khẩu là bắt buộc')
       return
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+      setError('Mật khẩu phải có ít nhất 6 ký tự')
       return
     }
 
     setIsLoading(true)
-    setUploadProgress('Creating account...')
+    setUploadProgress('Đang tạo tài khoản...')
 
     const requestBody = {
       userName: username.trim(),
@@ -74,7 +74,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       console.log('Registration successful, userId:', response.userId)
 
       if (profileFile) {
-        setUploadProgress('Uploading profile picture...')
+        setUploadProgress('Đang tải ảnh đại diện...')
         try {
           const uploadResult = await uploadProfile(response.userId, profileFile)
           console.log('Profile uploaded:', uploadResult.url)
@@ -87,7 +87,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       onRegister()
     } catch (err) {
       console.error('Registration catch error:', err)
-      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')
+      setError(err instanceof Error ? err.message : 'Đăng ký thất bại. Vui lòng thử lại.')
     } finally {
       setIsLoading(false)
       setUploadProgress('')
@@ -99,8 +99,8 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold mb-2">Create Account</h1>
-            <p className="text-gray-500">Sign up to get started with Smart Schedule</p>
+            <h1 className="text-3xl font-semibold mb-2">Tạo tài khoản</h1>
+            <p className="text-gray-500">Đăng ký để bắt đầu với Smart Schedule</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -111,11 +111,11 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Tên người dùng</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="Enter your username"
+                placeholder="Nhập tên người dùng"
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value)
@@ -127,11 +127,11 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Địa chỉ email</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
@@ -143,12 +143,12 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
@@ -172,7 +172,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="profile">Profile Picture (Optional)</Label>
+              <Label htmlFor="profile">Ảnh đại diện (tùy chọn)</Label>
               <div className="relative">
                 <Input
                   id="profile"
@@ -187,7 +187,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
                 >
                   <Upload className="w-5 h-5 mr-2 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    {profilePreview ? 'Image selected' : 'Choose a file'}
+                    {profilePreview ? 'Đã chọn ảnh' : 'Chọn tệp'}
                   </span>
                 </label>
               </div>
@@ -216,17 +216,17 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              Already have an account?{' '}
+              Đã có tài khoản?{' '}
               <button
                 type="button"
                 onClick={onSwitchToLogin}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Sign in
+                Đăng nhập
               </button>
             </div>
           </form>

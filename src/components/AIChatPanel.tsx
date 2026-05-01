@@ -116,8 +116,8 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm">Schedule Assistant</h3>
-              <p className="text-xs text-gray-500">AI-powered helper</p>
+              <h3 className="font-semibold text-sm">Trợ lý lịch trình</h3>
+              <p className="text-xs text-gray-500">Trợ lý AI</p>
             </div>
           </div>
           <Button
@@ -132,16 +132,16 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
 
         {/* Quick Actions */}
         <div className="p-4 border-b border-gray-100 bg-white">
-          <p className="text-xs text-gray-500 mb-2">Quick actions:</p>
+          <p className="text-xs text-gray-500 mb-2">Thao tác nhanh:</p>
           <div className="flex flex-wrap gap-2">
             <button className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs hover:bg-blue-100 transition-colors">
-              📅 View this week
+              📅 Xem tuần này
             </button>
             <button className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs hover:bg-purple-100 transition-colors">
-              ➕ Add new class
+              ➕ Thêm lớp mới
             </button>
             <button className="px-3 py-1.5 bg-pink-50 text-pink-700 rounded-lg text-xs hover:bg-pink-100 transition-colors">
-              📊 Show analytics
+              📊 Xem phân tích
             </button>
           </div>
         </div>
@@ -159,9 +159,9 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                 <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center mx-auto mb-3">
                   <Sparkles className="w-6 h-6 text-white" />
                 </div>
-                <h3 className="font-semibold text-gray-700 mb-1">Welcome to Schedule Assistant</h3>
+                <h3 className="font-semibold text-gray-700 mb-1">Chào mừng đến Trợ lý lịch trình</h3>
                 <p className="text-sm text-gray-500 max-w-xs mx-auto">
-                  Ask me anything about your schedule, tasks, or get help with planning your day.
+                  Hỏi tôi bất cứ điều gì về lịch trình, công việc, hoặc nhận hỗ trợ lập kế hoạch.
                 </p>
               </div>
             ) : (
@@ -321,7 +321,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
       <div className="p-4 border-t border-gray-200 bg-white">
         <div className="flex space-x-2">
           <Input
-            placeholder="Ask me anything about your schedule..."
+            placeholder="Hỏi tôi bất cứ điều gì..."
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyPress={(e) => e.key === "Enter" && handleSend()}

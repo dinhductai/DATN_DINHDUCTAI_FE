@@ -82,7 +82,7 @@ function UserLayout() {
       setTasks(uiTasks);
     } catch (error) {
       console.error('Failed to load tasks:', error);
-      alert('Failed to load tasks. Please try again.');
+      alert('Không thể tải công việc. Vui lòng thử lại.');
     }
   };
 
@@ -113,9 +113,9 @@ function UserLayout() {
       const overlapping = checkTaskOverlap(taskData, taskData.id);
       if (overlapping.length > 0) {
         setConflictWarning(
-          `Warning: This task overlaps with "${overlapping[0].title}" and ${
+          `Cảnh báo: Công việc này trùng lặp với "${overlapping[0].title}" và ${
             overlapping.length - 1
-          } other task(s). Please adjust the date/time.`
+          } công việc khác. Vui lòng điều chỉnh ngày/giờ.`
         );
         return;
       }
@@ -123,9 +123,9 @@ function UserLayout() {
       const overlapping = checkTaskOverlap(taskData);
       if (overlapping.length > 0) {
         setConflictWarning(
-          `Warning: This task overlaps with "${overlapping[0].title}" and ${
-            overlapping.length > 1 ? overlapping.length - 1 + " other" : ""
-          } task(s). Please adjust the date/time.`
+          `Cảnh báo: Công việc này trùng lặp với "${overlapping[0].title}" và ${
+            overlapping.length > 1 ? overlapping.length - 1 + " công việc khác" : ""
+          } công việc khác. Vui lòng điều chỉnh ngày/giờ.`
         );
         return;
       }
@@ -162,7 +162,7 @@ function UserLayout() {
       }
     } catch (error) {
       console.error('Failed to save task:', error);
-      alert('Failed to save task. Please try again.');
+      alert('Không thể lưu công việc. Vui lòng thử lại.');
     }
   };
 

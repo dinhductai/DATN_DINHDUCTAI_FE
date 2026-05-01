@@ -32,10 +32,10 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
         const isAdmin = email.includes('admin')
         onLogin(isAdmin)
       } else {
-        setError('Invalid credentials')
+        setError('Thông tin đăng nhập không hợp lệ')
       }
     } catch (error) {
-      setError('Login failed. Please try again.')
+      setError('Đăng nhập thất bại. Vui lòng thử lại.')
     }
   }
 
@@ -44,8 +44,8 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold mb-2">Sign In</h1>
-            <p className="text-gray-500">Enter your credentials to access your account</p>
+            <h1 className="text-3xl font-semibold mb-2">Đăng nhập</h1>
+            <p className="text-gray-500">Nhập thông tin đăng nhập để truy cập tài khoản</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -56,11 +56,11 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email Address</Label>
+              <Label htmlFor="email">Địa chỉ email</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder="Enter your email"
+                placeholder="Nhập email của bạn"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
@@ -72,12 +72,12 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">Mật khẩu</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
+                  placeholder="Nhập mật khẩu"
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
@@ -111,14 +111,14 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
                   htmlFor="remember"
                   className="text-sm text-gray-600 cursor-pointer"
                 >
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </label>
               </div>
               <button
                 type="button"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
-                Forgot password?
+                Quên mật khẩu?
               </button>
             </div>
 
@@ -126,17 +126,17 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
               type="submit"
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Sign In
+              Đăng nhập
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              Don't have an account?{' '}
+              Chưa có tài khoản?{' '}
               <button
                 type="button"
                 onClick={onSwitchToRegister}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Create one
+                Tạo tài khoản
               </button>
             </div>
           </form>

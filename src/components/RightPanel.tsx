@@ -19,7 +19,16 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
   const [overdueTasks, setOverdueTasks] = useState<TaskResponse[]>([])
   const [loading, setLoading] = useState(true)
 
-  const calendarDays = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+  const calendarDays = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':   return 'Cao'
+      case 'MEDIUM': return 'Trung bình'
+      case 'LOW':    return 'Thấp'
+      default:       return priority
+    }
+  }
   
   useEffect(() => {
     const fetchTasksData = async () => {
@@ -143,15 +152,15 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
 
   // Format date and time for display
   const formatDateTime = (date: string | Date | undefined | null) => {
-    if (!date) return 'N/A'
+    if (!date) return 'Không có'
     const d = new Date(date)
-    return d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleString('vi-VN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
   }
 
   const formatTime = (date: string | Date | undefined | null) => {
-    if (!date) return 'N/A'
+    if (!date) return 'Không có'
     const d = new Date(date)
-    return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
   }
 
   const changeMonth = (direction: 'prev' | 'next') => {
@@ -166,7 +175,7 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="font-semibold text-sm">
-            {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            {currentMonth.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
           </div>
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => changeMonth('prev')}>
@@ -209,22 +218,22 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
             ))}
           </div>
         </div>
-        <p className="text-xs text-gray-400 mt-2">Click and drag to select date range (3-15 days)</p>
+        <p className="text-xs text-gray-400 mt-2">Nhấn và kéo để chọn khoảng ngày (3-15 ngày)</p>
       </Card>
 
-      {/* Today's Schedule */}
+      {/* Lịch trình hôm nay */}
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <Clock className="w-4 h-4 text-blue-600" />
-            <h3 className="font-semibold text-sm">Today's Schedule</h3>
+            <h3 className="font-semibold text-sm">Lịch trình hôm nay</h3>
           </div>
-          <span className="text-xs text-gray-500">{todayTasks.length} tasks</span>
+          <span className="text-xs text-gray-500">{todayTasks.length} công việc</span>
         </div>
 
         <div className="space-y-2">
           {loading ? (
-            <div className="text-xs text-gray-400 py-2">Loading...</div>
+            <div className="text-xs text-gray-400 py-2">Đang tải...</div>
           ) : todayTasks.length > 0 ? (
             todayTasks.map((task) => (
               <div key={task.taskId} className="p-3 bg-blue-100 rounded-lg">
@@ -238,7 +247,7 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
                       <div className="text-xs text-gray-600 ml-4 mb-1">{task.description}</div>
                     )}
                     <div className="text-xs text-gray-600 ml-4">
-                      Due: {formatDateTime(task.deadline)}
+                      Hạn: {formatDateTime(task.deadline)}
                     </div>
                   </div>
                   <div className={`px-2 py-1 rounded text-xs font-medium ${
@@ -246,23 +255,23 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
                     task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-green-100 text-green-700'
                   }`}>
-                    {task.priority}
+                    {getPriorityLabel(task.priority)}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-xs text-gray-400 py-2">No tasks for today</div>
+            <div className="text-xs text-gray-400 py-2">Không có công việc hôm nay</div>
           )}
         </div>
       </Card>
 
-      {/* Completed Activities */}
+      {/* Hoàn thành */}
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-4 h-4 text-green-600" />
-            <h3 className="font-semibold text-sm">Completed</h3>
+            <h3 className="font-semibold text-sm">Hoàn thành</h3>
           </div>
         </div>
 
@@ -276,30 +285,30 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm">{task.title}</div>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    Completed: {formatDateTime(task.completedAt)}
+                    Hoàn thành: {formatDateTime(task.completedAt)}
                   </div>
                   <div className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-medium ${
                     task.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
                     task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-green-100 text-green-700'
                   }`}>
-                    {task.priority}
+                    {getPriorityLabel(task.priority)}
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-xs text-gray-400 py-2">No completed tasks</div>
+            <div className="text-xs text-gray-400 py-2">Không có công việc đã hoàn thành</div>
           )}
         </div>
       </Card>
 
-      {/* Missed Activities */}
+      {/* Quá hạn */}
       <Card className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center space-x-2">
             <XCircle className="w-4 h-4 text-red-600" />
-            <h3 className="font-semibold text-sm">Missed</h3>
+            <h3 className="font-semibold text-sm">Quá hạn</h3>
           </div>
         </div>
 
@@ -313,23 +322,23 @@ export function RightPanel({ selectedDateRange, onDateRangeSelect }: RightPanelP
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm">{task.title}</div>
                   <div className="text-xs text-gray-500 mt-0.5">
-                    Deadline: {formatDateTime(task.deadline)}
+                    Hạn chót: {formatDateTime(task.deadline)}
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
-                    <div className="text-xs text-red-600 font-medium">Overdue</div>
+                    <div className="text-xs text-red-600 font-medium">Quá hạn</div>
                     <div className={`px-2 py-0.5 rounded text-xs font-medium ${
                       task.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
                       task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
                       'bg-green-100 text-green-700'
                     }`}>
-                      {task.priority}
+                      {getPriorityLabel(task.priority)}
                     </div>
                   </div>
                 </div>
               </div>
             ))
           ) : (
-            <div className="text-xs text-gray-400 py-2">No missed tasks</div>
+            <div className="text-xs text-gray-400 py-2">Không có công việc quá hạn</div>
           )}
         </div>
       </Card>

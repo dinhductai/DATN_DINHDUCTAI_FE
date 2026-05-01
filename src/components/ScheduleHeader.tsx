@@ -76,12 +76,12 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
           await pushNotificationService.subscribe();
           setIsSubscribed(true);
         } else {
-          alert('Notification permission denied. Please enable it in your browser settings.');
+          alert('Thông báo bị từ chối. Vui lòng bật trong cài đặt trình duyệt.');
         }
       }
     } catch (error) {
       console.error('Error toggling notifications:', error);
-      alert('Failed to update notification settings. Please try again.');
+      alert('Không thể cập nhật cài đặt thông báo. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +101,7 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
-              placeholder="Search tasks..."
+              placeholder="Tìm kiếm công việc..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery && setShowResults(true)}
@@ -129,7 +129,7 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg"
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              Schedule Assistant
+              Trợ lý lịch trình
             </Button>
 
             <Button 
@@ -138,7 +138,7 @@ export function ScheduleHeader({ onOpenAIChat }: ScheduleHeaderProps) {
               className={`relative ${isSubscribed ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
               onClick={handleNotificationToggle}
               disabled={isLoading}
-              title={isSubscribed ? 'Disable notifications' : 'Enable notifications'}
+              title={isSubscribed ? 'Tắt thông báo' : 'Bật thông báo'}
             >
               <Bell className="w-5 h-5" />
               {isSubscribed && (

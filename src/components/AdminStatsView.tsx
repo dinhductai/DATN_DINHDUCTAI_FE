@@ -73,7 +73,7 @@ export function AdminStatsView() {
 
   const stats = [
     {
-      title: 'Total Users',
+      title: 'Tổng số người dùng',
       value: totalUsers.toLocaleString(),
       icon: Users,
       color: 'bg-blue-500',
@@ -81,7 +81,7 @@ export function AdminStatsView() {
       iconColor: 'text-blue-600'
     },
     {
-      title: 'New Users This Week',
+      title: 'Người dùng mới tuần này',
       value: newUsersThisWeek.toLocaleString(),
       icon: UserPlus,
       color: 'bg-green-500',
@@ -89,7 +89,7 @@ export function AdminStatsView() {
       iconColor: 'text-green-600'
     },
     {
-      title: 'Active Users This Week',
+      title: 'Người dùng hoạt động tuần này',
       value: activeUsersThisWeek.toLocaleString(),
       icon: Activity,
       color: 'bg-purple-500',
@@ -97,7 +97,7 @@ export function AdminStatsView() {
       iconColor: 'text-purple-600'
     },
     {
-      title: 'Tasks Created This Week',
+      title: 'Công việc được tạo tuần này',
       value: tasksCreatedThisWeek.toLocaleString(),
       icon: Briefcase,
       color: 'bg-orange-500',
@@ -108,9 +108,18 @@ export function AdminStatsView() {
 
   // Transform completed tasks data for line chart
   const completedTasksChartData = completedTasksData.map(item => ({
-    day: item.dayName,
+    day: translateDayName(item.dayName),
     tasks: Number(item.completedCount) || 0
   }))
+
+  const translateDayName = (dayName: string): string => {
+    const map: Record<string, string> = {
+      'Monday': 'T2', 'Tuesday': 'T3', 'Wednesday': 'T4',
+      'Thursday': 'T5', 'Friday': 'T6', 'Saturday': 'T7', 'Sunday': 'CN',
+      'Mon': 'T2', 'Tue': 'T3', 'Wed': 'T4', 'Thu': 'T5', 'Fri': 'T6', 'Sat': 'T7', 'Sun': 'CN',
+    }
+    return map[dayName] || dayName
+  }
 
   // Transform priority tasks data for bar chart with colors
   const priorityTasksChartData = priorityTasksData.map(item => ({
@@ -126,8 +135,8 @@ export function AdminStatsView() {
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold mb-1">Admin Statistics</h1>
-        <p className="text-gray-500">Overview of system metrics and user activity</p>
+        <h1 className="text-2xl font-semibold mb-1">Thống kê quản trị</h1>
+        <p className="text-gray-500">Tổng quan về chỉ số hệ thống và hoạt động người dùng</p>
       </div>
 
       {/* Stats Cards */}
@@ -152,8 +161,8 @@ export function AdminStatsView() {
         {/* Completed Tasks Line Chart */}
         <Card className="p-6 col-span-2">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold">Completed Tasks This Week</h3>
-            <p className="text-sm text-gray-500">Daily task completion trend</p>
+            <h3 className="text-lg font-semibold">Công việc hoàn thành tuần này</h3>
+            <p className="text-sm text-gray-500">Xu hướng hoàn thành công việc theo ngày</p>
           </div>
           {completedTasksChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -187,7 +196,7 @@ export function AdminStatsView() {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-gray-400">
-              No data available
+              Không có dữ liệu
             </div>
           )}
         </Card>
@@ -195,8 +204,8 @@ export function AdminStatsView() {
         {/* Priority Tasks Bar Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="text-lg font-semibold">Tasks by Priority</h3>
-            <p className="text-sm text-gray-500">This week</p>
+            <h3 className="text-lg font-semibold">Công việc theo mức ưu tiên</h3>
+            <p className="text-sm text-gray-500">Tuần này</p>
           </div>
           {priorityTasksChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={300}>
@@ -223,7 +232,7 @@ export function AdminStatsView() {
             </ResponsiveContainer>
           ) : (
             <div className="h-[300px] flex items-center justify-center text-gray-400">
-              No data available
+              Không có dữ liệu
             </div>
           )}
         </Card>

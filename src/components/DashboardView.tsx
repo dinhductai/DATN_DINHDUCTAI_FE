@@ -65,29 +65,38 @@ export function DashboardView() {
   }, [])
   // Task completion data for pie chart
   const taskCompletionData = weeklyStatus ? [
-    { name: 'Completed', value: Math.round(weeklyStatus.completedRate || 0), color: '#10b981' },
-    { name: 'In Progress', value: Math.round(weeklyStatus.inProgressRate || 0), color: '#3b82f6' },
-    { name: 'Not Started', value: Math.round(weeklyStatus.todoRate || 0), color: '#ef4444' },
+    { name: 'Hoàn thành', value: Math.round(weeklyStatus.completedRate || 0), color: '#10b981' },
+    { name: 'Đang làm', value: Math.round(weeklyStatus.inProgressRate || 0), color: '#3b82f6' },
+    { name: 'Chưa bắt đầu', value: Math.round(weeklyStatus.todoRate || 0), color: '#ef4444' },
   ] : [
-    { name: 'Completed', value: 0, color: '#10b981' },
-    { name: 'In Progress', value: 0, color: '#3b82f6' },
-    { name: 'Not Started', value: 0, color: '#ef4444' },
+    { name: 'Hoàn thành', value: 0, color: '#10b981' },
+    { name: 'Đang làm', value: 0, color: '#3b82f6' },
+    { name: 'Chưa bắt đầu', value: 0, color: '#ef4444' },
   ]
 
   // Workload data for bar chart (tasks per day)
-  const workloadData = weeklyDistribution && Array.isArray(weeklyDistribution) 
+  const workloadData = weeklyDistribution && Array.isArray(weeklyDistribution)
     ? weeklyDistribution.map(item => ({
-        day: item.dayName || 'Unknown',
+        day: translateDayName(item.dayName || ''),
         tasks: Number(item.taskCount) || 0,
       }))
     : []
 
   const totalTasks = taskCompletionData.reduce((sum, item) => sum + item.value, 0)
 
+  const translateDayName = (dayName: string): string => {
+    const map: Record<string, string> = {
+      'Monday': 'T2', 'Tuesday': 'T3', 'Wednesday': 'T4',
+      'Thursday': 'T5', 'Friday': 'T6', 'Saturday': 'T7', 'Sunday': 'CN',
+      'Mon': 'T2', 'Tue': 'T3', 'Wed': 'T4', 'Thu': 'T5', 'Fri': 'T6', 'Sat': 'T7', 'Sun': 'CN',
+    }
+    return map[dayName] || dayName
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-500">Loading statistics...</p>
+        <p className="text-gray-500">Đang tải thống kê...</p>
       </div>
     )
   }
@@ -96,8 +105,8 @@ export function DashboardView() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold mb-1">Dashboard</h1>
-        <p className="text-sm text-gray-500">Overview of your tasks and schedule</p>
+        <h1 className="text-2xl font-semibold mb-1">Tổng quan</h1>
+        <p className="text-sm text-gray-500">Tổng quan về công việc và lịch trình của bạn</p>
       </div>
 
       {/* Top Stats */}
@@ -105,11 +114,11 @@ export function DashboardView() {
         <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Completion Before Deadline</p>
+              <p className="text-sm text-gray-500 mb-1">Tỷ lệ hoàn thành đúng hạn</p>
               <p className="text-3xl font-semibold text-gray-900">{completionRate}%</p>
               <div className="flex items-center space-x-1 mt-2">
                 <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">+5% from last week</span>
+                <span className="text-sm text-green-600">+5% so với tuần trước</span>
               </div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -121,11 +130,11 @@ export function DashboardView() {
         <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Free Time This Week</p>
+              <p className="text-sm text-gray-500 mb-1">Thời gian rảnh tuần này</p>
               <p className="text-3xl font-semibold text-gray-900">{freeHours}h</p>
               <div className="flex items-center space-x-1 mt-2">
                 <Calendar className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-600">Available for planning</span>
+                <span className="text-sm text-blue-600">Có sẵn để lập kế hoạch</span>
               </div>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -140,8 +149,8 @@ export function DashboardView() {
         {/* Task Completion Pie Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="font-semibold mb-1">Weekly Task Status</h3>
-            <p className="text-sm text-gray-500">{totalTasks} total tasks this week</p>
+            <h3 className="font-semibold mb-1">Tình trạng công việc tuần này</h3>
+            <p className="text-sm text-gray-500">{totalTasks} công việc trong tuần</p>
           </div>
           
           <div className="flex items-center justify-center">
@@ -169,15 +178,15 @@ export function DashboardView() {
           <div className="flex items-center justify-center space-x-6 mt-4">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Completed ({taskCompletionData[0].value})</span>
+              <span className="text-sm text-gray-600">Hoàn thành ({taskCompletionData[0].value})</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">In Progress ({taskCompletionData[1].value})</span>
+              <span className="text-sm text-gray-600">Đang làm ({taskCompletionData[1].value})</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Not Started ({taskCompletionData[2].value})</span>
+              <span className="text-sm text-gray-600">Chưa bắt đầu ({taskCompletionData[2].value})</span>
             </div>
           </div>
         </Card>
@@ -185,8 +194,8 @@ export function DashboardView() {
         {/* Workload Bar Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="font-semibold mb-1">Weekly Workload</h3>
-            <p className="text-sm text-gray-500">Tasks per day</p>
+            <h3 className="font-semibold mb-1">Khối lượng công việc tuần</h3>
+            <p className="text-sm text-gray-500">Công việc mỗi ngày</p>
           </div>
           
           {workloadData.length > 0 ? (
@@ -206,12 +215,12 @@ export function DashboardView() {
 
               <div className="flex items-center justify-center space-x-2 mt-4">
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-sm text-gray-600">Tasks Count</span>
+                <span className="text-sm text-gray-600">Số công việc</span>
               </div>
             </>
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
-              No weekly data available
+              Không có dữ liệu tuần
             </div>
           )}
         </Card>
@@ -220,8 +229,8 @@ export function DashboardView() {
       {/* Timeline Chart */}
       <Card className="p-6">
         <div className="mb-4">
-          <h3 className="font-semibold mb-1">Tasks Added Timeline</h3>
-          <p className="text-sm text-gray-500">Number of tasks added to your schedule over time</p>
+          <h3 className="font-semibold mb-1">Lịch sử tạo công việc</h3>
+          <p className="text-sm text-gray-500">Số công việc được thêm vào lịch trình theo thời gian</p>
         </div>
         
         {timelineData.length > 0 ? (
@@ -251,12 +260,12 @@ export function DashboardView() {
 
             <div className="flex items-center justify-center space-x-2 mt-4">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Tasks Added</span>
+              <span className="text-sm text-gray-600">Công việc đã tạo</span>
             </div>
           </>
         ) : (
           <div className="h-[280px] flex items-center justify-center text-gray-400">
-            No timeline data available
+            Không có dữ liệu lịch sử
           </div>
         )}
       </Card>
@@ -264,16 +273,16 @@ export function DashboardView() {
       {/* Recent Tasks */}
       <Card className="p-6">
         <div className="mb-4">
-          <h3 className="font-semibold mb-1">Recent Tasks</h3>
-          <p className="text-sm text-gray-500">Your latest task updates</p>
+          <h3 className="font-semibold mb-1">Công việc gần đây</h3>
+          <p className="text-sm text-gray-500">Cập nhật công việc gần đây</p>
         </div>
 
         <div className="space-y-3">
           {[
-            { title: 'UX Research Class Preparation', status: 'completed', time: '2 hours ago', color: 'bg-green-100 text-green-700' },
-            { title: 'Grade Student Assignments', status: 'in-progress', time: '5 hours ago', color: 'bg-blue-100 text-blue-700' },
-            { title: 'Update Course Materials', status: 'pending', time: '1 day ago', color: 'bg-gray-100 text-gray-700' },
-            { title: 'Prepare Webinar Slides', status: 'in-progress', time: '2 days ago', color: 'bg-blue-100 text-blue-700' },
+            { title: 'Chuẩn bị bài giảng nghiên cứu UX', status: 'completed', time: '2 giờ trước', color: 'bg-green-100 text-green-700' },
+            { title: 'Chấm bài tập cho sinh viên', status: 'in-progress', time: '5 giờ trước', color: 'bg-blue-100 text-blue-700' },
+            { title: 'Cập nhật tài liệu khóa học', status: 'pending', time: '1 ngày trước', color: 'bg-gray-100 text-gray-700' },
+            { title: 'Chuẩn bị slide hội thảo', status: 'in-progress', time: '2 ngày trước', color: 'bg-blue-100 text-blue-700' },
           ].map((task, idx) => (
             <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
               <div className="flex items-center space-x-3">
@@ -286,9 +295,9 @@ export function DashboardView() {
                 </div>
               </div>
               <span className={`px-2 py-1 rounded-lg text-xs ${task.color}`}>
-                {task.status === 'completed' && 'Completed'}
-                {task.status === 'in-progress' && 'In Progress'}
-                {task.status === 'pending' && 'Pending'}
+                {task.status === 'completed' && 'Hoàn thành'}
+                {task.status === 'in-progress' && 'Đang làm'}
+                {task.status === 'pending' && 'Đang chờ'}
               </span>
             </div>
           ))}

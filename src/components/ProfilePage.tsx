@@ -63,7 +63,7 @@ export function ProfilePage() {
       setUser(userData)
     } catch (err) {
       console.error('Failed to load user profile:', err)
-      setError('Failed to load profile. Please try again.')
+      setError('Tải hồ sơ thất bại. Vui lòng thử lại.')
     } finally {
       setLoading(false)
     }
@@ -79,9 +79,9 @@ export function ProfilePage() {
   }
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A'
+    if (!dateStr) return 'Không có'
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -91,13 +91,13 @@ export function ProfilePage() {
   }
 
   const getMemberSince = (dateStr?: string) => {
-    if (!dateStr) return 'N/A'
+    if (!dateStr) return 'Không có'
     const date = new Date(dateStr)
     const now = new Date()
     const months = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 30))
-    if (months < 1) return 'Less than a month'
-    if (months === 1) return '1 month'
-    return `${months} months`
+    if (months < 1) return 'Ít hơn một tháng'
+    if (months === 1) return '1 tháng'
+    return `${months} tháng`
   }
 
   if (loading) {
@@ -105,7 +105,7 @@ export function ProfilePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Loading profile...</p>
+          <p className="text-sm text-gray-500">Đang tải hồ sơ...</p>
         </div>
       </div>
     )
@@ -118,10 +118,10 @@ export function ProfilePage() {
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Unable to load profile</h2>
-          <p className="text-sm text-gray-500 mb-6">{error || 'Something went wrong. Please try again.'}</p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Không thể tải hồ sơ</h2>
+          <p className="text-sm text-gray-500 mb-6">{error || 'Đã xảy ra lỗi. Vui lòng thử lại.'}</p>
           <Button onClick={loadUserProfile} className="bg-blue-600 hover:bg-blue-700">
-            Try Again
+            Thử lại
           </Button>
         </div>
       </div>
@@ -139,17 +139,17 @@ export function ProfilePage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Back to Home</span>
+              <span>Quay lại trang chủ</span>
             </button>
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <span 
                 className="hover:text-gray-700 cursor-pointer"
                 onClick={() => navigate('/schedule')}
               >
-                Home
+                Trang chủ
               </span>
               <span>›</span>
-              <span className="text-gray-900">My Profile</span>
+              <span className="text-gray-900">Hồ sơ của tôi</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -162,7 +162,7 @@ export function ProfilePage() {
               className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              <span>Đăng xuất</span>
             </button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
               <img 
@@ -226,11 +226,11 @@ export function ProfilePage() {
                 <h1 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', margin: 0 }}>{user.userName}</h1>
                 <span style={{ fontSize: '0.875rem', color: '#2563eb', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <User style={{ width: '12px', height: '12px' }} />
-                  Personal Account
+                  Tài khoản cá nhân
                 </span>
                 <span style={{ fontSize: '0.875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '6px', height: '6px', background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
-                  Verified
+                  Đã xác minh
                 </span>
               </div>
               <p style={{ color: '#6b7280', margin: 0 }}>{user.email}</p>
@@ -245,11 +245,11 @@ export function ProfilePage() {
             {/* Account Status Card */}
             <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3>Account Status</h3>
-                <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">Active</span>
+                <h3>Trạng thái tài khoản</h3>
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">Hoạt động</span>
               </div>
               <div className="mt-4">
-                <p className="text-sm text-white/80">Member Since</p>
+                <p className="text-sm text-white/80">Thành viên từ</p>
                 <p className="text-lg">{getMemberSince(user.createdAt)}</p>
               </div>
             </div>
@@ -260,13 +260,13 @@ export function ProfilePage() {
             {/* Account Information */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl">Account Information</h2>
+                <h2 className="text-xl">Thông tin tài khoản</h2>
                 <button
                   onClick={() => setIsUpdateDialogOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1 transition-colors"
                 >
                   <span>✎</span>
-                  Edit
+                  Sửa
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -275,7 +275,7 @@ export function ProfilePage() {
                     <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Account Name</p>
+                    <p className="text-sm text-gray-500">Tên tài khoản</p>
                     <p className="text-gray-900">{user.userName}</p>
                   </div>
                 </div>
@@ -284,7 +284,7 @@ export function ProfilePage() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Email Address</p>
+                    <p className="text-sm text-gray-500">Địa chỉ email</p>
                     <p className="text-gray-900">{user.email}</p>
                   </div>
                 </div>
@@ -293,8 +293,8 @@ export function ProfilePage() {
                     <ImageIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Profile Picture</p>
-                    <p className="text-gray-900">{user.profile ? 'Uploaded' : 'Not set'}</p>
+                    <p className="text-sm text-gray-500">Ảnh đại diện</p>
+                    <p className="text-gray-900">{user.profile ? 'Đã tải lên' : 'Chưa đặt'}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
@@ -302,7 +302,7 @@ export function ProfilePage() {
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Account Created</p>
+                    <p className="text-sm text-gray-500">Tài khoản được tạo</p>
                     <p className="text-gray-900">{formatDate(user.createdAt)}</p>
                   </div>
                 </div>
@@ -311,7 +311,7 @@ export function ProfilePage() {
 
             {/* Settings & Preferences */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h2 className="text-xl mb-6">Settings & Preferences</h2>
+              <h2 className="text-xl mb-6">Cài đặt & Tùy chọn</h2>
               <div className="space-y-3">
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
@@ -322,9 +322,9 @@ export function ProfilePage() {
                       onClick={() => setShowNotifications(!showNotifications)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Notifications</p>
+                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Thông báo</p>
                       <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
-                        {notificationsEnabled ? 'Enabled' : 'Disabled'}
+                        {notificationsEnabled ? 'Bật' : 'Tắt'}
                       </p>
                     </button>
                     <button
@@ -339,8 +339,8 @@ export function ProfilePage() {
                     <div style={{ marginTop: '8px', marginLeft: '56px', padding: '16px', background: '#f9fafb', borderRadius: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Push Notifications</p>
-                          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Browser push notifications</p>
+                          <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Thông báo đẩy</p>
+                          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Thông báo đẩy từ trình duyệt</p>
                         </div>
                         <button
                           onClick={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -385,7 +385,7 @@ export function ProfilePage() {
                       onClick={() => setShowSystemSettings(!showSystemSettings)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>System Settings</p>
+                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Cài đặt hệ thống</p>
                       <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{language}</p>
                     </button>
                     <button
@@ -406,8 +406,8 @@ export function ProfilePage() {
                             : <Sun style={{ width: '20px', height: '20px', color: '#374151' }} />
                           }
                           <div>
-                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Dark Mode</p>
-                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Toggle dark/light theme</p>
+                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Chế độ tối</p>
+                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Chuyển đổi chế độ tối/sáng</p>
                           </div>
                         </div>
                         <button
@@ -446,8 +446,8 @@ export function ProfilePage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <Globe style={{ width: '20px', height: '20px', color: '#374151' }} />
                           <div>
-                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Language</p>
-                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Select your language</p>
+                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Ngôn ngữ</p>
+                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Chọn ngôn ngữ của bạn</p>
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '8px', padding: '4px', border: '1px solid #e5e7eb' }}>
@@ -491,16 +491,16 @@ export function ProfilePage() {
 
             {/* Danger Zone */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-red-100">
-              <h2 className="text-xl text-red-600 mb-2">Danger Zone</h2>
+              <h2 className="text-xl text-red-600 mb-2">Khu vực nguy hiểm</h2>
               <p className="text-gray-600 text-sm mb-4">
-                Once you delete your account, there is no going back. Please be certain.
+                Khi bạn xóa tài khoản, không thể khôi phục. Vui lòng chắc chắn.
               </p>
               <button
                 onClick={() => setIsDeleteDialogOpen(true)}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                Delete My Account
+                Xóa tài khoản của tôi
               </button>
             </div>
           </div>

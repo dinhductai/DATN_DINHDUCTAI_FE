@@ -116,15 +116,15 @@ export function AdminUsersView() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold mb-1">User Management</h1>
-          <p className="text-gray-500">Manage all registered users</p>
+          <h1 className="text-2xl font-semibold mb-1">Quản lý người dùng</h1>
+          <p className="text-gray-500">Quản lý tất cả người dùng đã đăng ký</p>
         </div>
         <Button
           onClick={() => setCreatingUser(true)}
           className="bg-purple-600 hover:bg-purple-700"
         >
           <Plus className="w-4 h-4 mr-2" />
-          Create User
+          Tạo người dùng
         </Button>
       </div>
 
@@ -134,7 +134,7 @@ export function AdminUsersView() {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
           <Input
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Tìm kiếm theo tên hoặc email..."
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             className="pl-10"
@@ -151,12 +151,12 @@ export function AdminUsersView() {
         <div className="overflow-x-auto">
           {loading ? (
             <div className="flex items-center justify-center p-8">
-              <p className="text-gray-500">Loading users...</p>
+              <p className="text-gray-500">Đang tải người dùng...</p>
             </div>
           ) : users.length === 0 ? (
             <div className="flex items-center justify-center p-8">
               <p className="text-gray-500">
-                {searchKeyword ? 'No users found matching your search' : 'No users found'}
+                {searchKeyword ? 'Không tìm thấy người dùng phù hợp với tìm kiếm' : 'Không tìm thấy người dùng'}
               </p>
             </div>
           ) : (
@@ -165,11 +165,11 @@ export function AdminUsersView() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Avatar</TableHead>
-                    <TableHead>Name</TableHead>
+                    <TableHead>Ảnh đại diện</TableHead>
+                    <TableHead>Tên</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Profile</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Hồ sơ</TableHead>
+                    <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -197,7 +197,7 @@ export function AdminUsersView() {
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                           >
                             <Edit className="w-4 h-4 mr-1" />
-                            Update
+                            Cập nhật
                           </Button>
                           <Button
                             size="sm"
@@ -206,7 +206,7 @@ export function AdminUsersView() {
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="w-4 h-4 mr-1" />
-                            Delete
+                            Xóa
                           </Button>
                         </div>
                       </TableCell>
@@ -221,7 +221,7 @@ export function AdminUsersView() {
         {/* Pagination */}
         <div className="flex items-center justify-between border-t px-6 py-4">
           <div className="text-sm text-gray-500">
-            Showing {startIndex + 1} to {Math.min(startIndex + usersPerPage, users.length)} of {users.length} users
+            Hiển thị {startIndex + 1} đến {Math.min(startIndex + usersPerPage, users.length)} của {users.length} người dùng
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -279,10 +279,10 @@ export function AdminUsersView() {
         open={!!deletingUserId}
         onClose={() => setDeletingUserId(null)}
         onConfirm={handleConfirmDelete}
-        title="Confirm Delete"
-        description="Are you sure you want to delete this user? This action cannot be undone."
-        confirmText="Delete"
-        cancelText="Cancel"
+        title="Xác nhận xóa"
+        description="Bạn có chắc muốn xóa người dùng này? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
         variant="destructive"
       />
     </div>

@@ -46,24 +46,24 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
     
     // Validation
     if (userName.length < 3) {
-      toast.error('Username must be at least 3 characters')
+      toast.error('Tên người dùng phải có ít nhất 3 ký tự')
       return
     }
     
     if (!email.includes('@')) {
-      toast.error('Please enter a valid email')
+      toast.error('Vui lòng nhập email hợp lệ')
       return
     }
 
     // Validate password if provided
     if (password && password.length < 6) {
-      toast.error('Password must be at least 6 characters if provided')
+      toast.error('Mật khẩu phải có ít nhất 6 ký tự nếu được cung cấp')
       return
     }
     
     // For create mode, password is required
     if (!user && !password) {
-      toast.error('Password is required for new user')
+      toast.error('Mật khẩu là bắt buộc cho người dùng mới')
       return
     }
 
@@ -83,7 +83,7 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
         }
         
         await userService.updateUser(user.userId, updateRequest)
-        toast.success('User updated successfully')
+        toast.success('Cập nhật người dùng thành công')
       } else {
         // Create new user - password is required
         await userService.createUser({
@@ -91,14 +91,14 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
           password,
           email
         })
-        toast.success('User created successfully')
+        toast.success('Tạo người dùng thành công')
       }
       
       onSave() // Trigger parent to refresh user list
       handleClose()
     } catch (error: any) {
       console.error('Error saving user:', error)
-      toast.error(error.message || 'Failed to save user')
+      toast.error(error.message || 'Lưu người dùng thất bại')
     } finally {
       setLoading(false)
     }
@@ -115,15 +115,15 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>{user ? 'Update User' : 'Create New User'}</DialogTitle>
+          <DialogTitle>{user ? 'Cập nhật người dùng' : 'Tạo người dùng mới'}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="userName">Name</Label>
+            <Label htmlFor="userName">Tên</Label>
             <Input
               id="userName"
-              placeholder="Enter user name (min 3 characters)"
+              placeholder="Nhập tên người dùng (tối thiểu 3 ký tự)"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               required
@@ -132,11 +132,11 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">Địa chỉ email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter user email"
+              placeholder="Nhập email người dùng"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -145,12 +145,12 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
 
           <div className="space-y-2">
             <Label htmlFor="password">
-              {user ? 'New Password (Optional)' : 'Password *'}
+              {user ? 'Mật khẩu mới (tùy chọn)' : 'Mật khẩu *'}
             </Label>
             <Input
               id="password"
               type="password"
-              placeholder={user ? 'Leave empty to keep current password' : 'Enter password (min 6 characters)'}
+              placeholder={user ? 'Để trống để giữ nguyên mật khẩu hiện tại' : 'Nhập mật khẩu (tối thiểu 6 ký tự)'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required={!user}
@@ -158,17 +158,17 @@ export function UserFormDialog({ open, onClose, onSave, user }: UserFormDialogPr
             />
             {user && (
               <p className="text-xs text-gray-500">
-                💡 Leave empty if you don't want to change the password
+                💡 Để trống nếu bạn không muốn thay đổi mật khẩu
               </p>
             )}
           </div>
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
-              Cancel
+              Hủy
             </Button>
             <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={loading}>
-              {loading ? 'Saving...' : (user ? 'Update User' : 'Create User')}
+              {loading ? 'Đang lưu...' : (user ? 'Cập nhật người dùng' : 'Tạo người dùng')}
             </Button>
           </DialogFooter>
         </form>

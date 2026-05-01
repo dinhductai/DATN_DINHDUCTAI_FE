@@ -188,13 +188,13 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
     e.preventDefault()
 
     if (!title || !startDate || !deadline) {
-      toast.error('Please fill in all required fields')
+      toast.error('Vui lòng điền đầy đủ các trường bắt buộc')
       return
     }
 
     // Validate eventDescription when creating an event
     if (isEvent && !eventDescription.trim()) {
-      toast.error('Event description is required when creating an event')
+      toast.error('Mô tả sự kiện là bắt buộc khi tạo sự kiện')
       return
     }
 
@@ -228,7 +228,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
         const response = await updateTask(Number(editingTask.id), updatePayload)
 
-        toast.success(isEvent ? 'Event updated successfully' : 'Task updated successfully')
+        toast.success(isEvent ? 'Cập nhật sự kiện thành công' : 'Cập nhật công việc thành công')
 
         const updatedTask: Task = {
           id: response.taskId.toString(),
@@ -283,7 +283,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       onClose()
     } catch (error: any) {
       console.error('Error saving task:', error)
-      toast.error(error.message || 'Failed to save task')
+      toast.error(error.message || 'Lưu công việc thất bại')
     } finally {
       setIsSaving(false)
     }
@@ -292,20 +292,20 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
   const handleDelete = async () => {
     if (!editingTask || !onDeleteTask) return
 
-    if (!confirm('Are you sure you want to delete this task?')) {
+    if (!confirm('Bạn có chắc muốn xóa công việc này?')) {
       return
     }
 
     setIsDeleting(true)
     try {
       await deleteTask(Number(editingTask.id), editingTask.eventId ?? undefined)
-      toast.success(isEvent ? 'Event deleted successfully' : 'Task deleted successfully')
+      toast.success(isEvent ? 'Xóa sự kiện thành công' : 'Xóa công việc thành công')
       onDeleteTask(editingTask.id)
       resetForm()
       onClose()
     } catch (error: any) {
       console.error('Error deleting task:', error)
-      toast.error(error.message || 'Failed to delete task')
+      toast.error(error.message || 'Lưu công việc thất bại')
     } finally {
       setIsDeleting(false)
     }
@@ -323,15 +323,15 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               <div className="flex items-center">
                 <h2 className="text-lg leading-none font-semibold">
                   {isEditMode
-                    ? (isEvent ? 'Edit Event' : 'Edit Task')
-                    : (isEvent ? 'Create New Event' : 'Create New Task')}
+                    ? (isEvent ? 'Sửa sự kiện' : 'Sửa công việc')
+                    : (isEvent ? 'Tạo sự kiện mới' : 'Tạo công việc mới')}
                 </h2>
                 {!isEditMode && (
                   <>
                     <button
                       type="button"
                       onClick={handleToggleEvent}
-                      title={isEvent ? 'Switch to normal task' : 'Convert to event'}
+                      title={isEvent ? 'Chuyển sang công việc thường' : 'Chuyển thành sự kiện'}
                       className={`ml-4 p-1.5 rounded-md border-2 transition-all duration-200 cursor-pointer ${
                         isEvent
                           ? 'border-blue-500 bg-blue-50 text-blue-600 hover:bg-blue-100'
@@ -345,7 +345,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                         ? 'text-blue-600 border-blue-200 bg-blue-50'
                         : 'text-gray-400 border-gray-200 bg-gray-50'
                     }`}>
-                      Event Mode
+                      Chế độ sự kiện
                     </span>
                   </>
                 )}
@@ -367,10 +367,10 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             <form id="task-form" onSubmit={handleSubmit} className="space-y-4 pb-4">
             {/* ── Title ── */}
             <div className="space-y-2">
-              <Label htmlFor="title">Title *</Label>
+              <Label htmlFor="title">Tiêu đề *</Label>
               <Input
                 id="title"
-                placeholder={isEvent ? 'Enter event title' : 'Enter task title'}
+                placeholder={isEvent ? 'Nhập tiêu đề sự kiện' : 'Nhập tiêu đề công việc'}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -379,10 +379,10 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
             {/* ── Description ── */}
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Mô tả</Label>
               <Textarea
                 id="description"
-                placeholder={isEvent ? 'Enter event description' : 'Enter task description'}
+                placeholder={isEvent ? 'Nhập mô tả sự kiện' : 'Nhập mô tả công việc'}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -392,7 +392,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             {/* ── Date range ── */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date *</Label>
+                <Label htmlFor="startDate">Ngày bắt đầu *</Label>
                 <Input
                   id="startDate"
                   type="datetime-local"
@@ -405,7 +405,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="deadline">Deadline *</Label>
+                <Label htmlFor="deadline">Hạn chót *</Label>
                 <Input
                   id="deadline"
                   type="datetime-local"
@@ -419,7 +419,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             {/* ── Priority + Status ── */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
+                <Label htmlFor="priority">Mức ưu tiên</Label>
                 <Select value={priority} onValueChange={(value: string) => setPriority(value as PriorityLevel)}>
                   <SelectTrigger id="priority">
                     <SelectValue />
@@ -428,19 +428,19 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     <SelectItem value="HIGH">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-red-500 rounded" />
-                        <span>High</span>
+                        <span>Cao</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="MEDIUM">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-yellow-500 rounded" />
-                        <span>Medium</span>
+                        <span>Trung bình</span>
                       </div>
                     </SelectItem>
                     <SelectItem value="LOW">
                       <div className="flex items-center space-x-2">
                         <div className="w-3 h-3 bg-green-500 rounded" />
-                        <span>Low</span>
+                        <span>Thấp</span>
                       </div>
                     </SelectItem>
                   </SelectContent>
@@ -449,7 +449,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
               {isEditMode && (
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status</Label>
+                  <Label htmlFor="status">Trạng thái</Label>
                   <Select value={status} onValueChange={(value: string) => setStatus(value as TaskStatus)}>
                     <SelectTrigger id="status">
                       <SelectValue />
@@ -458,19 +458,19 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                       <SelectItem value="TODO">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-gray-400 rounded-full" />
-                          <span>To Do</span>
+                          <span>Cần làm</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="IN_PROGRESS">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-blue-500 rounded-full" />
-                          <span>In Progress</span>
+                          <span>Đang làm</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="DONE">
                         <div className="flex items-center space-x-2">
                           <div className="w-3 h-3 bg-green-500 rounded-full" />
-                          <span>Done</span>
+                          <span>Hoàn thành</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -482,14 +482,14 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             {/* ── Event fields — create mode (isEvent toggle ON) ── */}
             {!isEditMode && isEvent && (
               <div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50/40 p-4">
-                <p className="text-sm font-medium text-blue-700">Event Details</p>
+                <p className="text-sm font-medium text-blue-700">Chi tiết sự kiện</p>
 
                 {/* eventDescription */}
                 <div className="space-y-2">
-                  <Label htmlFor="eventDescription">Event Description *</Label>
+                  <Label htmlFor="eventDescription">Mô tả sự kiện *</Label>
                   <Textarea
                     id="eventDescription"
-                    placeholder="Describe the event content or agenda"
+                    placeholder="Mô tả nội dung hoặc chương trình sự kiện"
                     value={eventDescription}
                     onChange={(e) => setEventDescription(e.target.value)}
                     rows={2}
@@ -512,14 +512,14 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     />
                   </button>
                   <Label className="cursor-pointer select-none">
-                    {isOnline ? 'Online event' : 'Offline event'}
+                    {isOnline ? 'Sự kiện trực tuyến' : 'Sự kiện ngoại tuyến'}
                   </Label>
                 </div>
 
                 {/* Conditional: link if online, location if offline */}
                 {isOnline ? (
                   <div className="space-y-2">
-                    <Label htmlFor="linkEvent">Meeting Link</Label>
+                    <Label htmlFor="linkEvent">Đường link họp</Label>
                     <Input
                       id="linkEvent"
                       type="url"
@@ -530,10 +530,10 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
+                    <Label htmlFor="location">Địa điểm</Label>
                     <Input
                       id="location"
-                      placeholder="Enter venue or address"
+                      placeholder="Nhập địa điểm hoặc địa chỉ"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     />
@@ -542,7 +542,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
                 {/* reminderMinutesBefore */}
                 <div className="space-y-2">
-                  <Label htmlFor="reminderMinutesBefore">Reminder (minutes before)</Label>
+                  <Label htmlFor="reminderMinutesBefore">Nhắc nhở (phút trước khi bắt đầu)</Label>
                   <Input
                     id="reminderMinutesBefore"
                     type="number"
@@ -552,20 +552,20 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     value={reminderMinutesBefore}
                     onChange={(e) => setReminderMinutesBefore(Number(e.target.value))}
                   />
-                  <p className="text-xs text-gray-500">Email reminder will be sent this many minutes before the event starts.</p>
+                  <p className="text-xs text-gray-500">Email nhắc nhở sẽ được gửi trước sự kiện bắt đầu đúng khoảng thời gian này.</p>
                 </div>
 
                 {/* invitedEmails — dynamic list */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Invited Emails</Label>
+                    <Label>Email được mời</Label>
                     <button
                       type="button"
                       onClick={handleAddEmailField}
                       className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add email
+                      Thêm email
                     </button>
                   </div>
 
@@ -593,10 +593,10 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     ))}
                   </div>
                   <p className="text-xs text-gray-500">
-                    The first email is automatically your account email.
+                    Email đầu tiên tự động là email tài khoản của bạn.
                     {invitedEmails.length <= 1
-                      ? ' Click "Add email" to invite others.'
-                      : ' Emails are sent event reminders automatically.'}
+                      ? ' Nhấn "Thêm email" để mời người khác.'
+                      : ' Email nhắc nhở sự kiện được gửi tự động.'}
                   </p>
                 </div>
               </div>
@@ -605,15 +605,15 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
             {/* ── Event fields — edit mode (task is an event) ── */}
             {isEditMode && isEvent && (
               <div className="space-y-4 rounded-lg border-2 border-blue-200 bg-blue-50/40 p-4">
-                <p className="text-sm font-medium text-blue-700">Event Details</p>
-                <p className="text-xs text-gray-500 -mt-2">Leave fields blank to keep existing values.</p>
+                <p className="text-sm font-medium text-blue-700">Chi tiết sự kiện</p>
+                <p className="text-xs text-gray-500 -mt-2">Để trống nếu muốn giữ nguyên giá trị hiện tại.</p>
 
                 {/* eventDescription */}
                 <div className="space-y-2">
-                  <Label htmlFor="editEventDesc">Event Description</Label>
+                  <Label htmlFor="editEventDesc">Mô tả sự kiện</Label>
                   <Textarea
                     id="editEventDesc"
-                    placeholder="Update event description…"
+                    placeholder="Cập nhật mô tả sự kiện…"
                     value={eventDescription}
                     onChange={(e) => setEventDescription(e.target.value)}
                     rows={2}
@@ -632,13 +632,13 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${isOnline ? 'translate-x-6' : 'translate-x-1'}`} />
                   </button>
                   <Label className="cursor-pointer select-none">
-                    {isOnline ? 'Online event' : 'Offline event'}
+                    {isOnline ? 'Sự kiện trực tuyến' : 'Sự kiện ngoại tuyến'}
                   </Label>
                 </div>
 
                 {isOnline ? (
                   <div className="space-y-2">
-                    <Label htmlFor="editLinkEvent">Meeting Link</Label>
+                    <Label htmlFor="editLinkEvent">Đường link họp</Label>
                     <Input
                       id="editLinkEvent"
                       type="url"
@@ -649,10 +649,10 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <Label htmlFor="editLocation">Location</Label>
+                    <Label htmlFor="editLocation">Địa điểm</Label>
                     <Input
                       id="editLocation"
-                      placeholder="Enter venue or address"
+                      placeholder="Nhập địa điểm hoặc địa chỉ"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     />
@@ -661,7 +661,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
 
                 {/* reminderMinutesBefore */}
                 <div className="space-y-2">
-                  <Label htmlFor="editReminder">Reminder (minutes before)</Label>
+                  <Label htmlFor="editReminder">Nhắc nhở (phút trước khi bắt đầu)</Label>
                   <Input
                     id="editReminder"
                     type="number"
@@ -675,14 +675,14 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                 {/* invitedEmails */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label>Invited Emails</Label>
+                    <Label>Email được mời</Label>
                     <button
                       type="button"
                       onClick={handleAddEmailField}
                       className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add email
+                      Thêm email
                     </button>
                   </div>
                   <div className="space-y-2">
@@ -705,7 +705,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                       </div>
                     ))}
                     {invitedEmails.length === 0 && (
-                      <p className="text-xs text-gray-400 italic">No emails added — existing invites will be kept.</p>
+                      <p className="text-xs text-gray-400 italic">Chưa thêm email — lời mời hiện có sẽ được giữ.</p>
                     )}
                   </div>
                 </div>
@@ -725,7 +725,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               className="mr-auto"
             >
               <Trash2 className="w-4 h-4 mr-2" />
-              {isDeleting ? 'Deleting...' : 'Delete'}
+              {isDeleting ? 'Đang xóa...' : 'Xóa'}
             </Button>
           )}
           <div className="flex justify-end gap-2 mt-2">
@@ -735,7 +735,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               onClick={handleClose}
               disabled={isSaving || isDeleting}
             >
-              Cancel
+              Hủy
             </Button>
             <Button
               type="submit"
@@ -743,7 +743,7 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
               className="bg-blue-600 hover:bg-blue-700"
               disabled={isSaving || isDeleting}
             >
-              {isSaving ? 'Saving...' : isEditMode ? 'Update Task' : isEvent ? 'Create Event' : 'Create Task'}
+              {isSaving ? 'Đang lưu...' : isEditMode ? 'Cập nhật công việc' : isEvent ? 'Tạo sự kiện' : 'Tạo công việc'}
             </Button>
           </div>
         </div>

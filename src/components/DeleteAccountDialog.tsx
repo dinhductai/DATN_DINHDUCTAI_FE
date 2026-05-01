@@ -30,7 +30,7 @@ export function DeleteAccountDialog({
       onOpenChange(false)
     } catch (err: any) {
       console.error('Failed to delete account:', err)
-      setError(err?.message || 'Failed to delete account. Please try again.')
+      setError(err?.message || 'Xóa tài khoản thất bại. Vui lòng thử lại.')
       setIsDeleting(false)
     }
   }
@@ -41,10 +41,10 @@ export function DeleteAccountDialog({
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-red-600">
             <AlertTriangle className="w-5 h-5" />
-            Delete Account
+            Xóa tài khoản
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently removed.
+            Bạn có chắc muốn xóa tài khoản? Hành động này không thể hoàn tác và tất cả dữ liệu của bạn sẽ bị xóa vĩnh viễn.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -57,7 +57,7 @@ export function DeleteAccountDialog({
         <AlertDialogFooter>
           <AlertDialogCancel asChild>
             <Button variant="outline" disabled={isDeleting}>
-              Cancel
+              Hủy
             </Button>
           </AlertDialogCancel>
           <AlertDialogAction asChild>
@@ -70,10 +70,10 @@ export function DeleteAccountDialog({
               {isDeleting ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
+                  Đang xóa...
                 </>
               ) : (
-                'Agree'
+                'Đồng ý'
               )}
             </Button>
           </AlertDialogAction>

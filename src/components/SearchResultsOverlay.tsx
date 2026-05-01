@@ -24,8 +24,8 @@ export function SearchResultsOverlay({
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { 
-      month: 'short', 
+    return date.toLocaleDateString('vi-VN', {
+      month: 'short',
       day: 'numeric',
       year: 'numeric',
       hour: '2-digit',
@@ -43,6 +43,24 @@ export function SearchResultsOverlay({
         return 'bg-green-100 text-green-700 border-green-200'
       default:
         return 'bg-gray-100 text-gray-700 border-gray-200'
+    }
+  }
+
+  const getPriorityLabel = (priority: string) => {
+    switch (priority) {
+      case 'HIGH':   return 'Cao'
+      case 'MEDIUM': return 'Trung bình'
+      case 'LOW':    return 'Thấp'
+      default:       return priority
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'TODO':        return 'Cần làm'
+      case 'IN_PROGRESS': return 'Đang làm'
+      case 'DONE':       return 'Hoàn thành'
+      default:           return status
     }
   }
 
@@ -72,8 +90,8 @@ export function SearchResultsOverlay({
           <div className="flex items-center space-x-3">
             <Search className="w-5 h-5 text-gray-400" />
             <div>
-              <span className="font-semibold text-gray-900">Search Results</span>
-              <span className="text-gray-500 ml-2">for "{searchQuery}"</span>
+              <span className="font-semibold text-gray-900">Kết quả tìm kiếm</span>
+              <span className="text-gray-500 ml-2">cho "{searchQuery}"</span>
             </div>
             {isSearching && (
               <div className="ml-2">
@@ -97,13 +115,13 @@ export function SearchResultsOverlay({
             <div className="text-center py-12">
               <Search className="w-12 h-12 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-500">
-                {isSearching ? 'Searching...' : 'No tasks found matching your search'}
+                {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy công việc phù hợp với tìm kiếm'}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-gray-600">
-                Found {searchResults.length} task{searchResults.length !== 1 ? 's' : ''}
+                Tìm thấy {searchResults.length} công việc
               </p>
               {searchResults.map((task) => (
                 <Card 
@@ -116,7 +134,7 @@ export function SearchResultsOverlay({
                     <div className="flex items-start justify-between gap-3">
                       <h3 className="font-semibold text-lg flex-1">{task.title}</h3>
                       <span className={`px-2 py-1 rounded-md text-xs font-medium border ${getPriorityColor(task.priority)}`}>
-                        {task.priority}
+                        {getPriorityLabel(task.priority)}
                       </span>
                     </div>
 
@@ -131,14 +149,14 @@ export function SearchResultsOverlay({
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <Calendar className="w-4 h-4" />
-                        <span>Start:</span>
+                        <span>Bắt đầu:</span>
                         <span className="font-medium text-gray-700">
-                          {task.startTime ? formatDate(task.startTime) : 'N/A'}
+                          {task.startTime ? formatDate(task.startTime) : 'Không có'}
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock className="w-4 h-4" />
-                        <span>Deadline:</span>
+                        <span>Hạn chót:</span>
                         <span className="font-medium text-gray-700">
                           {formatDate(task.deadline)}
                         </span>
@@ -148,7 +166,7 @@ export function SearchResultsOverlay({
                     {/* Status */}
                     <div className="flex items-center gap-2">
                       <div className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(task.status)}`}>
-                        {task.status.replace('_', ' ')}
+                        {getStatusLabel(task.status)}
                       </div>
                     </div>
                   </div>
