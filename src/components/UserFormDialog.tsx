@@ -15,6 +15,7 @@ export interface User {
   email: string
   password?: string
   profile: string
+  createdAt?: string
   roles?: string[]
 }
 

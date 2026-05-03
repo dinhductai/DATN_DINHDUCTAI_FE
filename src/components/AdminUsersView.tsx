@@ -25,11 +25,13 @@ export function AdminUsersView() {
     try {
       setLoading(true)
       const data = await userService.getAllUsers()
-      const mappedUsers: User[] = data.map((u: any) => ({
+      const filteredData = data.filter((u: any) => u.email?.toLowerCase() !== 'admin@gmail.com')
+      const mappedUsers: User[] = filteredData.map((u: any) => ({
         userId: u.userId,
         userName: u.userName,
         email: u.email,
-        profile: u.profile || 'Default profile',
+        profile: u.profile || null,
+        createdAt: u.createdAt || null,
         roles: u.roles || []
       }))
       setUsers(mappedUsers)
@@ -55,7 +57,8 @@ export function AdminUsersView() {
         userId: u.userId,
         userName: u.userName,
         email: u.email,
-        profile: u.profile || 'Default profile',
+        profile: u.profile || null,
+        createdAt: u.createdAt || null,
         roles: u.roles || []
       }))
       setUsers(mappedUsers)
@@ -166,9 +169,9 @@ export function AdminUsersView() {
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Ảnh đại diện</TableHead>
-                    <TableHead>Tên</TableHead>
+                    <TableHead>Tên người dùng</TableHead>
                     <TableHead>Email</TableHead>
-                    <TableHead>Hồ sơ</TableHead>
+                    <TableHead>Thời điểm tạo</TableHead>
                     <TableHead className="text-right">Hành động</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -177,16 +180,34 @@ export function AdminUsersView() {
                     <TableRow key={user.userId}>
                       <TableCell className="font-medium">{user.userId}</TableCell>
                       <TableCell>
-                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                          <span className="text-sm font-medium text-purple-600">
-                            {user.userName.charAt(0).toUpperCase()}
-                          </span>
-                        </div>
+                        {user.profile ? (
+                          <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-gray-100">
+                            <img
+                              src={user.profile}
+                              alt={user.userName}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <span className="text-sm font-medium text-purple-600">
+                              {user.userName.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>{user.userName}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <span className="text-gray-400 text-sm">{user.profile}</span>
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                          : '-'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end space-x-2">

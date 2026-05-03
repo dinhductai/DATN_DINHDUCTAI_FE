@@ -531,5 +531,100 @@ export const taskService = {
       console.error('Error fetching tasks by priority:', error);
       throw error;
     }
+  },
+
+  // ============ EVENT STATISTICS ============
+
+  getEventStatisticsYear: async (): Promise<{
+    totalEvents: number;
+    personalEvents: number;
+    groupEvents: number;
+    eventsByPriority: Array<{ priority: string; taskId: number }>;
+  }> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/tasks/events/statistics/year', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch event statistics: ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error('Error fetching event statistics:', error);
+      return { totalEvents: 0, personalEvents: 0, groupEvents: 0, eventsByPriority: [] };
+    }
+  },
+
+  getUpcomingEvents: async (limit = 10): Promise<any[]> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/tasks/events/upcoming?limit=${limit}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch upcoming events: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching upcoming events:', error);
+      return [];
+    }
+  },
+
+  getAllEvents: async (): Promise<any[]> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/tasks/events', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch all events: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching all events:', error);
+      return [];
+    }
+  },
+
+  deleteEvent: async (taskId: number, eventId: number): Promise<void> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/tasks/events/${taskId}?eventId=${eventId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete event: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      throw error;
+    }
   }
 };

@@ -13,7 +13,7 @@ import { AdminUsersView } from "./components/AdminUsersView";
 import { RightPanel } from "./components/RightPanel";
 import { AIChatPanel } from "./components/AIChatPanel";
 import { TaskFormDialog, Task, mapTaskResponseToTask } from "./components/TaskFormDialog";
-import { PushNotificationSettings } from "./components/PushNotificationSettings";
+import { EventManagementView } from "./components/EventManagementView";
 import { ProfilePage } from "./components/ProfilePage";
 import { createTask, getTasks } from "./services/taskService";
 // import { pushNotificationService } from "./services/pushNotificationService";
@@ -267,7 +267,7 @@ function UserLayout() {
               {activeView === "stats" ? (
                 <DashboardView />
               ) : activeView === "notifications" ? (
-                <PushNotificationSettings />
+                <EventManagementView />
               ) : (
                 <ScheduleView
                   tasks={tasks}
