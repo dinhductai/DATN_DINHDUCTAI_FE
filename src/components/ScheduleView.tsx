@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2, Calendar } from 'lucide-react'
 import { Button } from './ui/button'
 import { Task } from './TaskFormDialog'
 import { PriorityLevel, TaskStatus } from '../types/task'
@@ -165,6 +165,16 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
   // Current time label
   const currentTimeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+
+  // Upcoming event: nearest event (isEvent = true) from all days in range
+  const upcomingEvent = (() => {
+    if (!tasksByDay.length) return null
+    const allFutureEvents = tasksByDay.flatMap(e => e.dayTasks)
+      .filter(t => t.isEvent && t.eventId != null && new Date(t.startDate).getTime() > now.getTime())
+      .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    return allFutureEvents[0] || null
+  })()
+
   const STATUS_LABELS: Record<string, string> = {
     TODO: 'Cần làm',
     IN_PROGRESS: 'Đang làm',
@@ -201,7 +211,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
   return (
     <div className="flex flex-col">
-      {/* Header row: Lịch trình của tôi (1/4) | Task info (3/4) */}
+      {/* Header row: Lịch trình của tôi (1/4) | Task info (3/4) → split 50/50 */}
       <div className="flex items-center mb-6 gap-6">
         {/* Left: Lịch trình của tôi + date range */}
         <div className="w-1/4 flex-shrink-0">
@@ -229,60 +239,101 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
           </div>
         </div>
 
-        {/* Right: task info (3/4) */}
-        <div className="flex-1 min-w-0">
-          {currentTask ? (
-            <div className={`flex items-start gap-6 rounded-2xl px-10 py-8 border-l-8 ${
-              currentTask.priority === 'HIGH' ? 'bg-red-50 border-red-400' :
-              currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400' :
-              'bg-green-50 border-green-400'
-            }`}>
-              {/* Status icon */}
-              <div className="flex-shrink-0 mt-1">
-                {currentTask.status === 'DONE' ? (
-                  <CheckCircle2 className="w-5 h-5 text-green-600" />
-                ) : currentTask.status === 'IN_PROGRESS' ? (
-                  <Clock className="w-5 h-5 text-blue-600" />
-                ) : (
-                  <Circle className="w-5 h-5 text-gray-400" />
-                )}
+        {/* Right: split 50/50 */}
+        <div className="flex-1 min-w-0 flex gap-6">
+
+          {/* Left half: current task */}
+          <div className="flex-1">
+            {currentTask ? (
+              <div className={`flex items-center gap-4 rounded-2xl px-6 py-6 border-l-8 ${
+                currentTask.priority === 'HIGH' ? 'bg-red-50 border-red-400' :
+                currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400' :
+                'bg-green-50 border-green-400'
+              }`}>
+                <div className="flex-shrink-0">
+                  {currentTask.status === 'DONE' ? (
+                    <CheckCircle2 className="w-5 h-5 text-green-600" />
+                  ) : currentTask.status === 'IN_PROGRESS' ? (
+                    <Clock className="w-5 h-5 text-blue-600" />
+                  ) : (
+                    <Circle className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                <div className="flex flex-col min-w-0 flex-1 gap-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-sm font-bold text-gray-500">{currentTimeLabel}</span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                      currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
+                      currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-green-100 text-green-700'
+                    }`}>
+                      {PRIORITY_LABELS[currentTask.priority]}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                      currentTask.status === 'DONE' ? 'bg-green-100 text-green-700' :
+                      currentTask.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                      'bg-gray-100 text-gray-600'
+                    }`}>
+                      {STATUS_LABELS[currentTask.status]}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="text-lg font-bold text-gray-900 truncate">{currentTask.title}</span>
+                    <span className="text-xs font-medium text-gray-400 flex-shrink-0">
+                      {formatTime(currentTask.startDate)} → {formatTime(currentTask.deadline)}
+                    </span>
+                  </div>
+                </div>
               </div>
-              <div className="flex flex-col min-w-0 flex-1 gap-3">
-                {/* Line 1: time + badges */}
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="text-base font-bold text-gray-500">{currentTimeLabel}</span>
-                  <span className={`text-sm px-3 py-1 rounded-full font-semibold ${
-                    currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                    currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
+            ) : (
+              <div className="flex items-center gap-3 text-sm text-gray-400 rounded-2xl bg-gray-50 px-6 py-6">
+                <div className="w-3 h-3 rounded-full bg-gray-300" />
+                <span>{currentTimeLabel} — Không có công việc đang hoạt động</span>
+              </div>
+            )}
+          </div>
+
+          {/* Right half: upcoming event (nearest isEvent = true) */}
+          <div className="flex-1 flex flex-col gap-2">
+            <span className="text-sm font-semibold text-gray-500 mb-1">Sự kiện sắp tới</span>
+            {upcomingEvent ? (
+              <div
+                className={`flex items-center gap-3 rounded-xl px-5 py-4 cursor-pointer border-l-4 ${
+                  upcomingEvent.priority === 'HIGH' ? 'bg-red-50 border-red-400 hover:bg-red-100' :
+                  upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400 hover:bg-yellow-100' :
+                  'bg-green-50 border-green-400 hover:bg-green-100'
+                }`}
+                onClick={() => onTaskClick(upcomingEvent)}
+              >
+                <div className="flex items-center gap-4 flex-1 min-w-0">
+                  <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                  <span className="text-base font-semibold text-gray-800 truncate flex-shrink-0">{upcomingEvent.title}</span>
+                  <span className="text-xs font-medium text-gray-400 flex-shrink-0">
+                    {formatTime(upcomingEvent.startDate)} → {formatTime(upcomingEvent.deadline)}
+                  </span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
+                    upcomingEvent.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
+                    upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
                     'bg-green-100 text-green-700'
                   }`}>
-                    {PRIORITY_LABELS[currentTask.priority]}
+                    {PRIORITY_LABELS[upcomingEvent.priority]}
                   </span>
-                  <span className={`text-sm px-3 py-1 rounded-full font-medium ${
-                    currentTask.status === 'DONE' ? 'bg-green-100 text-green-700' :
-                    currentTask.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
-                    'bg-gray-100 text-gray-600'
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
+                    upcomingEvent.status === 'TODO' ? 'bg-gray-100 text-gray-600' :
+                    upcomingEvent.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                    'bg-green-100 text-green-700'
                   }`}>
-                    {STATUS_LABELS[currentTask.status]}
-                  </span>
-                </div>
-                {/* Line 2: title + time range */}
-                <div className="flex items-center gap-4 flex-wrap">
-                  <span className="text-2xl font-bold text-gray-900 truncate">{currentTask.title}</span>
-                  <span className="text-sm font-medium text-gray-400 flex-shrink-0">
-                    {new Date(currentTask.startDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                    {' → '}
-                    {new Date(currentTask.deadline).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                    {STATUS_LABELS[upcomingEvent.status]}
                   </span>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3 text-base text-gray-400">
-              <div className="w-3 h-3 rounded-full bg-gray-300" />
-              <span>{currentTimeLabel} — Không có công việc đang hoạt động</span>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-gray-400 rounded-xl bg-gray-50 px-4 py-3">
+                <Circle className="w-3 h-3" />
+                <span>Không có sự kiện sắp tới</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
