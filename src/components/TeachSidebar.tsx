@@ -16,7 +16,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
   
   const menuItems = [
     { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
-    { icon: BarChart3, label: 'Bảng điều khiển', view: 'stats' as const },
+    { icon: BarChart3, label: 'Thống kê', view: 'stats' as const },
     { icon: CalendarDays, label: 'Sự kiện', view: 'notifications' as const },
   ]
 

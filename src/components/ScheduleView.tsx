@@ -259,8 +259,8 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                     <Circle className="w-5 h-5 text-gray-400" />
                   )}
                 </div>
-                <div className="flex flex-col min-w-0 flex-1 gap-2">
-                  <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex flex-col min-w-0 flex-1 gap-3">
+                  <div className="flex items-center gap-4 flex-wrap px-2">
                     <span className="text-sm font-bold text-gray-500">{currentTimeLabel}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
                       currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
@@ -277,7 +277,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                       {STATUS_LABELS[currentTask.status]}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex items-center gap-4 flex-wrap px-2">
                     <span className="text-lg font-bold text-gray-900 truncate">{currentTask.title}</span>
                     <span className="text-xs font-medium text-gray-400 flex-shrink-0">
                       {formatTime(currentTask.startDate)} → {formatTime(currentTask.deadline)}
@@ -305,7 +305,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 }`}
                 onClick={() => onTaskClick(upcomingEvent)}
               >
-                <div className="flex items-center gap-4 flex-1 min-w-0">
+                <div className="flex items-center justify-center gap-6 px-2 flex-1 min-w-0">
                   <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0" />
                   <span className="text-base font-semibold text-gray-800 truncate flex-shrink-0">{upcomingEvent.title}</span>
                   <span className="text-xs font-medium text-gray-400 flex-shrink-0">
@@ -461,7 +461,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                   >
                     {showTitle ? (
                       showDesc ? (
-                        <div className="h-full flex flex-col justify-center px-2 py-1 gap-0.5">
+                        <div className="h-full flex flex-col justify-center px-3 py-1.5 gap-1">
                           <div className="flex items-center justify-between gap-1">
                             <span className="text-[11px] font-semibold truncate leading-tight text-white flex-1 min-w-0">
                               {task.title}
@@ -476,7 +476,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                           </span>
                         </div>
                       ) : (
-                        <div className="h-full flex items-center justify-between gap-1 px-2">
+                        <div className="h-full flex items-center justify-between gap-2 px-3">
                           <span className={`${vTinyText ? 'text-[6px]' : tinyText ? 'text-[8px]' : 'text-[11px]'} font-semibold truncate leading-tight text-white flex-1 min-w-0`}>
                             {task.title}
                           </span>
