@@ -130,8 +130,7 @@ export const userService = {
   updateUser: async (userId: number, request: { 
     userName: string; 
     email: string; 
-    password?: string;  // Optional - only send when changing password
-    profile?: string 
+    password?: string;
   }): Promise<any> => {
     try {
       const token = localStorage.getItem('token');
@@ -223,7 +222,35 @@ export const userService = {
     }
   },
 
-  // Lấy số users đăng ký tuần này
+  // Upload profile image to cloud
+  uploadProfileImage: async (userId: number, file: File): Promise<string> => {
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`/api/users/upload-profile/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Upload profile error:', response.status, errorText);
+        throw new Error(`Failed to upload profile image: ${response.status}`);
+      }
+
+      const url = await response.text();
+      console.log('[API] Upload profile success:', url);
+      return url;
+    } catch (error) {
+      console.error('Error uploading profile image:', error);
+      throw error;
+    }
+  },
   getNewUsersThisWeek: async (): Promise<number> => {
     try {
       const token = localStorage.getItem('token');

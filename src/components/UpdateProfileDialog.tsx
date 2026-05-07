@@ -34,7 +34,6 @@ interface FormErrors {
   email?: string
   password?: string
   confirmPassword?: string
-  profile?: string
 }
 
 export function UpdateProfileDialog({
@@ -47,12 +46,15 @@ export function UpdateProfileDialog({
   const [email, setEmail] = useState(user.email)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [profile, setProfile] = useState(user.profile || '')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+
+  // Preview của ảnh mới (base64 data URL) — chỉ dùng để hiển thị preview
+  const [newImageFile, setNewImageFile] = useState<File | null>(null)
+  const [newImagePreview, setNewImagePreview] = useState<string>('')
 
   useEffect(() => {
     if (open) {
@@ -60,7 +62,8 @@ export function UpdateProfileDialog({
       setEmail(user.email)
       setPassword('')
       setConfirmPassword('')
-      setProfile(user.profile || '')
+      setNewImageFile(null)
+      setNewImagePreview('')
       setErrors({})
       setSubmitError(null)
     }
@@ -78,7 +81,7 @@ export function UpdateProfileDialog({
     if (!email.trim()) {
       newErrors.email = 'Email là bắt buộc'
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      newErrors.email = 'Vui lòng nhập địa chỉ email hợp lệ'
+      newErrors.email = 'Vui lòng nhập địa chỉ email hỏi lệ'
     }
 
     if (password) {
@@ -99,6 +102,18 @@ export function UpdateProfileDialog({
     return Object.keys(newErrors).length === 0
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setNewImageFile(file)
+      setNewImagePreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitError(null)
@@ -110,31 +125,52 @@ export function UpdateProfileDialog({
     setIsSubmitting(true)
 
     try {
-      const updateData: {
-        userName: string
-        email: string
-        profile?: string
-        password?: string
-      } = {
-        userName: userName.trim(),
-        email: email.trim(),
+      const hasTextChange =
+        userName.trim() !== user.userName ||
+        email.trim() !== user.email ||
+        password !== ''
+
+      const hasImageChange = newImageFile !== null
+
+      // 1. Nếu có thay đổi thông tin text → gọi PUT /api/users/{userId}
+      if (hasTextChange) {
+        const updateData: {
+          userName: string
+          email: string
+          password?: string
+        } = {
+          userName: userName.trim(),
+          email: email.trim(),
+        }
+
+        if (password) {
+          updateData.password = password
+        }
+
+        await userService.updateUser(user.userId, updateData)
       }
 
-      if (password) {
-        updateData.password = password
+      // 2. Nếu có thay đổi ảnh → gọi POST /api/users/upload-profile/{userId} (chạy ngầm)
+      if (hasImageChange) {
+        userService.uploadProfileImage(user.userId, newImageFile!).catch(err => {
+          console.error('[UpdateProfile] Upload image failed:', err)
+        })
       }
 
-      if (profile) {
-        updateData.profile = profile
+      // 3. Nếu không có gì thay đổi thì không call API
+      if (!hasTextChange && !hasImageChange) {
+        onOpenChange(false)
+        setIsSubmitting(false)
+        return
       }
 
-      await userService.updateUser(user.userId, updateData)
+      // Đợi update text xong (nếu có) rồi mới gọi onSuccess
       onSuccess()
       onOpenChange(false)
     } catch (error: any) {
       console.error('Failed to update profile:', error)
       const errorMessage = error?.message || 'Cập nhật hồ sơ thất bại. Vui lòng thử lại.'
-      
+
       if (errorMessage.includes('email')) {
         setErrors({ email: 'Email này đã được sử dụng' })
       } else {
@@ -153,6 +189,9 @@ export function UpdateProfileDialog({
       .toUpperCase()
       .slice(0, 2)
   }
+
+  // Ảnh hiển thị: ưu tiên preview mới > ảnh cũ
+  const displayImage = newImagePreview || user.profile
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -175,8 +214,8 @@ export function UpdateProfileDialog({
           <div className="flex justify-center">
             <div className="relative">
               <Avatar className="w-24 h-24 border-4 border-gray-100 shadow-sm">
-                {profile ? (
-                  <ImageWithFallback src={profile} alt={userName} />
+                {displayImage ? (
+                  <ImageWithFallback src={displayImage} alt={userName} />
                 ) : null}
                 <AvatarFallback className="text-2xl bg-blue-100 text-blue-700">
                   {getInitials(userName || 'U')}
@@ -199,23 +238,14 @@ export function UpdateProfileDialog({
               type="file"
               accept="image/*"
               className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) {
-                  const reader = new FileReader()
-                  reader.onloadend = () => {
-                    setProfile(reader.result as string)
-                  }
-                  reader.readAsDataURL(file)
-                }
-              }}
+              onChange={handleImageChange}
             />
             <div className="relative">
               <Input
                 type="text"
                 readOnly
                 placeholder="Chọn ảnh từ máy..."
-                value={profile ? 'Đã chọn ảnh' : ''}
+                value={newImageFile ? 'Đã chọn ảnh mới' : ''}
                 className="pr-10 cursor-pointer"
                 onClick={() => document.getElementById('profile-upload')?.click()}
               />
