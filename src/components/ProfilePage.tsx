@@ -16,6 +16,7 @@ interface UserProfile {
   email: string
   profile?: string
   createdAt?: string
+  registerSince?: number
 }
 
 export function ProfilePage() {
@@ -42,19 +43,13 @@ export function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    const fakeUser: UserProfile = {
-      userId: 1,
-      userName: 'John Carter',
-      email: 'johnacarter@example.com',
-      profile: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop',
-      createdAt: '2024-01-15T17:30:00Z'
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
     }
-
-    setTimeout(() => {
-      setUser(fakeUser)
-      setLoading(false)
-    }, 500)
-  }, [])
+    loadUserProfile();
+  }, []);
 
   const loadUserProfile = async () => {
     try {
@@ -98,9 +93,15 @@ export function ProfilePage() {
     })
   }
 
-  const getMemberSince = (dateStr?: string) => {
-    if (!dateStr) return 'Không có'
-    const date = new Date(dateStr)
+  const getMemberSinceText = (profile?: UserProfile) => {
+    if (!profile) return 'Không có'
+    if (profile.registerSince !== undefined && profile.registerSince !== null) {
+      if (profile.registerSince < 1) return 'Ít hơn một tháng'
+      if (profile.registerSince === 1) return '1 tháng'
+      return `${profile.registerSince} tháng`
+    }
+    if (!profile.createdAt) return 'Không có'
+    const date = new Date(profile.createdAt)
     const now = new Date()
     const months = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 30))
     if (months < 1) return 'Ít hơn một tháng'
@@ -174,7 +175,7 @@ export function ProfilePage() {
             </button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
               <img 
-                src={user.profile || ''} 
+                src={user.profile || '/profile_picture.png'} 
                 alt={user.userName} 
                 className="w-full h-full rounded-full object-cover" 
               />
@@ -220,7 +221,7 @@ export function ProfilePage() {
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: '128px', height: '128px', borderRadius: '16px', background: 'white', padding: '4px', boxShadow: '0 10px 25px rgba(0,0,0,0.15)' }}>
                 <img
-                  src={user.profile || ''}
+                  src={user.profile || '/profile_picture.png'}
                   alt={user.userName}
                   style={{ width: '100%', height: '100%', borderRadius: '12px', objectFit: 'cover' }}
                 />
@@ -254,7 +255,7 @@ export function ProfilePage() {
               </div>
               <div className="mt-4">
                 <p className="text-sm text-white/80">Thành viên từ</p>
-                <p className="text-lg">{getMemberSince(user.createdAt)}</p>
+                <p className="text-lg">{getMemberSinceText(user)}</p>
               </div>
             </div>
           </div>

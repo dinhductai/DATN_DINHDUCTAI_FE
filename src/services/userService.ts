@@ -1,13 +1,13 @@
 // services/userService.ts
 
 export const userService = {
-  // Lấy thông tin user hiện tại
+  // Lấy thông tin user hiện tại (profile detail)
   getMe: async (): Promise<any> => {
     try {
       const token = localStorage.getItem('token');
       console.log('[API] Fetching current user, token:', token ? 'present' : 'missing');
-      
-      const response = await fetch('/api/users/me', {
+
+      const response = await fetch('/api/users/profile', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

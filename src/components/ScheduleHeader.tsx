@@ -4,6 +4,7 @@ import { Button } from './ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
 import { ImageWithFallback } from './figma/ImageWithFallback'
 import { pushNotificationService } from '../services/pushNotificationService'
+import { userService } from '../services/userService'
 import { useState, useEffect } from 'react'
 import { searchTasksByTitle } from '../services/taskService'
 import { TaskResponse } from '../types/task'
@@ -18,6 +19,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
   const navigate = useNavigate()
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [currentUser, setCurrentUser] = useState<{ userName: string; profile?: string } | null>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -27,7 +29,17 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
   useEffect(() => {
     checkSubscriptionStatus();
+    fetchCurrentUser();
   }, []);
+
+  const fetchCurrentUser = async () => {
+    try {
+      const user = await userService.getMe();
+      setCurrentUser({ userName: user.userName, profile: user.profile });
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
 
   // Debounced search
   useEffect(() => {
@@ -232,10 +244,10 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               onClick={() => navigate('/profile')}
             >
               <ImageWithFallback 
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBoZWFkc2hvdHxlbnwxfHx8fDE3NjAwNDEwMjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral"
-                alt="User"
+                src={currentUser?.profile || '/profile_picture.png'}
+                alt={currentUser?.userName || 'User'}
               />
-              <AvatarFallback>JC</AvatarFallback>
+              <AvatarFallback>{currentUser?.userName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
             <ChevronDown className="w-4 h-4 text-gray-400" />
           </div>
