@@ -2,7 +2,7 @@ import { Card } from './ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts'
 import { CheckCircle, Clock, Circle, TrendingUp, Calendar } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse } from '../services/taskService'
+import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse, RecentTaskResponse, MonthlyEventCountResponse } from '../services/taskService'
 
 export function DashboardView() {
   const [completionRate, setCompletionRate] = useState<number>(0)
@@ -11,6 +11,8 @@ export function DashboardView() {
   const [weeklyDistribution, setWeeklyDistribution] = useState<DailyTaskCountResponse[]>([])
   const [timelineData, setTimelineData] = useState<TaskTimelineResponse[]>([])
   const [loading, setLoading] = useState(true)
+  const [recentTasks, setRecentTasks] = useState<RecentTaskResponse[]>([])
+  const [monthlyChartData, setMonthlyChartData] = useState<MonthlyEventCountResponse[]>([])
 
   useEffect(() => {
     const fetchStatistics = async () => {
@@ -53,6 +55,20 @@ export function DashboardView() {
           return []
         })
         setTimelineData(Array.isArray(timeline) ? timeline : [])
+
+        // Fetch recent tasks (last 48 hours)
+        const recent = await taskService.getRecentTasks(48).catch(err => {
+          console.warn('Recent tasks fetch failed:', err)
+          return []
+        })
+        setRecentTasks(Array.isArray(recent) ? recent : [])
+
+        // Fetch monthly event counts
+        const monthly = await taskService.getEventCountsByMonth().catch(err => {
+          console.warn('Monthly event counts fetch failed:', err)
+          return []
+        })
+        setMonthlyChartData(Array.isArray(monthly) ? monthly : [])
 
       } catch (err: any) {
         console.error('Unexpected error in fetchStatistics:', err)
@@ -278,29 +294,62 @@ export function DashboardView() {
         </div>
 
         <div className="space-y-3">
-          {[
-            { title: 'Chuẩn bị bài giảng nghiên cứu UX', status: 'completed', time: '2 giờ trước', color: 'bg-green-100 text-green-700' },
-            { title: 'Chấm bài tập cho sinh viên', status: 'in-progress', time: '5 giờ trước', color: 'bg-blue-100 text-blue-700' },
-            { title: 'Cập nhật tài liệu khóa học', status: 'pending', time: '1 ngày trước', color: 'bg-gray-100 text-gray-700' },
-            { title: 'Chuẩn bị slide hội thảo', status: 'in-progress', time: '2 ngày trước', color: 'bg-blue-100 text-blue-700' },
-          ].map((task, idx) => (
-            <div key={idx} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-              <div className="flex items-center space-x-3">
-                {task.status === 'completed' && <CheckCircle className="w-5 h-5 text-green-600" />}
-                {task.status === 'in-progress' && <Clock className="w-5 h-5 text-blue-600" />}
-                {task.status === 'pending' && <Circle className="w-5 h-5 text-gray-400" />}
-                <div>
-                  <p className="font-medium text-sm">{task.title}</p>
-                  <p className="text-xs text-gray-500">{task.time}</p>
+          {recentTasks.length === 0 ? (
+            <div className="py-6 text-center text-sm text-gray-400">Không có công việc nào trong 48 giờ qua</div>
+          ) : (
+            recentTasks.map((task) => {
+              const now = new Date()
+              const start = new Date(task.startTime)
+              const diffMs = now.getTime() - start.getTime()
+              const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+              const diffDays = Math.floor(diffHours / 24)
+              const timeAgo = diffDays > 0
+                ? `${diffDays} ngày trước`
+                : `${diffHours} giờ trước`
+
+              const statusIcon = task.status === 'DONE'
+                ? <CheckCircle className="w-5 h-5 text-green-600" />
+                : task.status === 'IN_PROGRESS'
+                ? <Clock className="w-5 h-5 text-blue-600" />
+                : <Circle className="w-5 h-5 text-gray-400" />
+
+              const statusLabel = task.status === 'DONE' ? 'Hoàn thành'
+                : task.status === 'IN_PROGRESS' ? 'Đang làm'
+                : task.status === 'TODO' ? 'Quá hạn' : task.status
+
+              const priorityLabel = task.priority === 'HIGH' ? 'Cao'
+                : task.priority === 'MEDIUM' ? 'Trung bình'
+                : task.priority === 'LOW' ? 'Thấp' : task.priority
+
+              const priorityColor = task.priority === 'HIGH' ? 'bg-red-100 text-red-700'
+                : task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700'
+                : task.priority === 'LOW' ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-700'
+
+              const rowBg = task.status === 'DONE' ? 'bg-green-50 hover:bg-green-100'
+                : task.status === 'IN_PROGRESS' ? 'bg-blue-50 hover:bg-blue-100'
+                : task.status === 'TODO' ? 'bg-red-50 hover:bg-red-100'
+                : 'bg-white hover:bg-gray-50'
+
+              return (
+                <div key={task.taskId} className={`flex items-center justify-between py-3 border-b border-gray-100 last:border-0 cursor-pointer transition-colors ${rowBg}`}>
+                  <div className="flex items-center space-x-3">
+                    {statusIcon}
+                    <div>
+                      <p className="font-medium text-sm">{task.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-500">{timeAgo}</span>
+                        <span className={`text-xs px-1.5 py-0.5 rounded border ${priorityColor}`}>{priorityLabel}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-lg text-xs ${task.status === 'DONE' ? 'bg-green-100 text-green-700' : task.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' : task.status === 'TODO' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'}`}>
+                    {statusLabel}
+                  </span>
                 </div>
-              </div>
-              <span className={`px-2 py-1 rounded-lg text-xs ${task.color}`}>
-                {task.status === 'completed' && 'Hoàn thành'}
-                {task.status === 'in-progress' && 'Đang làm'}
-                {task.status === 'pending' && 'Đang chờ'}
-              </span>
-            </div>
-          ))}
+              )
+            })
+          )}
         </div>
       </Card>
 
@@ -312,20 +361,7 @@ export function DashboardView() {
         </div>
 
         <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={[
-            { month: 'Thg 6', events: 12 },
-            { month: 'Thg 7', events: 19 },
-            { month: 'Thg 8', events: 15 },
-            { month: 'Thg 9', events: 22 },
-            { month: 'Thg 10', events: 28 },
-            { month: 'Thg 11', events: 24 },
-            { month: 'Thg 12', events: 31 },
-            { month: 'Thg 1', events: 18 },
-            { month: 'Thg 2', events: 25 },
-            { month: 'Thg 3', events: 33 },
-            { month: 'Thg 4', events: 27 },
-            { month: 'Thg 5', events: 30 },
-          ]}>
+          <BarChart data={monthlyChartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis dataKey="month" />
             <YAxis allowDecimals={false} />

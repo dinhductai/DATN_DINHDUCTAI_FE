@@ -142,6 +142,11 @@ export interface TaskPriorityCountResponse {
   taskCount: number;
 }
 
+export interface MonthlyEventCountResponse {
+  month: string;
+  events: number;
+}
+
 export const taskService = {
   // Lấy tỷ lệ hoàn thành trước deadline
   getCompletionBeforeDeadlineRate: async (): Promise<number> => {
@@ -562,6 +567,29 @@ export const taskService = {
     }
   },
 
+  getEventCountsByMonth: async (): Promise<MonthlyEventCountResponse[]> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/tasks/events/statistics/monthly', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch event counts by month: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching event counts by month:', error);
+      return [];
+    }
+  },
+
   getUpcomingEvents: async (limit = 10): Promise<any[]> => {
     try {
       const token = localStorage.getItem('token');
@@ -626,5 +654,36 @@ export const taskService = {
       console.error('Error deleting event:', error);
       throw error;
     }
+  },
+
+  getRecentTasks: async (hours = 48): Promise<RecentTaskResponse[]> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/tasks/recent?hours=${hours}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch recent tasks: ${response.status}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data : [];
+    } catch (error) {
+      console.error('Error fetching recent tasks:', error);
+      return [];
+    }
   }
+};
+
+export interface RecentTaskResponse {
+  taskId: number;
+  title: string;
+  status: string;
+  priority: string;
+  startTime: string;
 };
