@@ -53,6 +53,9 @@
       target: 'esnext',
       outDir: 'build',
     },
+    define: {
+      global: 'globalThis',
+    },
     server: {
       port: 3000,
       open: true,
@@ -61,6 +64,12 @@
           target: 'http://localhost:8080',
           changeOrigin: true,
           secure: false,
+        },
+        '/ws': {
+          target: 'http://localhost:8080',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
         }
       }
     },

@@ -1,13 +1,14 @@
-import { Search, Sparkles, Bell, ChevronDown, X, Calendar, Clock } from 'lucide-react'
+import { Search, Sparkles, Bell, ChevronDown, X, Clock } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { Avatar, AvatarImage, AvatarFallback } from './ui/avatar'
+import { Avatar, AvatarFallback } from './ui/avatar'
 import { ImageWithFallback } from './figma/ImageWithFallback'
-import { pushNotificationService } from '../services/pushNotificationService'
 import { userService } from '../services/userService'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { searchTasksByTitle } from '../services/taskService'
 import { TaskResponse } from '../types/task'
+import { NotificationItem } from '../types/notification'
+import { notificationService, formatNotificationTime } from '../services/notificationService'
 import { useNavigate } from 'react-router-dom'
 
 interface ScheduleHeaderProps {
@@ -17,9 +18,7 @@ interface ScheduleHeaderProps {
 
 export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProps) {
   const navigate = useNavigate()
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ userName: string; profile?: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ userName: string; profile?: string } | null>(null)
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -27,19 +26,84 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
   const [isSearching, setIsSearching] = useState(false)
   const [showResults, setShowResults] = useState(false)
 
+  // Notification state
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
-    checkSubscriptionStatus();
-    fetchCurrentUser();
-  }, []);
+    fetchCurrentUser()
+  }, [])
+
+  // Load notifications + connect WebSocket
+  useEffect(() => {
+    loadNotifications()
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    notificationService.connect((incoming) => {
+      setNotifications((prev) => [incoming, ...prev])
+      setUnreadCount((c) => c + 1)
+    })
+
+    return () => {
+      notificationService.disconnect()
+    }
+  }, [])
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const fetchCurrentUser = async () => {
     try {
-      const user = await userService.getMe();
-      setCurrentUser({ userName: user.userName, profile: user.profile });
+      const user = await userService.getMe()
+      setCurrentUser({ userName: user.userName, profile: user.profile })
     } catch (error) {
-      console.error('Error fetching current user:', error);
+      console.error('Error fetching current user:', error)
     }
-  };
+  }
+
+  const loadNotifications = async () => {
+    try {
+      const data = await notificationService.getNotifications()
+      setNotifications(data.notifications)
+      setUnreadCount(data.unreadCount)
+    } catch (error) {
+      console.error('Error loading notifications:', error)
+    }
+  }
+
+  const handleMarkAsRead = useCallback(async (id: number) => {
+    try {
+      await notificationService.markAsRead(id)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      )
+      setUnreadCount((c) => Math.max(0, c - 1))
+    } catch (error) {
+      console.error('Error marking as read:', error)
+    }
+  }, [])
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    try {
+      await notificationService.markAllAsRead()
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      setUnreadCount(0)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }, [])
 
   // Debounced search
   useEffect(() => {
@@ -65,39 +129,6 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
     return () => clearTimeout(timer)
   }, [searchQuery])
-
-  const checkSubscriptionStatus = async () => {
-    try {
-      const subscribed = await pushNotificationService.isSubscribed();
-      setIsSubscribed(subscribed);
-    } catch (error) {
-      console.error('Error checking subscription:', error);
-    }
-  };
-
-  const handleNotificationToggle = async () => {
-    setIsLoading(true);
-    
-    try {
-      if (isSubscribed) {
-        await pushNotificationService.unsubscribe();
-        setIsSubscribed(false);
-      } else {
-        const permission = await pushNotificationService.requestPermission();
-        if (permission === 'granted') {
-          await pushNotificationService.subscribe();
-          setIsSubscribed(true);
-        } else {
-          alert('Thông báo bị từ chối. Vui lòng bật trong cài đặt trình duyệt.');
-        }
-      }
-    } catch (error) {
-      console.error('Error toggling notifications:', error);
-      alert('Không thể cập nhật cài đặt thông báo. Vui lòng thử lại.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleCloseSearch = () => {
     setShowResults(false)
@@ -127,8 +158,8 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
     switch (status) {
       case 'TODO':        return 'Cần làm'
       case 'IN_PROGRESS': return 'Đang làm'
-      case 'DONE':       return 'Hoàn thành'
-      default:           return status
+      case 'DONE':        return 'Hoàn thành'
+      default:            return status
     }
   }
 
@@ -168,7 +199,6 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               </div>
             )}
 
-            {/* Inline Search Dropdown */}
             {showResults && searchQuery.trim().length > 0 && (
               <div className="absolute top-full left-0 w-96 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
                 {searchResults.length === 0 ? (
@@ -217,7 +247,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
           {/* Right Actions */}
           <div className="flex items-center space-x-3">
-            <Button 
+            <Button
               onClick={onOpenAIChat}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg"
             >
@@ -225,25 +255,78 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               Trợ lý lịch trình
             </Button>
 
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className={`relative ${isSubscribed ? 'text-blue-600 hover:bg-blue-50' : 'text-gray-600 hover:bg-gray-50'}`}
-              onClick={handleNotificationToggle}
-              disabled={isLoading}
-              title={isSubscribed ? 'Tắt thông báo' : 'Bật thông báo'}
-            >
-              <Bell className="w-5 h-5" />
-              {isSubscribed && (
-                <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 rounded-full"></div>
-              )}
-            </Button>
+            {/* Notification Bell */}
+            <div className="relative" ref={notifRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative text-gray-600 hover:bg-gray-50"
+                onClick={() => setShowNotifications((v) => !v)}
+              >
+                <Bell className="w-5 h-5" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </Button>
 
-            <Avatar 
+              {showNotifications && (
+                <div className="absolute top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                  style={{ right: '0' }}>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                    <span className="font-semibold text-gray-900 text-sm">Thông báo</span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Đánh dấu tất cả đã đọc
+                      </button>
+                    )}
+                  </div>
+
+                  {/* List */}
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="py-10 text-center text-sm text-gray-400">
+                        Không có thông báo nào
+                      </div>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => !n.isRead && handleMarkAsRead(n.id)}
+                          className={`px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
+                            n.isRead ? 'bg-white hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700' : 'text-gray-900'}`}>
+                              {n.title}
+                            </span>
+                            {!n.isRead && (
+                              <span className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">{n.content}</p>
+                          <span className="text-xs text-gray-400 mt-1 block">
+                            {formatNotificationTime(n.createdAt)}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <Avatar
               className="w-9 h-9 cursor-pointer hover:ring-2 hover:ring-blue-200 transition-all"
               onClick={() => navigate('/profile')}
             >
-              <ImageWithFallback 
+              <ImageWithFallback
                 src={currentUser?.profile || '/profile_picture.png'}
                 alt={currentUser?.userName || 'User'}
               />
