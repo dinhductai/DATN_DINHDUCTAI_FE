@@ -1,32 +1,68 @@
-import { ChatAIResponse, ConversationPage } from '../types/chat';
+import { ChatAIResponse, ConversationPage, Mode1ChatResponse, ChatMode } from '../types/chat';
 
 const API_URL = '/api/ai';
 const RICH_API_URL = '/api/ai/rich';
+const MODE1_API_URL = '/api/ai/mode/1';
 
-export const getConversationHistory = async (page = 0, size = 10): Promise<ConversationPage> => {
+export const getConversationHistory = async (
+  conversationId: string,
+  page = 0,
+  size = 20
+): Promise<ConversationPage> => {
   try {
     const token = localStorage.getItem('token');
-    console.log('[API] Fetching conversation history, page:', page, 'size:', size, 'token:', token ? 'present' : 'missing');
-    
-    const response = await fetch(`${API_URL}/history?page=${page}&size=${size}`, {
+    const response = await fetch(`${API_URL}/history?conversationId=${encodeURIComponent(conversationId)}&page=${page}&size=${size}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
-    console.log('[API] Conversation history response status:', response.status, response.statusText);
-
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[API] Conversation history error:', response.status, errorText);
       throw new Error(`Failed to fetch conversation history: ${response.status} ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('[API] Conversation history data:', data);
     return data;
   } catch (error) {
     console.error('Error fetching conversation history:', error);
+    throw error;
+  }
+};
+
+export const sendMessageMode1 = async (
+  message: string,
+  conversationId?: string,
+  mode: ChatMode = 1
+): Promise<Mode1ChatResponse> => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const body = new URLSearchParams();
+    body.append('message', message);
+    body.append('mode', String(mode));
+    if (conversationId) {
+      body.append('conversationId', conversationId);
+    }
+
+    const response = await fetch(MODE1_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to send message: ${response.status} ${errorText}`);
+    }
+
+    const data: Mode1ChatResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error sending mode 1 message:', error);
     throw error;
   }
 };
@@ -71,30 +107,23 @@ export const sendMessage = async (
   }
 };
 
-export const getConversationId = async (): Promise<string> => {
+export const getConversationId = async (mode: ChatMode = 1): Promise<string | null> => {
   try {
     const token = localStorage.getItem('token');
-    console.log('[API] Getting conversation ID, token:', token ? 'present' : 'missing');
-    
-    const response = await fetch(`${API_URL}/id`, {
+    const response = await fetch(`${API_URL}/id?mode=${mode}`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
     });
 
-    console.log('[API] Get conversation ID response status:', response.status, response.statusText);
-
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[API] Get conversation ID error:', response.status, errorText);
-      throw new Error(`Failed to get conversation ID: ${response.status} ${errorText}`);
+      return null;
     }
 
     const conversationId = await response.text();
-    console.log('[API] Conversation ID:', conversationId);
-    return conversationId;
+    return conversationId || null;
   } catch (error) {
     console.error('Error getting conversation ID:', error);
-    throw error;
+    return null;
   }
 };
