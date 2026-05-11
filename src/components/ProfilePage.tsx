@@ -320,7 +320,7 @@ export function ProfilePage() {
               <h2 className="text-xl mb-6">Cài đặt & Tùy chọn</h2>
               <div className="space-y-3">
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
                     <div style={{ width: '40px', height: '40px', background: '#f97316', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
                       <Bell style={{ width: '20px', height: '20px' }} />
                     </div>
@@ -328,8 +328,8 @@ export function ProfilePage() {
                       onClick={() => setShowNotifications(!showNotifications)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Thông báo</p>
-                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>
+                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Thông báo</p>
+                      <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>
                         {notificationsEnabled ? 'Bật' : 'Tắt'}
                       </p>
                     </button>
@@ -342,11 +342,11 @@ export function ProfilePage() {
                   </div>
 
                   {showNotifications && (
-                    <div style={{ marginTop: '8px', marginLeft: '56px', padding: '16px', background: '#f9fafb', borderRadius: '12px' }}>
+                    <div style={{ marginTop: '8px', marginLeft: '56px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Thông báo đẩy</p>
-                          <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Thông báo đẩy từ trình duyệt</p>
+                          <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Thông báo đẩy</p>
+                          <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Thông báo đẩy từ trình duyệt</p>
                         </div>
                         <button
                           onClick={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -383,7 +383,7 @@ export function ProfilePage() {
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
                     <div style={{ width: '40px', height: '40px', background: '#22c55e', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', flexShrink: 0 }}>
                       <Settings style={{ width: '20px', height: '20px' }} />
                     </div>
@@ -391,8 +391,8 @@ export function ProfilePage() {
                       onClick={() => setShowSystemSettings(!showSystemSettings)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Cài đặt hệ thống</p>
-                      <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{language}</p>
+                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Cài đặt hệ thống</p>
+                      <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{language}</p>
                     </button>
                     <button
                       onClick={() => setShowSystemSettings(!showSystemSettings)}
@@ -403,17 +403,17 @@ export function ProfilePage() {
                   </div>
 
                   {showSystemSettings && (
-                    <div style={{ marginTop: '12px', marginLeft: '56px', padding: '16px', background: '#f9fafb', borderRadius: '12px' }}>
+                    <div style={{ marginTop: '12px', marginLeft: '56px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px' }}>
                       {/* Dark Mode Toggle */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: '1px solid #e5e7eb' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '16px', borderBottom: darkMode ? '1px solid #374151' : '1px solid #e5e7eb' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           {darkMode
-                            ? <Moon style={{ width: '20px', height: '20px', color: '#374151' }} />
-                            : <Sun style={{ width: '20px', height: '20px', color: '#374151' }} />
+                            ? <Moon style={{ width: '20px', height: '20px', color: darkMode ? '#9ca3af' : '#374151' }} />
+                            : <Sun style={{ width: '20px', height: '20px', color: darkMode ? '#9ca3af' : '#374151' }} />
                           }
                           <div>
-                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Chế độ tối</p>
-                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Chuyển đổi chế độ tối/sáng</p>
+                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Chế độ tối</p>
+                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Chuyển đổi chế độ tối/sáng</p>
                           </div>
                         </div>
                         <button
@@ -450,13 +450,13 @@ export function ProfilePage() {
                       {/* Language Toggle */}
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '16px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <Globe style={{ width: '20px', height: '20px', color: '#374151' }} />
+                          <Globe style={{ width: '20px', height: '20px', color: darkMode ? '#9ca3af' : '#374151' }} />
                           <div>
-                            <p style={{ color: '#111827', margin: 0, fontWeight: 500 }}>Ngôn ngữ</p>
-                            <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>Chọn ngôn ngữ của bạn</p>
+                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Ngôn ngữ</p>
+                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Chọn ngôn ngữ của bạn</p>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'white', borderRadius: '8px', padding: '4px', border: '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: darkMode ? '#374151' : 'white', borderRadius: '8px', padding: '4px', border: darkMode ? '1px solid #4b5563' : '1px solid #e5e7eb' }}>
                           <button
                             onClick={() => setLanguage('VIE')}
                             style={{
@@ -465,7 +465,7 @@ export function ProfilePage() {
                               fontSize: '14px',
                               transition: 'all 0.15s',
                               background: language === 'VIE' ? '#2563eb' : 'transparent',
-                              color: language === 'VIE' ? 'white' : '#4b5563',
+                              color: language === 'VIE' ? 'white' : darkMode ? '#d1d5db' : '#4b5563',
                               border: 'none',
                               cursor: 'pointer',
                             }}
@@ -480,7 +480,7 @@ export function ProfilePage() {
                               fontSize: '14px',
                               transition: 'all 0.15s',
                               background: language === 'ENG' ? '#2563eb' : 'transparent',
-                              color: language === 'ENG' ? 'white' : '#4b5563',
+                              color: language === 'ENG' ? 'white' : darkMode ? '#d1d5db' : '#4b5563',
                               border: 'none',
                               cursor: 'pointer',
                             }}
