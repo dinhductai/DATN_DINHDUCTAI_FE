@@ -58,10 +58,17 @@ export interface TaskResponse {
   deadline: string; // ISO date string (UTC)
   status: TaskStatus;
   priority: PriorityLevel;
-  startTime: string; // ISO date string — thời gian bắt đầu task (trường mới của BE)
-  createdAt: string; // ISO date string — kept for backward compat, same as startTime
+  startTime: string; // ISO date string — thời gian bắt đầu task
+  createdAt: string; // kept for backward compat, same as startTime
   completedAt: string | null; // ISO date string
   userId: number;
   isEvent?: boolean;
   eventId?: number | null;
+  // Event detail fields
+  eventDescription?: string;
+  linkEvent?: string;
+  location?: string;
+  isOnline?: boolean;
+  reminderMinutesBefore?: number;
+  invitedEmails?: string[];
 }

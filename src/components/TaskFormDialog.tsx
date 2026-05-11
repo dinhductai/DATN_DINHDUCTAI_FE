@@ -24,6 +24,13 @@ export interface Task {
   isEvent?: boolean
   eventId?: number | null
   eventCreationRequest?: EventCreationRequest
+  // Event detail fields for editing
+  eventDescription?: string
+  linkEvent?: string
+  location?: string
+  isOnline?: boolean
+  reminderMinutesBefore?: number
+  invitedEmails?: string[]
 }
 
 export const mapTaskResponseToTask = (response: TaskResponse): Task => ({
@@ -36,6 +43,12 @@ export const mapTaskResponseToTask = (response: TaskResponse): Task => ({
   status: response.status,
   isEvent: response.isEvent,
   eventId: response.eventId,
+  eventDescription: response.eventDescription,
+  linkEvent: response.linkEvent,
+  location: response.location,
+  isOnline: response.isOnline,
+  reminderMinutesBefore: response.reminderMinutesBefore,
+  invitedEmails: response.invitedEmails,
 })
 
 export const mapTaskToCreationRequest = (task: Omit<Task, 'id'>): TaskCreationRequest => ({
@@ -103,14 +116,14 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       setDeadline(formatForInput(editingTask.deadline))
       setPriority(editingTask.priority)
       setStatus(editingTask.status)
-      // Populate event fields when editing an event (blank defaults — BE accepts partial updates)
       setIsEvent(!!editingTask.isEvent)
-      setEventDescription('')
-      setLinkEvent('')
-      setLocation('')
-      setIsOnline(false)
-      setReminderMinutesBefore(30)
-      setInvitedEmails([])
+      // Populate event fields from editingTask data
+      setEventDescription(editingTask.eventDescription || '')
+      setLinkEvent(editingTask.linkEvent || '')
+      setLocation(editingTask.location || '')
+      setIsOnline(editingTask.isOnline || false)
+      setReminderMinutesBefore(editingTask.reminderMinutesBefore ?? 30)
+      setInvitedEmails(editingTask.invitedEmails || [])
     } else {
       resetForm()
       if (defaultStartDate) {
@@ -194,8 +207,8 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
       return
     }
 
-    // Validate eventDescription when creating an event
-    if (isEvent && !eventDescription.trim()) {
+    // Validate eventDescription when CREATING an event (not when editing)
+    if (!isEditMode && isEvent && !eventDescription.trim()) {
       toast.error('Mô tả sự kiện là bắt buộc khi tạo sự kiện')
       return
     }
@@ -242,6 +255,12 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
           status: response.status,
           isEvent: response.isEvent,
           eventId: response.eventId,
+          eventDescription: response.eventDescription,
+          linkEvent: response.linkEvent,
+          location: response.location,
+          isOnline: response.isOnline,
+          reminderMinutesBefore: response.reminderMinutesBefore,
+          invitedEmails: response.invitedEmails,
         }
 
         onSaveTask(updatedTask)
@@ -396,8 +415,6 @@ export function TaskFormDialog({ open, onClose, onSaveTask, onDeleteTask, defaul
                   type="datetime-local"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  readOnly={isEditMode}
-                  className={isEditMode ? 'cursor-not-allowed bg-muted' : ''}
                   required
                 />
               </div>
