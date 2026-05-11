@@ -216,7 +216,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
         {/* Left: Lịch trình của tôi + date range */}
         <div className="w-1/4 flex-shrink-0">
           <h1 className="text-2xl font-semibold mb-1">Lịch trình của tôi</h1>
-          <div className="flex items-center space-x-1 text-gray-500">
+          <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
             <Button
               variant="ghost"
               size="icon"
@@ -246,9 +246,9 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
           <div className="flex-1">
             {currentTask ? (
               <div className={`flex items-center gap-4 rounded-2xl px-6 py-6 border-l-8 ${
-                currentTask.priority === 'HIGH' ? 'bg-red-50 border-red-400' :
-                currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400' :
-                'bg-green-50 border-green-400'
+                currentTask.priority === 'HIGH' ? 'bg-red-50 dark:bg-red-900/20 border-red-400' :
+                currentTask.priority === 'MEDIUM' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400' :
+                'bg-green-50 dark:bg-green-900/20 border-green-400'
               }`}>
                 <div className="flex-shrink-0">
                   {currentTask.status === 'DONE' ? (
@@ -261,33 +261,33 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 </div>
                 <div className="flex flex-col min-w-0 flex-1 gap-3">
                   <div className="flex items-center gap-4 flex-wrap px-2">
-                    <span className="text-sm font-bold text-gray-500">{currentTimeLabel}</span>
+                    <span className="text-sm font-bold text-gray-500 dark:text-gray-400">{currentTimeLabel}</span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
-                      currentTask.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                      currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                      'bg-green-100 text-green-700'
+                      currentTask.priority === 'HIGH' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400' :
+                      currentTask.priority === 'MEDIUM' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400' :
+                      'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                     }`}>
                       {PRIORITY_LABELS[currentTask.priority]}
                     </span>
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      currentTask.status === 'DONE' ? 'bg-green-100 text-green-700' :
-                      currentTask.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
-                      'bg-gray-100 text-gray-600'
+                      currentTask.status === 'DONE' ? 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400' :
+                      currentTask.status === 'IN_PROGRESS' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' :
+                      'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                     }`}>
                       {STATUS_LABELS[currentTask.status]}
                     </span>
                   </div>
                   <div className="flex items-center gap-4 flex-wrap px-2">
-                    <span className="text-lg font-bold text-gray-900 truncate">{currentTask.title}</span>
-                    <span className="text-xs font-medium text-gray-400 flex-shrink-0">
+                    <span className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{currentTask.title}</span>
+                    <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex-shrink-0">
                       {formatTime(currentTask.startDate)} → {formatTime(currentTask.deadline)}
                     </span>
                   </div>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-3 text-sm text-gray-400 rounded-2xl bg-gray-50 px-6 py-6">
-                <div className="w-3 h-3 rounded-full bg-gray-300" />
+              <div className="flex items-center gap-3 text-sm text-gray-400 dark:text-gray-500 rounded-2xl bg-gray-50 dark:bg-gray-800 px-6 py-6">
+                <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
                 <span>{currentTimeLabel} — Không có công việc đang hoạt động</span>
               </div>
             )}
@@ -295,40 +295,40 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
           {/* Right half: upcoming event (nearest isEvent = true) */}
           <div className="flex-1 flex flex-col gap-2">
-            <span className="text-sm font-semibold text-gray-500 mb-1">Sự kiện sắp tới</span>
+            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Sự kiện sắp tới</span>
             {upcomingEvent ? (
               <div
                 className={`flex items-center gap-3 rounded-xl px-5 py-4 cursor-pointer border-l-4 ${
-                  upcomingEvent.priority === 'HIGH' ? 'bg-red-50 border-red-400 hover:bg-red-100' :
-                  upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-50 border-yellow-400 hover:bg-yellow-100' :
-                  'bg-green-50 border-green-400 hover:bg-green-100'
+                  upcomingEvent.priority === 'HIGH' ? 'bg-red-50 dark:bg-red-900/20 border-red-400 hover:bg-red-100 dark:hover:bg-red-900/30' :
+                  upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 hover:bg-yellow-100 dark:hover:bg-yellow-900/30' :
+                  'bg-green-50 dark:bg-green-900/20 border-green-400 hover:bg-green-100 dark:hover:bg-green-900/30'
                 }`}
                 onClick={() => onTaskClick(upcomingEvent)}
               >
                 <div className="flex items-center justify-center gap-6 px-2 flex-1 min-w-0">
-                  <Calendar className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                  <span className="text-base font-semibold text-gray-800 truncate flex-shrink-0">{upcomingEvent.title}</span>
-                  <span className="text-xs font-medium text-gray-400 flex-shrink-0">
+                  <Calendar className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />
+                  <span className="text-base font-semibold text-gray-800 dark:text-gray-100 truncate flex-shrink-0">{upcomingEvent.title}</span>
+                  <span className="text-xs font-medium text-gray-400 dark:text-gray-500 flex-shrink-0">
                     {formatTime(upcomingEvent.startDate)} → {formatTime(upcomingEvent.deadline)}
                   </span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
-                    upcomingEvent.priority === 'HIGH' ? 'bg-red-100 text-red-700' :
-                    upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-green-100 text-green-700'
+                    upcomingEvent.priority === 'HIGH' ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400' :
+                    upcomingEvent.priority === 'MEDIUM' ? 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400' :
+                    'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                   }`}>
                     {PRIORITY_LABELS[upcomingEvent.priority]}
                   </span>
                   <span className={`text-xs px-2 py-0.5 rounded-full font-semibold flex-shrink-0 ${
-                    upcomingEvent.status === 'TODO' ? 'bg-gray-100 text-gray-600' :
-                    upcomingEvent.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
-                    'bg-green-100 text-green-700'
+                    upcomingEvent.status === 'TODO' ? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400' :
+                    upcomingEvent.status === 'IN_PROGRESS' ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400' :
+                    'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400'
                   }`}>
                     {STATUS_LABELS[upcomingEvent.status]}
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-sm text-gray-400 rounded-xl bg-gray-50 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 rounded-xl bg-gray-50 dark:bg-gray-800 px-4 py-3">
                 <Circle className="w-3 h-3" />
                 <span>Không có sự kiện sắp tới</span>
               </div>
@@ -343,9 +343,9 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
         Each day column is position:relative so its events (position:absolute) are
         positioned relative to it.
       */}
-      <div className="flex bg-white border border-gray-200 rounded-lg overflow-hidden" style={{ height: 1440 + DAY_HEADER_HEIGHT }}>
+      <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style={{ height: 1440 + DAY_HEADER_HEIGHT }}>
         {/* ── Time axis (left column) ─────────────────────────────── */}
-        <div className="flex-shrink-0 w-20 bg-gray-50 border-r border-gray-200 flex flex-col">
+        <div className="flex-shrink-0 w-20 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
           {/* Header spacer */}
           <div style={{ height: DAY_HEADER_HEIGHT, borderBottom: '1px solid var(--color-gray-200)' }} />
 
@@ -353,7 +353,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
           {Array.from({ length: 24 }, (_, h) => (
             <div
               key={h}
-              className="text-xs text-gray-400 pr-2 text-right leading-none"
+              className="text-xs text-gray-400 dark:text-gray-500 pr-2 text-right leading-none"
               style={{ height: HOUR_HEIGHT }}
             >
               <span className="transform -translate-y-1/2 block">
@@ -367,15 +367,15 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
         {tasksByDay.map(({ day, dayTasks, positions, isToday }, dayIdx) => (
           <div
             key={dayIdx}
-            className="flex-1 relative border-r border-gray-200 last:border-r-0 px-1"
+            className="flex-1 relative border-r border-gray-200 dark:border-gray-700 last:border-r-0 px-1"
           >
             {/* Day header — sticky at the top */}
             <div
-              className="bg-gray-50 border-b border-gray-200 text-center py-2 flex-shrink-0"
+              className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-center py-2 flex-shrink-0"
               style={{ height: DAY_HEADER_HEIGHT }}
             >
-              <div className="text-xs text-gray-400">{dayNames[day.getDay()]}</div>
-              <div className="text-base font-semibold">{day.getDate()}</div>
+              <div className="text-xs text-gray-400 dark:text-gray-500">{dayNames[day.getDay()]}</div>
+              <div className="text-base font-semibold dark:text-gray-100">{day.getDate()}</div>
             </div>
 
             {/* Time area — relative so events position relative to this */}
@@ -397,7 +397,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
                 {Array.from({ length: 24 }, (_, h) => (
                   <div
                     key={h}
-                    className="border-t border-gray-100 hover:border-gray-200 hover:bg-blue-50/30 transition-colors"
+                    className="border-t border-gray-100 dark:border-gray-700/50 hover:border-gray-200 dark:hover:border-gray-600 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors"
                     style={{ height: HOUR_HEIGHT }}
                   />
                 ))}

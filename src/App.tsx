@@ -250,7 +250,7 @@ function UserLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex">
       <TeachSidebar
         activeView={activeView}
         onViewChange={handleNavigation}

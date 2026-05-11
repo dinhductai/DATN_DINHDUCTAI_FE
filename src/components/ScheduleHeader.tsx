@@ -138,10 +138,10 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'HIGH':   return 'bg-red-100 text-red-700 border-red-200'
-      case 'MEDIUM': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'LOW':    return 'bg-green-100 text-green-700 border-green-200'
-      default:       return 'bg-gray-100 text-gray-700 border-gray-200'
+      case 'HIGH':   return 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800'
+      case 'MEDIUM': return 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-400 border-yellow-200 dark:border-yellow-800'
+      case 'LOW':    return 'bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800'
+      default:       return 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
     }
   }
 
@@ -165,30 +165,30 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'DONE':        return 'bg-green-50 text-green-700'
-      case 'IN_PROGRESS': return 'bg-blue-50 text-blue-700'
-      default:            return 'bg-gray-50 text-gray-600'
+      case 'DONE':        return 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+      case 'IN_PROGRESS': return 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+      default:            return 'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
     }
   }
 
   return (
     <>
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Search */}
           <div className="relative w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
             <Input
               placeholder="Tìm kiếm công việc..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery.trim() && setShowResults(true)}
-              className="pl-10 pr-10 bg-gray-50 border-gray-200 rounded-lg"
+              className="pl-10 pr-10 bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 dark:text-gray-100 dark:placeholder-gray-500 rounded-lg"
             />
             {searchQuery && (
               <button
                 onClick={handleCloseSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -200,35 +200,35 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
             )}
 
             {showResults && searchQuery.trim().length > 0 && (
-              <div className="absolute top-full left-0 w-96 mt-1 bg-white rounded-xl shadow-xl border border-gray-200 max-h-96 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 w-96 mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
                 {searchResults.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-gray-500">
+                  <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
                     {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy công việc phù hợp'}
                   </div>
                 ) : (
                   <>
-                    <div className="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                    <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
                       Tìm thấy {searchResults.length} công việc
                     </div>
                     {searchResults.map((task) => (
                       <div
                         key={task.taskId}
-                        className="px-4 py-3 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-0 transition-colors"
+                        className="px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer border-b border-gray-100 dark:border-gray-700 last:border-0 transition-colors"
                         onClick={() => {
                           onTaskClick?.(task)
                           handleCloseSearch()
                         }}
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <span className="font-medium text-gray-900 text-sm">{task.title}</span>
+                          <span className="font-medium text-gray-900 dark:text-gray-100 text-sm">{task.title}</span>
                           <span className={`text-xs px-1.5 py-0.5 rounded border shrink-0 ${getPriorityColor(task.priority)}`}>
                             {getPriorityLabel(task.priority)}
                           </span>
                         </div>
                         {task.description && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">{task.description}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-1">{task.description}</p>
                         )}
-                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-gray-500">
                           <span className="flex items-center gap-0.5">
                             <Clock className="w-3 h-3" />
                             {new Date(task.deadline).toLocaleDateString('vi-VN', { day: 'numeric', month: 'short' })}
@@ -260,7 +260,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-gray-600 hover:bg-gray-50"
+                className="relative text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setShowNotifications((v) => !v)}
               >
                 <Bell className="w-5 h-5" />
@@ -272,15 +272,15 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               </Button>
 
               {showNotifications && (
-                <div className="absolute top-full mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                <div className="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
                   style={{ right: '0' }}>
                   {/* Header */}
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-                    <span className="font-semibold text-gray-900 text-sm">Thông báo</span>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Thông báo</span>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
-                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                       >
                         Đánh dấu tất cả đã đọc
                       </button>
@@ -290,7 +290,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
                   {/* List */}
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <div className="py-10 text-center text-sm text-gray-400">
+                      <div className="py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                         Không có thông báo nào
                       </div>
                     ) : (
@@ -298,20 +298,22 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
                         <div
                           key={n.id}
                           onClick={() => !n.isRead && handleMarkAsRead(n.id)}
-                          className={`px-4 py-3 border-b border-gray-50 last:border-0 cursor-pointer transition-colors ${
-                            n.isRead ? 'bg-white hover:bg-gray-50' : 'bg-blue-50 hover:bg-blue-100'
+                          className={`px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 cursor-pointer transition-colors ${
+                            n.isRead
+                              ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                              : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-2">
-                            <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700' : 'text-gray-900'}`}>
+                            <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>
                               {n.title}
                             </span>
                             {!n.isRead && (
                               <span className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
                             )}
                           </div>
-                          <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">{n.content}</p>
-                          <span className="text-xs text-gray-400 mt-1 block">
+                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">{n.content}</p>
+                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">
                             {formatNotificationTime(n.createdAt)}
                           </span>
                         </div>
@@ -323,7 +325,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
             </div>
 
             <Avatar
-              className="w-9 h-9 cursor-pointer hover:ring-2 hover:ring-blue-200 transition-all"
+              className="w-9 h-9 cursor-pointer hover:ring-2 hover:ring-blue-200 dark:hover:ring-blue-700 transition-all"
               onClick={() => navigate('/profile')}
             >
               <ImageWithFallback
@@ -332,7 +334,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               />
               <AvatarFallback>{currentUser?.userName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
             </Avatar>
-            <ChevronDown className="w-4 h-4 text-gray-400" />
+            <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
       </div>

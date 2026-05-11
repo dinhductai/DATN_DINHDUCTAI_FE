@@ -1,6 +1,8 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
+import "./dark-mode.css";
+import { ThemeProvider } from "./contexts/ThemeContext";
 // import { pushNotificationService } from "./services/pushNotificationService";
 
 // Push notifications disabled
@@ -20,4 +22,8 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>
+);

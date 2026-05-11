@@ -9,6 +9,7 @@ import { userService } from '../services/userService'
 import { UpdateProfileDialog } from './UpdateProfileDialog'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
 import { ConfirmDialog } from './ConfirmDialog'
+import { useTheme } from '../contexts/ThemeContext'
 
 interface UserProfile {
   userId: number
@@ -21,6 +22,7 @@ interface UserProfile {
 
 export function ProfilePage() {
   const navigate = useNavigate()
+  const { darkMode, toggleDarkMode } = useTheme()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -29,7 +31,6 @@ export function ProfilePage() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSystemSettings, setShowSystemSettings] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [darkMode, setDarkMode] = useState(false)
   const [language, setLanguage] = useState('ENG')
   const [bannerIndex, setBannerIndex] = useState(0)
 
@@ -416,7 +417,7 @@ export function ProfilePage() {
                           </div>
                         </div>
                         <button
-                          onClick={() => setDarkMode(!darkMode)}
+                          onClick={() => toggleDarkMode()}
                           style={{
                             position: 'relative',
                             height: '28px',

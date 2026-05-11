@@ -13,7 +13,7 @@ interface TeachSidebarProps {
 export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: TeachSidebarProps) {
   const [isPinned, setIsPinned] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
-  
+
   const menuItems = [
     { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
     { icon: BarChart3, label: 'Thống kê', view: 'stats' as const },
@@ -21,7 +21,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
   ]
 
   return (
-    <div className="w-56 bg-white border-r border-gray-200 flex flex-col h-screen">
+    <div className="w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex flex-col h-screen">
       {/* Logo */}
       <div className="p-6">
         <div className="flex items-center justify-between">
@@ -29,14 +29,14 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm">TD</span>
             </div>
-            <span className="font-semibold text-gray-900">TechDreams Schedule</span>
+            <span className="font-semibold text-gray-900 dark:text-gray-100">TechDreams Schedule</span>
           </div>
           <button
             onClick={() => setIsPinned(!isPinned)}
             className="transition-colors"
           >
-            <Pin 
-              className={`w-4 h-4 ${isPinned ? 'text-blue-600 fill-blue-600' : 'text-gray-400'}`}
+            <Pin
+              className={`w-4 h-4 ${isPinned ? 'text-blue-600 fill-blue-600' : 'text-gray-400 dark:text-gray-500'}`}
             />
           </button>
         </div>
@@ -51,8 +51,8 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
                 onClick={() => onViewChange(item.view)}
                 className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-colors ${
                   activeView === item.view
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                 }`}
               >
                 <item.icon className="w-5 h-5" />
@@ -65,7 +65,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
 
       {/* New Task Button */}
       <div className="px-3 mb-4">
-        <Button 
+        <Button
           onClick={onNewTask}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-6"
         >
@@ -75,10 +75,10 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
       </div>
 
       {/* Logout */}
-      <div className="px-3 pb-6 border-t pt-4">
+      <div className="px-3 pb-6 border-t dark:border-gray-700 pt-4">
         <button
           onClick={() => setShowLogoutConfirm(true)}
-          className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 hover:bg-gray-50 rounded-lg w-full"
+          className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg w-full"
         >
           <LogOut className="w-5 h-5" />
           <span className="text-sm">Đăng xuất</span>
