@@ -150,21 +150,27 @@ export function UpdateProfileDialog({
         await userService.updateUser(user.userId, updateData)
       }
 
-      // 2. Nếu có thay đổi ảnh → gọi POST /api/users/upload-profile/{userId} (chạy ngầm)
+      // 2. Nếu có thay đổi ảnh → upload ngầm (không block UI)
       if (hasImageChange) {
-        userService.uploadProfileImage(user.userId, newImageFile!).catch(err => {
+        onOpenChange(false)
+        // Đóng dialog trước, reload profile sau khi upload xong
+        userService.uploadProfileImage(user.userId, newImageFile!).then(() => {
+          onSuccess()
+        }).catch(err => {
           console.error('[UpdateProfile] Upload image failed:', err)
         })
+        setIsSubmitting(false)
+        return
       }
 
       // 3. Nếu không có gì thay đổi thì không call API
-      if (!hasTextChange && !hasImageChange) {
+      if (!hasTextChange) {
         onOpenChange(false)
         setIsSubmitting(false)
         return
       }
 
-      // Đợi update text xong (nếu có) rồi mới gọi onSuccess
+      // Đợi update text xong rồi mới gọi onSuccess
       onSuccess()
       onOpenChange(false)
     } catch (error: any) {
