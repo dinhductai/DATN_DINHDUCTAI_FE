@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2, Calendar } from
 import { Button } from './ui/button'
 import { Task } from './TaskFormDialog'
 import { PriorityLevel, TaskStatus } from '../types/task'
+import { useTranslation } from '../contexts/LanguageContext'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PX_PER_MINUTE = 1   // 1px per minute  →  1 hour = 60px
@@ -118,6 +119,7 @@ function useCurrentTime(): Date {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRangeChange, onCalendarClick, onTaskClick }: ScheduleViewProps) {
+  const { t } = useTranslation()
   const now = useCurrentTime()
 
   // ── Derived data per day ──────────────────────────────────────────────────
@@ -176,15 +178,15 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
   })()
 
   const STATUS_LABELS: Record<string, string> = {
-    TODO: 'Cần làm',
-    IN_PROGRESS: 'Đang làm',
-    DONE: 'Hoàn thành',
+    TODO: t('status_todo'),
+    IN_PROGRESS: t('status_inProgress'),
+    DONE: t('status_done'),
   }
 
   const PRIORITY_LABELS: Record<string, string> = {
-    HIGH: 'Cao',
-    MEDIUM: 'Trung bình',
-    LOW: 'Thấp',
+    HIGH: t('priority_high'),
+    MEDIUM: t('priority_medium'),
+    LOW: t('priority_low'),
   }
 
   const dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7']
@@ -215,7 +217,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
       <div className="flex items-center mb-6 gap-6">
         {/* Left: Lịch trình của tôi + date range */}
         <div className="w-1/4 flex-shrink-0">
-          <h1 className="text-2xl font-semibold mb-1">Lịch trình của tôi</h1>
+          <h1 className="text-2xl font-semibold mb-1">{t('schedule_mySchedule')}</h1>
           <div className="flex items-center space-x-1 text-gray-500 dark:text-gray-400">
             <Button
               variant="ghost"
@@ -288,14 +290,14 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
             ) : (
               <div className="flex items-center gap-3 text-sm text-gray-400 dark:text-gray-500 rounded-2xl bg-gray-50 dark:bg-gray-800 px-6 py-6">
                 <div className="w-3 h-3 rounded-full bg-gray-300 dark:bg-gray-600" />
-                <span>{currentTimeLabel} — Không có công việc đang hoạt động</span>
+                <span>{currentTimeLabel} — {t('schedule_noActiveTasks')}</span>
               </div>
             )}
           </div>
 
           {/* Right half: upcoming event (nearest isEvent = true) */}
           <div className="flex-1 flex flex-col gap-2">
-            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">Sự kiện sắp tới</span>
+            <span className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{t('schedule_upcomingEvents')}</span>
             {upcomingEvent ? (
               <div
                 className={`flex items-center gap-3 rounded-xl px-5 py-4 cursor-pointer border-l-4 ${
@@ -330,7 +332,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
             ) : (
               <div className="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 rounded-xl bg-gray-50 dark:bg-gray-800 px-4 py-3">
                 <Circle className="w-3 h-3" />
-                <span>Không có sự kiện sắp tới</span>
+                <span>{t('schedule_noUpcomingEvents')}</span>
               </div>
             )}
           </div>

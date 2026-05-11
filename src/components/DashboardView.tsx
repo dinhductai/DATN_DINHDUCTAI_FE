@@ -3,8 +3,11 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { CheckCircle, Clock, Circle, TrendingUp, Calendar } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse, RecentTaskResponse, MonthlyEventCountResponse } from '../services/taskService'
+import { useTranslation } from '../contexts/LanguageContext'
 
 export function DashboardView() {
+  const { t } = useTranslation()
+
   const [completionRate, setCompletionRate] = useState<number>(0)
   const [freeHours, setFreeHours] = useState<number>(0)
   const [weeklyStatus, setWeeklyStatus] = useState<StatusTaskWeekResponse | null>(null)
@@ -79,15 +82,16 @@ export function DashboardView() {
 
     fetchStatistics()
   }, [])
+
   // Task completion data for pie chart
   const taskCompletionData = weeklyStatus ? [
-    { name: 'Hoàn thành', value: Math.round(weeklyStatus.completedRate || 0), color: '#10b981' },
-    { name: 'Đang làm', value: Math.round(weeklyStatus.inProgressRate || 0), color: '#3b82f6' },
-    { name: 'Chưa bắt đầu', value: Math.round(weeklyStatus.todoRate || 0), color: '#ef4444' },
+    { name: t('dashboard_completed'), value: Math.round(weeklyStatus.completedRate || 0), color: '#10b981' },
+    { name: t('dashboard_inProgress'), value: Math.round(weeklyStatus.inProgressRate || 0), color: '#3b82f6' },
+    { name: t('dashboard_notStarted'), value: Math.round(weeklyStatus.todoRate || 0), color: '#ef4444' },
   ] : [
-    { name: 'Hoàn thành', value: 0, color: '#10b981' },
-    { name: 'Đang làm', value: 0, color: '#3b82f6' },
-    { name: 'Chưa bắt đầu', value: 0, color: '#ef4444' },
+    { name: t('dashboard_completed'), value: 0, color: '#10b981' },
+    { name: t('dashboard_inProgress'), value: 0, color: '#3b82f6' },
+    { name: t('dashboard_notStarted'), value: 0, color: '#ef4444' },
   ]
 
   const translateDayName = (dayName: string): string => {
@@ -112,7 +116,7 @@ export function DashboardView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <p className="text-gray-500">Đang tải thống kê...</p>
+        <p className="text-gray-500">{t('dashboard_loading')}</p>
       </div>
     )
   }
@@ -121,8 +125,8 @@ export function DashboardView() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-semibold mb-1">Tổng quan</h1>
-        <p className="text-sm text-gray-500">Tổng quan về công việc và lịch trình của bạn</p>
+        <h1 className="text-2xl font-semibold mb-1">{t('dashboard_title')}</h1>
+        <p className="text-sm text-gray-500">{t('dashboard_subtitle')}</p>
       </div>
 
       {/* Top Stats */}
@@ -130,11 +134,11 @@ export function DashboardView() {
         <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Tỷ lệ hoàn thành đúng hạn</p>
+              <p className="text-sm text-gray-500 mb-1">{t('dashboard_completionRate')}</p>
               <p className="text-3xl font-semibold text-gray-900">{completionRate}%</p>
               <div className="flex items-center space-x-1 mt-2">
                 <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">+5% so với tuần trước</span>
+                <span className="text-sm text-green-600">{t('dashboard_vsLastWeek')}</span>
               </div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -146,11 +150,11 @@ export function DashboardView() {
         <Card className="p-6">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-500 mb-1">Thời gian rảnh tuần này</p>
+              <p className="text-sm text-gray-500 mb-1">{t('dashboard_freeTime')}</p>
               <p className="text-3xl font-semibold text-gray-900">{freeHours}h</p>
               <div className="flex items-center space-x-1 mt-2">
                 <Calendar className="w-4 h-4 text-blue-600" />
-                <span className="text-sm text-blue-600">Có sẵn để lập kế hoạch</span>
+                <span className="text-sm text-blue-600">{t('dashboard_availableForPlanning')}</span>
               </div>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -165,10 +169,10 @@ export function DashboardView() {
         {/* Task Completion Pie Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="font-semibold mb-1">Tình trạng công việc tuần này</h3>
-            <p className="text-sm text-gray-500">{totalTasks} công việc trong tuần</p>
+            <h3 className="font-semibold mb-1">{t('dashboard_taskStatus')}</h3>
+            <p className="text-sm text-gray-500">{totalTasks} {t('dashboard_tasksThisWeek')}</p>
           </div>
-          
+
           <div className="flex items-center justify-center">
             <ResponsiveContainer width="100%" height={250}>
               <PieChart>
@@ -194,15 +198,15 @@ export function DashboardView() {
           <div className="flex items-center justify-center space-x-6 mt-4">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Hoàn thành ({taskCompletionData[0].value})</span>
+              <span className="text-sm text-gray-600">{t('dashboard_completed')} ({taskCompletionData[0].value})</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Đang làm ({taskCompletionData[1].value})</span>
+              <span className="text-sm text-gray-600">{t('dashboard_inProgress')} ({taskCompletionData[1].value})</span>
             </div>
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Chưa bắt đầu ({taskCompletionData[2].value})</span>
+              <span className="text-sm text-gray-600">{t('dashboard_notStarted')} ({taskCompletionData[2].value})</span>
             </div>
           </div>
         </Card>
@@ -210,10 +214,10 @@ export function DashboardView() {
         {/* Workload Bar Chart */}
         <Card className="p-6">
           <div className="mb-4">
-            <h3 className="font-semibold mb-1">Khối lượng công việc tuần</h3>
-            <p className="text-sm text-gray-500">Công việc mỗi ngày</p>
+            <h3 className="font-semibold mb-1">{t('dashboard_weeklyWorkload')}</h3>
+            <p className="text-sm text-gray-500">{t('dashboard_tasksPerDay')}</p>
           </div>
-          
+
           {workloadData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={250}>
@@ -221,7 +225,7 @@ export function DashboardView() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                   <XAxis dataKey="day" />
                   <YAxis />
-                  <Tooltip 
+                  <Tooltip
                     contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                     labelStyle={{ color: '#374151' }}
                   />
@@ -231,12 +235,12 @@ export function DashboardView() {
 
               <div className="flex items-center justify-center space-x-2 mt-4">
                 <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                <span className="text-sm text-gray-600">Số công việc</span>
+                <span className="text-sm text-gray-600">{t('dashboard_taskCount')}</span>
               </div>
             </>
           ) : (
             <div className="h-[250px] flex items-center justify-center text-gray-400">
-              Không có dữ liệu tuần
+              {t('dashboard_noWeeklyData')}
             </div>
           )}
         </Card>
@@ -245,10 +249,10 @@ export function DashboardView() {
       {/* Timeline Chart */}
       <Card className="p-6">
         <div className="mb-4">
-          <h3 className="font-semibold mb-1">Lịch sử tạo công việc</h3>
-          <p className="text-sm text-gray-500">Số công việc được thêm vào lịch trình theo thời gian</p>
+          <h3 className="font-semibold mb-1">{t('dashboard_history')}</h3>
+          <p className="text-sm text-gray-500">{t('dashboard_historyDesc')}</p>
         </div>
-        
+
         {timelineData.length > 0 ? (
           <>
             <ResponsiveContainer width="100%" height={280}>
@@ -259,14 +263,14 @@ export function DashboardView() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="week" />
                 <YAxis />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                   labelStyle={{ color: '#374151' }}
                 />
-                <Line 
-                  type="monotone" 
-                  dataKey="tasks" 
-                  stroke="#8b5cf6" 
+                <Line
+                  type="monotone"
+                  dataKey="tasks"
+                  stroke="#8b5cf6"
                   strokeWidth={3}
                   dot={{ fill: '#8b5cf6', r: 5 }}
                   activeDot={{ r: 7 }}
@@ -276,12 +280,12 @@ export function DashboardView() {
 
             <div className="flex items-center justify-center space-x-2 mt-4">
               <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Công việc đã tạo</span>
+              <span className="text-sm text-gray-600">{t('dashboard_createdTasks')}</span>
             </div>
           </>
         ) : (
           <div className="h-[280px] flex items-center justify-center text-gray-400">
-            Không có dữ liệu lịch sử
+            {t('dashboard_noHistoryData')}
           </div>
         )}
       </Card>
@@ -289,13 +293,13 @@ export function DashboardView() {
       {/* Recent Tasks */}
       <Card className="p-6">
         <div className="mb-4">
-          <h3 className="font-semibold mb-1">Công việc gần đây</h3>
-          <p className="text-sm text-gray-500">Cập nhật công việc gần đây</p>
+          <h3 className="font-semibold mb-1">{t('dashboard_recentTasks')}</h3>
+          <p className="text-sm text-gray-500">{t('dashboard_recentUpdates')}</p>
         </div>
 
         <div className="space-y-3">
           {recentTasks.length === 0 ? (
-            <div className="py-6 text-center text-sm text-gray-400">Không có công việc nào trong 48 giờ qua</div>
+            <div className="py-6 text-center text-sm text-gray-400">{t('dashboard_no48hTasks')}</div>
           ) : (
             recentTasks.map((task) => {
               const now = new Date()
@@ -304,8 +308,8 @@ export function DashboardView() {
               const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
               const diffDays = Math.floor(diffHours / 24)
               const timeAgo = diffDays > 0
-                ? `${diffDays} ngày trước`
-                : `${diffHours} giờ trước`
+                ? `${diffDays} ${t('dashboard_daysAgo')}`
+                : `${diffHours} ${t('dashboard_hoursAgo')}`
 
               const statusIcon = task.status === 'DONE'
                 ? <CheckCircle className="w-5 h-5 text-green-600" />
@@ -313,13 +317,13 @@ export function DashboardView() {
                 ? <Clock className="w-5 h-5 text-blue-600" />
                 : <Circle className="w-5 h-5 text-gray-400" />
 
-              const statusLabel = task.status === 'DONE' ? 'Hoàn thành'
-                : task.status === 'IN_PROGRESS' ? 'Đang làm'
-                : task.status === 'TODO' ? 'Quá hạn' : task.status
+              const statusLabel = task.status === 'DONE' ? t('dashboard_completed')
+                : task.status === 'IN_PROGRESS' ? t('dashboard_inProgress')
+                : task.status === 'TODO' ? t('dashboard_overdue') : task.status
 
-              const priorityLabel = task.priority === 'HIGH' ? 'Cao'
-                : task.priority === 'MEDIUM' ? 'Trung bình'
-                : task.priority === 'LOW' ? 'Thấp' : task.priority
+              const priorityLabel = task.priority === 'HIGH' ? t('priority_high')
+                : task.priority === 'MEDIUM' ? t('priority_medium')
+                : task.priority === 'LOW' ? t('priority_low') : task.priority
 
               const priorityColor = task.priority === 'HIGH' ? 'bg-red-100 text-red-700'
                 : task.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-700'
@@ -356,8 +360,8 @@ export function DashboardView() {
       {/* Monthly Events Bar Chart */}
       <Card className="p-6">
         <div className="mb-4">
-          <h3 className="font-semibold mb-1">Tổng sự kiện theo tháng</h3>
-          <p className="text-sm text-gray-500">12 tháng gần đây</p>
+          <h3 className="font-semibold mb-1">{t('dashboard_eventsByMonth')}</h3>
+          <p className="text-sm text-gray-500">{t('dashboard_last12months')}</p>
         </div>
 
         <ResponsiveContainer width="100%" height={280}>

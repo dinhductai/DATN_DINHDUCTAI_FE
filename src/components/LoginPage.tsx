@@ -5,6 +5,7 @@ import { Label } from './ui/label'
 import { Checkbox } from './ui/checkbox'
 import { Eye, EyeOff } from 'lucide-react'
 import { login } from '../services/authService'
+import { useTranslation } from '../contexts/LanguageContext'
 
 interface LoginPageProps {
   onLogin: (isAdmin: boolean) => void
@@ -12,6 +13,7 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -21,7 +23,7 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    
+
     try {
       const response = await login({ email, password })
       if (response.authenticated) {
@@ -32,10 +34,10 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
         const isAdmin = email.includes('admin')
         onLogin(isAdmin)
       } else {
-        setError('Thông tin đăng nhập không hợp lệ')
+        setError(t('auth_invalidCredentials'))
       }
     } catch (error) {
-      setError('Đăng nhập thất bại. Vui lòng thử lại.')
+      setError(t('auth_loginFailed'))
     }
   }
 
@@ -44,8 +46,8 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold mb-2">Đăng nhập</h1>
-            <p className="text-gray-500">Nhập thông tin đăng nhập để truy cập tài khoản</p>
+            <h1 className="text-3xl font-semibold mb-2">{t('auth_loginTitle')}</h1>
+            <p className="text-gray-500">{t('auth_loginSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -56,11 +58,11 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="email">Địa chỉ email</Label>
+              <Label htmlFor="email">{t('auth_email')}</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder="Nhập email của bạn"
+                placeholder={t('auth_emailPlaceholder')}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
@@ -72,12 +74,12 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">{t('auth_password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Nhập mật khẩu"
+                  placeholder={t('auth_passwordPlaceholder')}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
@@ -111,14 +113,14 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
                   htmlFor="remember"
                   className="text-sm text-gray-600 cursor-pointer"
                 >
-                  Ghi nhớ đăng nhập
+                  {t('auth_rememberMe')}
                 </label>
               </div>
               <button
                 type="button"
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
-                Quên mật khẩu?
+                {t('auth_forgotPassword')}
               </button>
             </div>
 
@@ -126,17 +128,17 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
               type="submit"
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Đăng nhập
+              {t('auth_loginBtn')}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              Chưa có tài khoản?{' '}
+              {t('auth_noAccount')}{' '}
               <button
                 type="button"
                 onClick={onSwitchToRegister}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Đăng ký
+                {t('auth_signUp')}
               </button>
             </div>
           </form>

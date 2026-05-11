@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import "./dark-mode.css";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 // import { pushNotificationService } from "./services/pushNotificationService";
 
 // Push notifications disabled
@@ -24,6 +25,8 @@ if ('serviceWorker' in navigator) {
 
 createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
-    <App />
+    <LanguageProvider>
+      <App />
+    </LanguageProvider>
   </ThemeProvider>
 );

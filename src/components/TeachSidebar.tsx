@@ -2,6 +2,7 @@ import { Calendar, BarChart3, LogOut, Plus, Pin, CalendarDays } from 'lucide-rea
 import { Button } from './ui/button'
 import { useState } from 'react'
 import { ConfirmDialog } from './ConfirmDialog'
+import { useTranslation } from '../contexts/LanguageContext'
 
 interface TeachSidebarProps {
   activeView: 'schedule' | 'stats' | 'notifications'
@@ -11,13 +12,14 @@ interface TeachSidebarProps {
 }
 
 export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: TeachSidebarProps) {
+  const { t } = useTranslation()
   const [isPinned, setIsPinned] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const menuItems = [
-    { icon: Calendar, label: 'Lịch trình', view: 'schedule' as const },
-    { icon: BarChart3, label: 'Thống kê', view: 'stats' as const },
-    { icon: CalendarDays, label: 'Sự kiện', view: 'notifications' as const },
+    { icon: Calendar, label: t('sidebar_schedule'), view: 'schedule' as const },
+    { icon: BarChart3, label: t('sidebar_stats'), view: 'stats' as const },
+    { icon: CalendarDays, label: t('sidebar_events'), view: 'notifications' as const },
   ]
 
   return (
@@ -29,7 +31,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
               <span className="text-white font-bold text-sm">TD</span>
             </div>
-            <span className="font-semibold text-gray-900 dark:text-gray-100">TechDreams Schedule</span>
+            <span className="font-semibold text-gray-900 dark:text-gray-100">{t('sidebar_appName')}</span>
           </div>
           <button
             onClick={() => setIsPinned(!isPinned)}
@@ -70,7 +72,7 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
           className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-6"
         >
           <Plus className="w-5 h-5 mr-2" />
-          Tạo công việc
+          {t('sidebar_createTask')}
         </Button>
       </div>
 
@@ -81,17 +83,17 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
           className="flex items-center space-x-3 px-3 py-2.5 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg w-full"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-sm">Đăng xuất</span>
+          <span className="text-sm">{t('sidebar_logout')}</span>
         </button>
       </div>
       <ConfirmDialog
         open={showLogoutConfirm}
         onOpenChange={setShowLogoutConfirm}
-        title="Đăng xuất"
-        description="Bạn có chắc chắn muốn đăng xuất không?"
+        title={t('sidebar_logout')}
+        description={t('sidebar_logoutConfirm')}
         onConfirm={onLogout}
-        confirmText="Đồng ý"
-        cancelText="Hủy"
+        confirmText={t('common_confirm')}
+        cancelText={t('common_cancel')}
         destructive
       />
     </div>

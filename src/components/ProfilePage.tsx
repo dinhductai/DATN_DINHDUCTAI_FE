@@ -10,6 +10,7 @@ import { UpdateProfileDialog } from './UpdateProfileDialog'
 import { DeleteAccountDialog } from './DeleteAccountDialog'
 import { ConfirmDialog } from './ConfirmDialog'
 import { useTheme } from '../contexts/ThemeContext'
+import { useLanguage, useTranslation } from '../contexts/LanguageContext'
 
 interface UserProfile {
   userId: number
@@ -23,6 +24,8 @@ interface UserProfile {
 export function ProfilePage() {
   const navigate = useNavigate()
   const { darkMode, toggleDarkMode } = useTheme()
+  const { language, setLanguage } = useLanguage()
+  const { t } = useTranslation()
   const [user, setUser] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -31,7 +34,6 @@ export function ProfilePage() {
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSystemSettings, setShowSystemSettings] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [language, setLanguage] = useState('ENG')
   const [bannerIndex, setBannerIndex] = useState(0)
 
   const banners = ['/banner1.jpg', '/banner2.jpg']
@@ -60,7 +62,7 @@ export function ProfilePage() {
       setUser(userData)
     } catch (err) {
       console.error('Failed to load user profile:', err)
-      setError('Tải hồ sơ thất bại. Vui lòng thử lại.')
+      setError(t('profile_loadFailedMsg'))
     } finally {
       setLoading(false)
     }
@@ -83,7 +85,7 @@ export function ProfilePage() {
   }
 
   const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Không có'
+    if (!dateStr) return t('profile_none')
     const date = new Date(dateStr)
     return date.toLocaleDateString('vi-VN', {
       year: 'numeric',
@@ -95,19 +97,19 @@ export function ProfilePage() {
   }
 
   const getMemberSinceText = (profile?: UserProfile) => {
-    if (!profile) return 'Không có'
+    if (!profile) return t('profile_none')
     if (profile.registerSince !== undefined && profile.registerSince !== null) {
-      if (profile.registerSince < 1) return 'Ít hơn một tháng'
-      if (profile.registerSince === 1) return '1 tháng'
-      return `${profile.registerSince} tháng`
+      if (profile.registerSince < 1) return t('profile_lessThanMonth')
+      if (profile.registerSince === 1) return t('profile_oneMonth')
+      return `${profile.registerSince} ${t('profile_months')}`
     }
-    if (!profile.createdAt) return 'Không có'
+    if (!profile.createdAt) return t('profile_none')
     const date = new Date(profile.createdAt)
     const now = new Date()
     const months = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24 * 30))
-    if (months < 1) return 'Ít hơn một tháng'
-    if (months === 1) return '1 tháng'
-    return `${months} tháng`
+    if (months < 1) return t('profile_lessThanMonth')
+    if (months === 1) return t('profile_oneMonth')
+    return `${months} ${t('profile_months')}`
   }
 
   if (loading) {
@@ -115,7 +117,7 @@ export function ProfilePage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-sm text-gray-500">Đang tải hồ sơ...</p>
+          <p className="text-sm text-gray-500">{t('profile_loading')}</p>
         </div>
       </div>
     )
@@ -128,10 +130,10 @@ export function ProfilePage() {
           <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <User className="w-8 h-8 text-red-400" />
           </div>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Không thể tải hồ sơ</h2>
-          <p className="text-sm text-gray-500 mb-6">{error || 'Đã xảy ra lỗi. Vui lòng thử lại.'}</p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">{t('profile_loadFailed')}</h2>
+          <p className="text-sm text-gray-500 mb-6">{error || t('profile_error')}</p>
           <Button onClick={loadUserProfile} className="bg-blue-600 hover:bg-blue-700">
-            Thử lại
+            {t('common_retry')}
           </Button>
         </div>
       </div>
@@ -149,17 +151,17 @@ export function ProfilePage() {
               className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span>Quay lại trang chủ</span>
+              <span>{t('profile_backHome')}</span>
             </button>
             <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span 
+              <span
                 className="hover:text-gray-700 cursor-pointer"
                 onClick={() => navigate('/schedule')}
               >
-                Trang chủ
+                {t('profile_home')}
               </span>
               <span>›</span>
-              <span className="text-gray-900">Hồ sơ của tôi</span>
+              <span className="text-gray-900">{t('profile_myProfile')}</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -167,18 +169,18 @@ export function ProfilePage() {
               <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
             </button>
-            <button 
+            <button
               onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              <span>Đăng xuất</span>
+              <span>{t('profile_logout')}</span>
             </button>
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-              <img 
-                src={user.profile || '/profile_picture.png'} 
-                alt={user.userName} 
-                className="w-full h-full rounded-full object-cover" 
+              <img
+                src={user.profile || '/profile_picture.png'}
+                alt={user.userName}
+                className="w-full h-full rounded-full object-cover"
               />
             </div>
           </div>
@@ -236,7 +238,7 @@ export function ProfilePage() {
                 <h1 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#111827', margin: 0 }}>{user.userName}</h1>
                 <span style={{ fontSize: '0.875rem', color: '#16a34a', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <span style={{ width: '6px', height: '6px', background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
-                  Đã xác minh
+                  {t('profile_verified')}
                 </span>
               </div>
               <p style={{ color: '#6b7280', margin: 0 }}>{user.email}</p>
@@ -251,11 +253,11 @@ export function ProfilePage() {
             {/* Account Status Card */}
             <div className="bg-gradient-to-br from-blue-500 via-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg">
               <div className="flex items-center justify-between mb-2">
-                <h3>Trạng thái tài khoản</h3>
-                <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">Hoạt động</span>
+                <h3>{t('profile_accountStatus')}</h3>
+                <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-sm">{t('profile_active')}</span>
               </div>
               <div className="mt-4">
-                <p className="text-sm text-white/80">Thành viên từ</p>
+                <p className="text-sm text-white/80">{t('profile_memberSince')}</p>
                 <p className="text-lg">{getMemberSinceText(user)}</p>
               </div>
             </div>
@@ -266,13 +268,13 @@ export function ProfilePage() {
             {/* Account Information */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl">Thông tin tài khoản</h2>
+                <h2 className="text-xl">{t('profile_accountInfo')}</h2>
                 <button
                   onClick={() => setIsUpdateDialogOpen(true)}
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg flex items-center gap-1 transition-colors"
                 >
                   <span>✎</span>
-                  Sửa
+                  {t('profile_edit')}
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -281,7 +283,7 @@ export function ProfilePage() {
                     <User className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Tên tài khoản</p>
+                    <p className="text-sm text-gray-500">{t('profile_accountName')}</p>
                     <p className="text-gray-900">{user.userName}</p>
                   </div>
                 </div>
@@ -290,7 +292,7 @@ export function ProfilePage() {
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Địa chỉ email</p>
+                    <p className="text-sm text-gray-500">{t('profile_emailAddress')}</p>
                     <p className="text-gray-900">{user.email}</p>
                   </div>
                 </div>
@@ -299,8 +301,8 @@ export function ProfilePage() {
                     <ImageIcon className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Ảnh đại diện</p>
-                    <p className="text-gray-900">{user.profile ? 'Đã tải lên' : 'Chưa đặt'}</p>
+                    <p className="text-sm text-gray-500">{t('profile_avatar')}</p>
+                    <p className="text-gray-900">{user.profile ? t('profile_uploaded') : t('profile_notSet')}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
@@ -308,7 +310,7 @@ export function ProfilePage() {
                     <Calendar className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-500">Tài khoản được tạo</p>
+                    <p className="text-sm text-gray-500">{t('profile_accountCreated')}</p>
                     <p className="text-gray-900">{formatDate(user.createdAt)}</p>
                   </div>
                 </div>
@@ -317,7 +319,7 @@ export function ProfilePage() {
 
             {/* Settings & Preferences */}
             <div className="bg-white rounded-2xl p-6 shadow-sm">
-              <h2 className="text-xl mb-6">Cài đặt & Tùy chọn</h2>
+              <h2 className="text-xl mb-6">{t('profile_settingsTitle')}</h2>
               <div className="space-y-3">
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px', transition: 'background 0.15s' }}>
@@ -328,9 +330,9 @@ export function ProfilePage() {
                       onClick={() => setShowNotifications(!showNotifications)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Thông báo</p>
+                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>{t('profile_notifications')}</p>
                       <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>
-                        {notificationsEnabled ? 'Bật' : 'Tắt'}
+                        {notificationsEnabled ? t('profile_notifOn') : t('profile_notifOff')}
                       </p>
                     </button>
                     <button
@@ -345,8 +347,8 @@ export function ProfilePage() {
                     <div style={{ marginTop: '8px', marginLeft: '56px', padding: '16px', background: darkMode ? '#1f2937' : '#f9fafb', borderRadius: '12px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <div>
-                          <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Thông báo đẩy</p>
-                          <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Thông báo đẩy từ trình duyệt</p>
+                          <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>{t('profile_pushNotif')}</p>
+                          <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{t('profile_pushNotifDesc')}</p>
                         </div>
                         <button
                           onClick={() => setNotificationsEnabled(!notificationsEnabled)}
@@ -391,7 +393,7 @@ export function ProfilePage() {
                       onClick={() => setShowSystemSettings(!showSystemSettings)}
                       style={{ flex: 1, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                     >
-                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Cài đặt hệ thống</p>
+                      <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>{t('profile_systemSettings')}</p>
                       <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{language}</p>
                     </button>
                     <button
@@ -412,8 +414,8 @@ export function ProfilePage() {
                             : <Sun style={{ width: '20px', height: '20px', color: darkMode ? '#9ca3af' : '#374151' }} />
                           }
                           <div>
-                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Chế độ tối</p>
-                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Chuyển đổi chế độ tối/sáng</p>
+                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>{t('profile_darkMode')}</p>
+                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{t('profile_darkModeDesc')}</p>
                           </div>
                         </div>
                         <button
@@ -452,8 +454,8 @@ export function ProfilePage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                           <Globe style={{ width: '20px', height: '20px', color: darkMode ? '#9ca3af' : '#374151' }} />
                           <div>
-                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>Ngôn ngữ</p>
-                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>Chọn ngôn ngữ của bạn</p>
+                            <p style={{ color: darkMode ? '#f9fafb' : '#111827', margin: 0, fontWeight: 500 }}>{t('profile_language')}</p>
+                            <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{t('profile_languageDesc')}</p>
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: darkMode ? '#374151' : 'white', borderRadius: '8px', padding: '4px', border: darkMode ? '1px solid #4b5563' : '1px solid #e5e7eb' }}>
@@ -497,16 +499,16 @@ export function ProfilePage() {
 
             {/* Danger Zone */}
             <div className="bg-white rounded-2xl p-6 shadow-sm border-2 border-red-100">
-              <h2 className="text-xl text-red-600 mb-2">Khu vực nguy hiểm</h2>
+              <h2 className="text-xl text-red-600 mb-2">{t('profile_dangerZone')}</h2>
               <p className="text-gray-600 text-sm mb-4">
-                Khi bạn xóa tài khoản, không thể khôi phục. Vui lòng chắc chắn.
+                {t('profile_dangerDesc')}
               </p>
               <button
                 onClick={() => setIsDeleteDialogOpen(true)}
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
-                Xóa tài khoản của tôi
+                {t('profile_deleteAccount')}
               </button>
             </div>
           </div>
@@ -531,11 +533,11 @@ export function ProfilePage() {
       <ConfirmDialog
         open={showLogoutConfirm}
         onOpenChange={setShowLogoutConfirm}
-        title="Đăng xuất"
-        description="Bạn có chắc chắn muốn đăng xuất không?"
+        title={t('profile_logout')}
+        description={t('profile_logoutConfirm')}
         onConfirm={handleLogout}
-        confirmText="Đồng ý"
-        cancelText="Hủy"
+        confirmText={t('common_confirm')}
+        cancelText={t('common_cancel')}
         destructive
       />
     </div>

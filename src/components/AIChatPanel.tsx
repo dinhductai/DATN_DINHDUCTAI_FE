@@ -5,6 +5,7 @@ import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
 import { sendMessageMode1, getConversationId } from '../services/chatService';
 import { Mode1ChatResponse, ChatMode, CHAT_MODES, ConversationMessage } from '../types/chat';
+import { useTranslation } from '../contexts/LanguageContext';
 
 interface AIChatPanelProps {
   onClose: () => void;
@@ -17,6 +18,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string>('');
   const [currentMode, setCurrentMode] = useState<ChatMode>(1);
+  const { t } = useTranslation();
 
   // Load conversation when mode changes
   useEffect(() => {
@@ -137,27 +139,27 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
         {parsed.summary && (
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="px-2 py-1 bg-gray-200 rounded-md">
-              Tổng: {parsed.summary.totalTasks}
+              {t('chat_total')} {parsed.summary.totalTasks}
             </span>
             <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md">
-              Chưa làm: {parsed.summary.todoCount}
+              {t('chat_todo')} {parsed.summary.todoCount}
             </span>
             <span className="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-md">
-              Đang làm: {parsed.summary.inProgressCount}
+              {t('chat_inProgress')} {parsed.summary.inProgressCount}
             </span>
             {parsed.summary.overdueCount > 0 && (
               <span className="px-2 py-1 bg-red-100 text-red-700 rounded-md">
                 <AlertCircle className="inline w-3 h-3 mr-1" />
-                Quá hạn: {parsed.summary.overdueCount}
+                {t('chat_overdue')} {parsed.summary.overdueCount}
               </span>
             )}
             <span className="px-2 py-1 bg-green-100 text-green-700 rounded-md">
               <CheckCircle className="inline w-3 h-3 mr-1" />
-              Hoàn thành: {parsed.summary.doneCount}
+              {t('chat_completed')} {parsed.summary.doneCount}
             </span>
             {parsed.summary.eventCount > 0 && (
               <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-md">
-                Sự kiện: {parsed.summary.eventCount}
+                {t('chat_events')} {parsed.summary.eventCount}
               </span>
             )}
           </div>
@@ -235,7 +237,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                 )}
                 {event.location && (
                   <p className="text-gray-500 mt-0.5">
-                    📍 {event.isOnline ? 'Trực tuyến' : event.location}
+                    📍 {event.isOnline ? t('chat_online') : event.location}
                   </p>
                 )}
                 {event.reason && (
@@ -266,8 +268,8 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-sm">Trợ lý lịch trình</h3>
-              <p className="text-xs text-gray-500">Trợ lý AI</p>
+              <h3 className="font-semibold text-sm">{t('chat_assistant')}</h3>
+              <p className="text-xs text-gray-500">{t('chat_aiAssistant')}</p>
             </div>
           </div>
           <Button
@@ -323,7 +325,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                 </h3>
                 <p className="text-sm text-gray-500 max-w-xs mx-auto">
                   {currentMode === 1
-                    ? 'Hỏi tôi về lịch trình: hôm nay có gì, task nào quan trọng, sự kiện sắp tới...'
+                    ? t('chat_hint')
                     : CHAT_MODES[currentMode - 1]?.description}
                 </p>
               </div>
@@ -388,7 +390,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
           <Input
             placeholder={
               currentMode === 1
-                ? "Hỏi về lịch trình..."
+                ? t('chat_inputPlaceholder')
                 : CHAT_MODES[currentMode - 1]?.description
             }
             value={inputMessage}

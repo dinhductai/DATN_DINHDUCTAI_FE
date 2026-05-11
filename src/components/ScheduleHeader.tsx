@@ -10,6 +10,7 @@ import { TaskResponse } from '../types/task'
 import { NotificationItem } from '../types/notification'
 import { notificationService, formatNotificationTime } from '../services/notificationService'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from '../contexts/LanguageContext'
 
 interface ScheduleHeaderProps {
   onOpenAIChat: () => void
@@ -17,6 +18,7 @@ interface ScheduleHeaderProps {
 }
 
 export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProps) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [currentUser, setCurrentUser] = useState<{ userName: string; profile?: string } | null>(null)
 
@@ -147,18 +149,18 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
   const getPriorityLabel = (priority: string) => {
     switch (priority) {
-      case 'HIGH':   return 'Cao'
-      case 'MEDIUM': return 'Trung bình'
-      case 'LOW':    return 'Thấp'
+      case 'HIGH':   return t('priority_high')
+      case 'MEDIUM': return t('priority_medium')
+      case 'LOW':    return t('priority_low')
       default:       return priority
     }
   }
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'TODO':        return 'Cần làm'
-      case 'IN_PROGRESS': return 'Đang làm'
-      case 'DONE':        return 'Hoàn thành'
+      case 'TODO':        return t('status_todo')
+      case 'IN_PROGRESS': return t('status_inProgress')
+      case 'DONE':        return t('status_done')
       default:            return status
     }
   }
@@ -179,7 +181,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
           <div className="relative w-96">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
             <Input
-              placeholder="Tìm kiếm công việc..."
+              placeholder={t('header_searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery.trim() && setShowResults(true)}
@@ -203,12 +205,12 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               <div className="absolute top-full left-0 w-96 mt-1 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-50">
                 {searchResults.length === 0 ? (
                   <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {isSearching ? 'Đang tìm kiếm...' : 'Không tìm thấy công việc phù hợp'}
+                    {isSearching ? t('header_searching') : t('header_noResults')}
                   </div>
                 ) : (
                   <>
                     <div className="px-4 py-2 text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
-                      Tìm thấy {searchResults.length} công việc
+                      {t('header_found').replace('{count}', String(searchResults.length))}
                     </div>
                     {searchResults.map((task) => (
                       <div
@@ -252,7 +254,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg"
             >
               <Sparkles className="w-4 h-4 mr-2" />
-              Trợ lý lịch trình
+              {t('header_assistant')}
             </Button>
 
             {/* Notification Bell */}
@@ -276,13 +278,13 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
                   style={{ right: '0' }}>
                   {/* Header */}
                   <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Thông báo</span>
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{t('header_notifications')}</span>
                     {unreadCount > 0 && (
                       <button
                         onClick={handleMarkAllAsRead}
                         className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                       >
-                        Đánh dấu tất cả đã đọc
+                        {t('header_markAllRead')}
                       </button>
                     )}
                   </div>
@@ -291,7 +293,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
                   <div className="max-h-96 overflow-y-auto">
                     {notifications.length === 0 ? (
                       <div className="py-10 text-center text-sm text-gray-400 dark:text-gray-500">
-                        Không có thông báo nào
+                        {t('header_noNotifications')}
                       </div>
                     ) : (
                       notifications.map((n) => (

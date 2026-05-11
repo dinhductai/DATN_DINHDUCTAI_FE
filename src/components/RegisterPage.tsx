@@ -4,6 +4,7 @@ import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Eye, EyeOff, Upload } from 'lucide-react'
 import { register, uploadProfile } from '../services/authService'
+import { useTranslation } from '../contexts/LanguageContext'
 
 interface RegisterPageProps {
   onRegister: () => void
@@ -11,6 +12,7 @@ interface RegisterPageProps {
 }
 
 export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps) {
+  const { t } = useTranslation()
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,7 +27,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
       setProfileFile(file)
-      
+
       const reader = new FileReader()
       reader.onloadend = () => {
         setProfilePreview(reader.result as string)
@@ -39,27 +41,27 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     setError('')
 
     if (!username.trim()) {
-      setError('Tên người dùng là bắt buộc')
+      setError(t('auth_usernameRequired'))
       return
     }
 
     if (!email.trim()) {
-      setError('Email là bắt buộc')
+      setError(t('auth_emailRequired'))
       return
     }
 
     if (!password.trim()) {
-      setError('Mật khẩu là bắt buộc')
+      setError(t('auth_passwordRequired'))
       return
     }
 
     if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự')
+      setError(t('auth_passwordMinLength'))
       return
     }
 
     setIsLoading(true)
-    setUploadProgress('Đang tạo tài khoản...')
+    setUploadProgress(t('auth_creatingAccount'))
 
     const requestBody = {
       userName: username.trim(),
@@ -74,7 +76,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       console.log('Registration successful, userId:', response.userId)
 
       if (profileFile) {
-        setUploadProgress('Đang tải ảnh đại diện...')
+        setUploadProgress(t('auth_uploadingAvatar'))
         try {
           const uploadResult = await uploadProfile(response.userId, profileFile)
           console.log('Profile uploaded:', uploadResult.url)
@@ -87,7 +89,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       onRegister()
     } catch (err) {
       console.error('Registration catch error:', err)
-      setError(err instanceof Error ? err.message : 'Đăng ký thất bại. Vui lòng thử lại.')
+      setError(err instanceof Error ? err.message : t('auth_registerFailed'))
     } finally {
       setIsLoading(false)
       setUploadProgress('')
@@ -99,8 +101,8 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-semibold mb-2">Tạo tài khoản</h1>
-            <p className="text-gray-500">Đăng ký để bắt đầu với TechDreams Schedule</p>
+            <h1 className="text-3xl font-semibold mb-2">{t('auth_registerTitle')}</h1>
+            <p className="text-gray-500">{t('auth_registerSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -111,11 +113,11 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">Tên người dùng</Label>
+              <Label htmlFor="username">{t('auth_username')}</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="Nhập tên người dùng"
+                placeholder={t('auth_usernamePlaceholder')}
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value)
@@ -127,11 +129,11 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Địa chỉ email</Label>
+              <Label htmlFor="email">{t('auth_email')}</Label>
               <Input
                 id="email"
                 type="text"
-                placeholder="Nhập email của bạn"
+                placeholder={t('auth_emailPlaceholder')}
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value)
@@ -143,12 +145,12 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mật khẩu</Label>
+              <Label htmlFor="password">{t('auth_password')}</Label>
               <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Nhập mật khẩu"
+                  placeholder={t('auth_passwordPlaceholder')}
                   value={password}
                   onChange={(e) => {
                     setPassword(e.target.value)
@@ -172,7 +174,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="profile">Ảnh đại diện (tùy chọn)</Label>
+              <Label htmlFor="profile">{t('auth_avatar')}</Label>
               <div className="relative">
                 <Input
                   id="profile"
@@ -187,7 +189,7 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
                 >
                   <Upload className="w-5 h-5 mr-2 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    {profilePreview ? 'Đã chọn ảnh' : 'Chọn tệp'}
+                    {profilePreview ? t('auth_imageSelected') : t('auth_chooseFile')}
                   </span>
                 </label>
               </div>
@@ -216,17 +218,17 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
               className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
+              {isLoading ? t('auth_creatingAccount') : t('auth_registerBtn')}
             </Button>
 
             <div className="text-center text-sm text-gray-600">
-              Đã có tài khoản?{' '}
+              {t('auth_hasAccount')}{' '}
               <button
                 type="button"
                 onClick={onSwitchToLogin}
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
-                Đăng nhập
+                {t('auth_loginBtn')}
               </button>
             </div>
           </form>
