@@ -1,4 +1,4 @@
-import { Search, Sparkles, Bell, ChevronDown, X, Clock } from 'lucide-react'
+import { Search, Sparkles, Bell, ChevronDown, X, Clock, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { Avatar, AvatarFallback } from './ui/avatar'
@@ -32,6 +32,9 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [notifPage, setNotifPage] = useState(0)
+  const [notifTotalPages, setNotifTotalPages] = useState(1)
+  const [notifLoading, setNotifLoading] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -40,13 +43,14 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
 
   // Load notifications + connect WebSocket
   useEffect(() => {
-    loadNotifications()
+    loadNotifications(0)
 
     const token = localStorage.getItem('token')
     if (!token) return
 
     notificationService.connect((incoming) => {
-      setNotifications((prev) => [incoming, ...prev])
+      // New real-time notif: prepend to page 0 data only if on page 0
+      setNotifications((prev) => [incoming, ...prev].slice(0, 5))
       setUnreadCount((c) => c + 1)
     })
 
@@ -75,13 +79,18 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
     }
   }
 
-  const loadNotifications = async () => {
+  const loadNotifications = async (page: number) => {
     try {
-      const data = await notificationService.getNotifications()
+      setNotifLoading(true)
+      const data = await notificationService.getNotifications(page, 5)
       setNotifications(data.notifications)
       setUnreadCount(data.unreadCount)
+      setNotifTotalPages(data.totalPages)
+      setNotifPage(page)
     } catch (error) {
       console.error('Error loading notifications:', error)
+    } finally {
+      setNotifLoading(false)
     }
   }
 
@@ -290,36 +299,72 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
                   </div>
 
                   {/* List */}
-                  <div className="max-h-96 overflow-y-auto">
-                    {notifications.length === 0 ? (
+                  <div
+                    className="overflow-y-auto notif-scroll"
+                    style={{ maxHeight: '24rem' }}
+                  >
+                    {notifLoading && notifications.length === 0 ? (
+                      <div className="py-10 text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto" />
+                      </div>
+                    ) : notifications.length === 0 ? (
                       <div className="py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                         {t('header_noNotifications')}
                       </div>
                     ) : (
-                      notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          onClick={() => !n.isRead && handleMarkAsRead(n.id)}
-                          className={`px-4 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0 cursor-pointer transition-colors ${
-                            n.isRead
-                              ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
-                              : 'bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30'
-                          }`}
-                        >
-                          <div className="flex items-start justify-between gap-2">
-                            <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>
-                              {n.title}
-                            </span>
-                            {!n.isRead && (
-                              <span className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
-                            )}
-                          </div>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">{n.content}</p>
-                          <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">
-                            {formatNotificationTime(n.createdAt)}
-                          </span>
+                      <>
+                        <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                          {notifications.map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => !n.isRead && handleMarkAsRead(n.id)}
+                              className={`px-4 py-3 cursor-pointer transition-colors ${
+                                n.isRead
+                                  ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                  : 'bg-blue-50/60 dark:bg-blue-900/20 hover:bg-blue-100/70 dark:hover:bg-blue-900/30'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>
+                                  {n.title}
+                                </span>
+                                {!n.isRead && (
+                                  <span className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">{n.content}</p>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">
+                                {formatNotificationTime(n.createdAt)}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                      ))
+
+                        {/* Pagination */}
+                        {notifTotalPages > 1 && (
+                          <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                            <button
+                              onClick={() => loadNotifications(notifPage - 1)}
+                              disabled={notifPage === 0}
+                              className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <ChevronLeft className="w-3.5 h-3.5" />
+                              Trước
+                            </button>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {notifPage + 1} / {notifTotalPages}
+                            </span>
+                            <button
+                              onClick={() => loadNotifications(notifPage + 1)}
+                              disabled={notifPage >= notifTotalPages - 1}
+                              className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Sau
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

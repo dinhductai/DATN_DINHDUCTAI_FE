@@ -11,4 +11,8 @@ export interface NotificationItem {
 export interface NotificationsResponse {
   notifications: NotificationItem[]
   unreadCount: number
+  totalElements: number
+  totalPages: number
+  currentPage: number
+  pageSize: number
 }

@@ -1,7 +1,9 @@
 import { Client } from '@stomp/stompjs'
 import { NotificationItem, NotificationsResponse } from '../types/notification'
 
-const BASE = '/api/v1/notifications'
+const BASE = '/api/notifications'
+
+const DEFAULT_PAGE_SIZE = 5
 
 const authHeaders = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -56,8 +58,8 @@ class NotificationService {
     this.stompClient = null
   }
 
-  async getNotifications(): Promise<NotificationsResponse> {
-    const res = await fetch(BASE, { headers: authHeaders() })
+  async getNotifications(page = 0, size = DEFAULT_PAGE_SIZE): Promise<NotificationsResponse> {
+    const res = await fetch(`${BASE}?page=${page}&size=${size}`, { headers: authHeaders() })
     if (!res.ok) throw new Error('Failed to fetch notifications')
     const data = await res.json()
     return data as NotificationsResponse
