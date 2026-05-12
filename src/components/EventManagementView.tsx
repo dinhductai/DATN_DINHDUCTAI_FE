@@ -421,46 +421,26 @@ export function EventManagementView() {
         )}
       </Card>
 
-      {/* Stats row: Events in year + Events by priority */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      {/* Compact charts: Events in year + Events by priority, side by side */}
+      <div className="grid grid-cols-2 gap-4">
         {/* Pie Chart: Events in year */}
-        <Card className="p-4">
-          <h3 className="font-semibold flex items-center gap-2 mb-3">
+        <div className="bg-white rounded-xl border border-gray-100 p-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2 mb-2">
             <Calendar className="w-4 h-4 text-purple-600" />
             Sự kiện trong năm {new Date().getFullYear()}
           </h3>
-
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="flex-1">
               {stats && (stats.totalEvents > 0) ? (
-                <ResponsiveContainer width="100%" height={220}>
+                <ResponsiveContainer width="100%" height={140}>
                   <PieChart>
                     <Pie
                       data={pieData}
-                      cx="50%"
+                      cx="40%"
                       cy="50%"
-                      labelLine={false}
-                      outerRadius={90}
-                      innerRadius={55}
+                      outerRadius={55}
+                      innerRadius={35}
                       dataKey="value"
-                      label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-                        const RADIAN = Math.PI / 180
-                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-                        const x = cx + radius * Math.cos(-midAngle * RADIAN)
-                        const y = cy + radius * Math.sin(-midAngle * RADIAN)
-                        return (
-                          <text
-                            x={x}
-                            y={y}
-                            fill="white"
-                            textAnchor="middle"
-                            dominantBaseline="central"
-                            style={{ fontSize: 14, fontWeight: 700 }}
-                          >
-                            {`${(percent * 100).toFixed(0)}%`}
-                          </text>
-                        )
-                      }}
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -470,77 +450,44 @@ export function EventManagementView() {
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-[220px] flex items-center justify-center">
-                  <div className="text-center">
-                    <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-                    <p className="text-sm text-gray-400">{t('events_noEvents')}</p>
-                  </div>
+                <div className="h-[140px] flex items-center justify-center">
+                  <p className="text-xs text-gray-400">{t('events_noEvents')}</p>
                 </div>
               )}
             </div>
-
-            <div className="flex flex-col gap-3 shrink-0 min-w-[140px]">
-              <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <User className="w-4 h-4 text-blue-600" />
-                  <span className="text-xs font-medium text-black">{t('events_personal')}</span>
+            <div className="flex flex-col gap-2 shrink-0 min-w-[100px]">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-gray-800">{stats?.personalEvents || 0} <span className="text-[10px] text-gray-400 font-normal">({stats && stats.totalEvents > 0 ? ((stats.personalEvents / stats.totalEvents) * 100).toFixed(0) : 0}%)</span></p>
+                  <p className="text-[10px] text-gray-400">{t('events_personal')}</p>
                 </div>
-                <p className="text-2xl font-bold text-black">{stats?.personalEvents || 0}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {stats && stats.totalEvents > 0
-                    ? `${((stats.personalEvents / stats.totalEvents) * 100).toFixed(0)}%`
-                    : '0%'}
-                </p>
               </div>
-
-              <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
-                <div className="flex items-center gap-2 mb-1">
-                  <Users className="w-4 h-4 text-purple-600" />
-                  <span className="text-xs font-medium text-black">{t('events_group')}</span>
+              <div className="flex items-center gap-1.5">
+                <div className="w-2 h-2 rounded-full bg-purple-500 shrink-0" />
+                <div>
+                  <p className="text-xs font-semibold text-gray-800">{stats?.groupEvents || 0} <span className="text-[10px] text-gray-400 font-normal">({stats && stats.totalEvents > 0 ? ((stats.groupEvents / stats.totalEvents) * 100).toFixed(0) : 0}%)</span></p>
+                  <p className="text-[10px] text-gray-400">{t('events_group')}</p>
                 </div>
-                <p className="text-2xl font-bold text-black">{stats?.groupEvents || 0}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {stats && stats.totalEvents > 0
-                    ? `${((stats.groupEvents / stats.totalEvents) * 100).toFixed(0)}%`
-                    : '0%'}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                <span className="text-xs text-gray-500 font-medium">Tổng sự kiện</span>
-                <p className="text-2xl font-bold text-gray-700 mt-1">{stats?.totalEvents || 0}</p>
               </div>
             </div>
           </div>
-
-          {stats && stats.totalEvents > 0 && (
-            <div className="flex items-center justify-center gap-6 mt-3">
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-blue-500" />
-                <span className="text-xs text-gray-600">{t('events_personal')}</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-purple-500" />
-                <span className="text-xs text-gray-600">{t('events_group')}</span>
-              </div>
-            </div>
-          )}
-        </Card>
+        </div>
 
         {/* Bar Chart: Events by Priority */}
-        <Card className="p-4">
-          <h3 className="font-semibold flex items-center gap-2 mb-3">
+        <div className="bg-white rounded-xl border border-gray-100 p-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2 mb-2">
             <BarChart3 className="w-4 h-4 text-orange-600" />
             {t('events_byPriority')}
           </h3>
           {priorityData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={280}>
+            <ResponsiveContainer width="100%" height={160}>
               <BarChart data={priorityData} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis type="number" allowDecimals={false} />
-                <YAxis type="category" dataKey="name" width={100} />
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={70} tick={{ fontSize: 11 }} />
                 <Tooltip formatter={(value: number) => `${value} sự kiện`} />
-                <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {priorityData.map((entry, index) => (
                     <Cell key={`bar-${index}`} fill={entry.fill} />
                   ))}
@@ -548,11 +495,11 @@ export function EventManagementView() {
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[280px] flex items-center justify-center">
-              <p className="text-sm text-gray-400">{t('events_noPriorityData')}</p>
+            <div className="h-[160px] flex items-center justify-center">
+              <p className="text-xs text-gray-400">{t('events_noPriorityData')}</p>
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {/* Edit Event Dialog */}
