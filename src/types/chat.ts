@@ -118,6 +118,7 @@ export interface Mode2ChatResponse {
     deadline: string | null;
     category: string;
   }>;
+  advice?: string[];
 }
 
 export interface ConversationMessage {
@@ -139,4 +140,25 @@ export interface ConversationPage {
   totalPages: number;
   last: boolean;
   first: boolean;
+}
+
+export interface Mode3ChatResponse {
+  structured: boolean;
+  message: string;
+  conversationId: string;
+  canApply: boolean;
+  created?: {
+    taskId?: number;
+    eventId?: number;
+    type: string;
+    title: string;
+    startTime: string | null;
+    deadline: string | null;
+    priority: string;
+    category: string;
+    eventDescription?: string | null;
+    isOnline?: boolean | null;
+    linkEvent?: string | null;
+    location?: string | null;
+  };
 }

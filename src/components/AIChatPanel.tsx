@@ -3,8 +3,8 @@ import { X, Send, Sparkles, CheckCircle, AlertCircle, Clock, Calendar } from "lu
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { sendMessageMode1, sendMessageMode2, getConversationId } from '../services/chatService';
-import { Mode1ChatResponse, Mode2ChatResponse, ChatMode, CHAT_MODES, ConversationMessage } from '../types/chat';
+import { sendMessageMode1, sendMessageMode2, sendMessageMode3, getConversationId } from '../services/chatService';
+import { Mode1ChatResponse, Mode2ChatResponse, Mode3ChatResponse, ChatMode, CHAT_MODES, ConversationMessage } from '../types/chat';
 import { useTranslation } from '../contexts/LanguageContext';
 
 interface AIChatPanelProps {
@@ -76,9 +76,11 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
     setIsLoading(true);
 
     try {
-      let response: Mode1ChatResponse | Mode2ChatResponse;
+      let response: Mode1ChatResponse | Mode2ChatResponse | Mode3ChatResponse;
       if (currentMode === 2) {
         response = await sendMessageMode2(inputMessage, currentConversationId, currentMode);
+      } else if (currentMode === 3) {
+        response = await sendMessageMode3(inputMessage, currentConversationId, currentMode);
       } else {
         response = await sendMessageMode1(inputMessage, currentConversationId, currentMode);
       }
@@ -351,11 +353,107 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
           </div>
         )}
 
+        {/* Advice / Reasons */}
+        {parsed.advice && parsed.advice.length > 0 && (
+          <div className="mt-3 space-y-1.5">
+            <p className="text-xs font-semibold text-gray-600 flex items-center gap-1">
+              <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+              Lời khuyên & Lý do sắp xếp:
+            </p>
+            <div className="space-y-1">
+              {parsed.advice.map((item, idx) => (
+                <div key={idx} className="text-xs text-gray-600 bg-blue-50 border border-blue-100 rounded-lg p-2 leading-relaxed">
+                  {item}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Reschedule confirmation */}
         {parsed.canApply && (
           <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 rounded-lg p-2 border border-blue-200">
             <Sparkles className="w-3.5 h-3.5" />
             <span>Nhắn <strong>"chỉnh sửa lại"</strong> để tôi cập nhật lịch trình cho bạn.</span>
+          </div>
+        )}
+      </>
+    );
+  };
+
+  const renderMode3Response = (content: string) => {
+    let parsed: Mode3ChatResponse | null = null;
+    try {
+      if (content.trim().startsWith('{')) {
+        parsed = JSON.parse(content) as Mode3ChatResponse;
+      }
+    } catch { /* not JSON */ }
+
+    if (!parsed) {
+      return (
+        <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+          {content}
+        </p>
+      );
+    }
+
+    return (
+      <>
+        {parsed.message && (
+          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words mb-3">
+            {parsed.message}
+          </p>
+        )}
+
+        {/* Created item summary */}
+        {parsed.created && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span className="text-xs font-semibold text-green-700">
+                {parsed.created.type === 'sự kiện' ? 'Sự kiện đã tạo' : 'Công việc đã tạo'}
+              </span>
+              <span className={`px-1.5 py-0.5 rounded text-[10px] border ${
+                parsed.created.type === 'sự kiện'
+                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                  : 'bg-gray-50 text-gray-600 border-gray-200'
+              }`}>
+                {parsed.created.type}
+              </span>
+            </div>
+
+            <div className="space-y-1 text-xs">
+              <p className="font-medium text-gray-800">{parsed.created.title}</p>
+
+              {parsed.created.startTime && (
+                <p className="flex items-center gap-1 text-gray-500">
+                  <Clock className="w-3 h-3" />
+                  Bắt đầu: {parsed.created.startTime}
+                </p>
+              )}
+              {parsed.created.deadline && (
+                <p className="flex items-center gap-1 text-gray-500">
+                  <AlertCircle className="w-3 h-3" />
+                  Kết thúc: {parsed.created.deadline}
+                </p>
+              )}
+              {parsed.created.priority && (
+                <p className="text-gray-500">
+                  ⭐ Priority: {parsed.created.priority}
+                </p>
+              )}
+              {parsed.created.location && (
+                <p className="text-gray-500">📍 {parsed.created.location}</p>
+              )}
+              {parsed.created.linkEvent && (
+                <p className="text-blue-600">
+                  🔗 Link: <a href={parsed.created.linkEvent} target="_blank" rel="noopener noreferrer" className="underline">{parsed.created.linkEvent}</a>
+                </p>
+              )}
+              {parsed.created.eventDescription && (
+                <p className="text-gray-500 italic">{parsed.created.eventDescription}</p>
+              )}
+            </div>
           </div>
         )}
       </>
@@ -452,11 +550,7 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                             ? renderMode1Response(message.content)
                             : currentMode === 2
                             ? renderMode2Response(message.content)
-                            : (
-                              <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
-                                {message.content}
-                              </p>
-                            )
+                            : renderMode3Response(message.content)
                           }
                         </div>
                       </div>

@@ -1,9 +1,10 @@
-import { ChatAIResponse, ConversationPage, Mode1ChatResponse, Mode2ChatResponse, ChatMode } from '../types/chat';
+import { ChatAIResponse, ConversationPage, Mode1ChatResponse, Mode2ChatResponse, Mode3ChatResponse, ChatMode } from '../types/chat';
 
 const API_URL = '/api/ai';
 const RICH_API_URL = '/api/ai/rich';
 const MODE1_API_URL = '/api/ai/mode/1';
 const MODE2_API_URL = '/api/ai/mode/2';
+const MODE3_API_URL = '/api/ai/mode/3';
 
 export const getConversationHistory = async (
   conversationId: string,
@@ -101,6 +102,43 @@ export const sendMessageMode2 = async (
     return data;
   } catch (error) {
     console.error('Error sending mode 2 message:', error);
+    throw error;
+  }
+};
+
+export const sendMessageMode3 = async (
+  message: string,
+  conversationId?: string,
+  mode: ChatMode = 3
+): Promise<Mode3ChatResponse> => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const body = new URLSearchParams();
+    body.append('message', message);
+    body.append('mode', String(mode));
+    if (conversationId) {
+      body.append('conversationId', conversationId);
+    }
+
+    const response = await fetch(MODE3_API_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Failed to send message: ${response.status} ${errorText}`);
+    }
+
+    const data: Mode3ChatResponse = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error sending mode 3 message:', error);
     throw error;
   }
 };
