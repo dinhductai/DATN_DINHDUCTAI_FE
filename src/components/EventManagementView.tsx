@@ -436,7 +436,7 @@ export function EventManagementView() {
                   <PieChart>
                     <Pie
                       data={pieData}
-                      cx="40%"
+                      cx="55%"
                       cy="50%"
                       outerRadius={55}
                       innerRadius={35}
