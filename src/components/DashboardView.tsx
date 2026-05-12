@@ -95,12 +95,13 @@ export function DashboardView() {
   ]
 
   const translateDayName = (dayName: string): string => {
+    const trimmed = (dayName || '').trim()
     const map: Record<string, string> = {
       'Monday': 'T2', 'Tuesday': 'T3', 'Wednesday': 'T4',
       'Thursday': 'T5', 'Friday': 'T6', 'Saturday': 'T7', 'Sunday': 'CN',
       'Mon': 'T2', 'Tue': 'T3', 'Wed': 'T4', 'Thu': 'T5', 'Fri': 'T6', 'Sat': 'T7', 'Sun': 'CN',
     }
-    return map[dayName] || dayName
+    return map[trimmed] || dayName
   }
 
   // Workload data for bar chart (tasks per day)
