@@ -2,7 +2,7 @@ import { Card } from './ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts'
 import { CheckCircle, Clock, Circle, TrendingUp, Calendar } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse, RecentTaskResponse, MonthlyEventCountResponse, MonthlyCreationResponse } from '../services/taskService'
+import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse, RecentTaskResponse, MonthlyEventCountResponse } from '../services/taskService'
 import { useTranslation } from '../contexts/LanguageContext'
 
 export function DashboardView() {
@@ -16,7 +16,6 @@ export function DashboardView() {
   const [loading, setLoading] = useState(true)
   const [recentTasks, setRecentTasks] = useState<RecentTaskResponse[]>([])
   const [monthlyChartData, setMonthlyChartData] = useState<MonthlyEventCountResponse[]>([])
-  const [monthlyCreation, setMonthlyCreation] = useState<MonthlyCreationResponse | null>(null)
 
   useEffect(() => {
     const fetchStatistics = async () => {
@@ -73,15 +72,6 @@ export function DashboardView() {
           return []
         })
         setMonthlyChartData(Array.isArray(monthly) ? monthly : [])
-
-        // Fetch monthly creation stats (events & tasks this month vs last month)
-        const creation = await taskService.getMonthlyCreationStats().catch(err => {
-          console.warn('Monthly creation stats fetch failed:', err)
-          return null
-        })
-        if (creation) {
-          setMonthlyCreation(creation)
-        }
 
       } catch (err: any) {
         console.error('Unexpected error in fetchStatistics:', err)
@@ -387,70 +377,6 @@ export function DashboardView() {
           </BarChart>
         </ResponsiveContainer>
       </Card>
-
-      {/* Monthly Creation Stats: Events & Tasks this month */}
-      {monthlyCreation && (
-        <Card className="p-6">
-          <div className="mb-4">
-            <h3 className="font-semibold mb-1">{t('dashboard_monthlyCreation')}</h3>
-            <p className="text-sm text-gray-500">{t('dashboard_monthlyCreationDesc')}</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Events this month */}
-            <div className="flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800">
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-purple-600 dark:text-purple-400 font-medium">{t('dashboard_eventsThisMonth')}</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-purple-700 dark:text-purple-300">{monthlyCreation.thisMonthEvents}</span>
-                  <span className="text-sm text-purple-500 dark:text-purple-500">tháng này</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-purple-400 dark:text-purple-500">
-                    {monthlyCreation.lastMonthEvents} tháng trước
-                  </span>
-                  <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                    monthlyCreation.eventsChange >= 0
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                  }`}>
-                    {monthlyCreation.eventsChange >= 0 ? '+' : ''}{monthlyCreation.eventsChange}%
-                  </span>
-                </div>
-              </div>
-              <div className="w-14 h-14 bg-purple-100 dark:bg-purple-800/50 rounded-2xl flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-purple-600 dark:text-purple-400" />
-              </div>
-            </div>
-
-            {/* Tasks this month */}
-            <div className="flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">{t('dashboard_tasksThisMonth_label')}</span>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold text-blue-700 dark:text-blue-300">{monthlyCreation.thisMonthTasks}</span>
-                  <span className="text-sm text-blue-500 dark:text-blue-500">tháng này</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs text-blue-400 dark:text-blue-500">
-                    {monthlyCreation.lastMonthTasks} tháng trước
-                  </span>
-                  <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                    monthlyCreation.tasksChange >= 0
-                      ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
-                      : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'
-                  }`}>
-                    {monthlyCreation.tasksChange >= 0 ? '+' : ''}{monthlyCreation.tasksChange}%
-                  </span>
-                </div>
-              </div>
-              <div className="w-14 h-14 bg-blue-100 dark:bg-blue-800/50 rounded-2xl flex items-center justify-center">
-                <CheckCircle className="w-7 h-7 text-blue-600 dark:text-blue-400" />
-              </div>
-            </div>
-          </div>
-        </Card>
-      )}
     </div>
   )
 }
