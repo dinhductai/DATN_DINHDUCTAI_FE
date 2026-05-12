@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Send, Sparkles, CheckCircle, AlertCircle, Clock } from "lucide-react";
+import { X, Send, Sparkles, CheckCircle, AlertCircle, Clock, Calendar } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { ScrollArea } from "./ui/scroll-area";
-import { sendMessageMode1, getConversationId } from '../services/chatService';
-import { Mode1ChatResponse, ChatMode, CHAT_MODES, ConversationMessage } from '../types/chat';
+import { sendMessageMode1, sendMessageMode2, getConversationId } from '../services/chatService';
+import { Mode1ChatResponse, Mode2ChatResponse, ChatMode, CHAT_MODES, ConversationMessage } from '../types/chat';
 import { useTranslation } from '../contexts/LanguageContext';
 
 interface AIChatPanelProps {
@@ -76,7 +76,12 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
     setIsLoading(true);
 
     try {
-      const response: Mode1ChatResponse = await sendMessageMode1(inputMessage, currentConversationId, currentMode);
+      let response: Mode1ChatResponse | Mode2ChatResponse;
+      if (currentMode === 2) {
+        response = await sendMessageMode2(inputMessage, currentConversationId, currentMode);
+      } else {
+        response = await sendMessageMode1(inputMessage, currentConversationId, currentMode);
+      }
 
       if (!currentConversationId && response.conversationId) {
         setCurrentConversationId(response.conversationId);
@@ -258,6 +263,105 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
     );
   };
 
+  const renderMode2Response = (content: string) => {
+    let parsed: Mode2ChatResponse | null = null;
+    try {
+      if (content.trim().startsWith('{')) {
+        parsed = JSON.parse(content) as Mode2ChatResponse;
+      }
+    } catch { /* not JSON */ }
+
+    if (!parsed) {
+      return (
+        <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
+          {content}
+        </p>
+      );
+    }
+
+    const getCategoryColor = (type: string) => {
+      switch (type) {
+        case 'essential': return 'bg-green-100 text-green-700 border-green-200';
+        case 'work': return 'bg-blue-100 text-blue-700 border-blue-200';
+        case 'personal': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+        case 'leisure': return 'bg-purple-100 text-purple-700 border-purple-200';
+        default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      }
+    };
+
+    const getTypeLabel = (type: string) => {
+      if (type === 'sự kiện') return 'sự kiện';
+      if (type === 'công việc') return 'công việc';
+      if (type === 'event') return 'sự kiện';
+      if (type === 'task') return 'công việc';
+      return type;
+    };
+
+    return (
+      <>
+        {parsed.message && (
+          <p className="text-sm text-gray-800 whitespace-pre-wrap break-words mb-3">
+            {parsed.message}
+          </p>
+        )}
+
+        {/* Scheduled items */}
+        {parsed.schedule && parsed.schedule.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-gray-600 flex items-center gap-1">
+              <Calendar className="w-3.5 h-3.5" />
+              Lịch trình đề xuất:
+            </p>
+            {parsed.schedule.map((item, idx) => (
+              <div key={idx} className="text-xs bg-white border border-gray-200 rounded-lg p-2">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="font-semibold text-gray-800">{idx + 1}.</span>
+                  <span className="font-medium text-gray-800 flex-1">{item.title}</span>
+                  <span className={`px-1 py-0.5 rounded text-[10px] border ${getCategoryColor(item.category)}`}>
+                    {item.category === 'essential' ? 'Thiết yếu' :
+                     item.category === 'work' ? 'Công việc' :
+                     item.category === 'personal' ? 'Cá nhân' :
+                     item.category === 'leisure' ? 'Giải trí' :
+                     item.category}
+                  </span>
+                  <span className={`px-1 py-0.5 rounded text-[10px] border ${
+                    item.type === 'sự kiện' || item.type === 'event' ? 'bg-purple-50 text-purple-700 border-purple-200' :
+                    'bg-gray-50 text-gray-600 border-gray-200'
+                  }`}>
+                    {getTypeLabel(item.type)}
+                  </span>
+                </div>
+
+                <div className="mt-1 space-y-0.5 text-gray-500">
+                  {item.startTime && (
+                    <p className="flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Bắt đầu: {item.startTime}
+                    </p>
+                  )}
+                  {item.deadline && (
+                    <p className="flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      Kết thúc: {item.deadline}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Reschedule confirmation */}
+        {parsed.canApply && (
+          <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 rounded-lg p-2 border border-blue-200">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Nhắn <strong>"chỉnh sửa lại"</strong> để tôi cập nhật lịch trình cho bạn.</span>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div className="w-96 h-full bg-white border-l border-gray-200 flex flex-col">
       {/* Fixed Header */}
@@ -346,6 +450,8 @@ export function AIChatPanel({ onClose }: AIChatPanelProps) {
                         <div className="bg-gray-100 rounded-lg p-3 space-y-2 min-w-0">
                           {currentMode === 1
                             ? renderMode1Response(message.content)
+                            : currentMode === 2
+                            ? renderMode2Response(message.content)
                             : (
                               <p className="text-sm text-gray-800 whitespace-pre-wrap break-words">
                                 {message.content}

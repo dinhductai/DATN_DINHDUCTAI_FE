@@ -104,6 +104,22 @@ export interface Mode1ChatResponse {
   conversationId: string;
 }
 
+export interface Mode2ChatResponse {
+  structured: boolean;
+  message: string;
+  conversationId: string;
+  canApply: boolean;
+  schedule?: Array<{
+    taskId: number | null;
+    eventId: number | null;
+    type: string;
+    title: string;
+    startTime: string | null;
+    deadline: string | null;
+    category: string;
+  }>;
+}
+
 export interface ConversationMessage {
   chatId: number;
   conversationId: string;
