@@ -154,8 +154,8 @@ export const translations = {
     events_deleteConfirm: 'Bạn có chắc muốn xóa sự kiện "{title}"? Hành động này không thể hoàn tác.',
 
     // Dashboard
-    dashboard_title: 'Tổng quan',
-    dashboard_subtitle: 'Tổng quan về công việc và lịch trình của bạn',
+    dashboard_title: 'Thống kê',
+    dashboard_subtitle: 'Thống kê về công việc và lịch trình của bạn',
     dashboard_completionRate: 'Tỷ lệ hoàn thành đúng hạn',
     dashboard_vsLastWeek: '+5% so với tuần trước',
     dashboard_freeTime: 'Thời gian rảnh tuần này',
@@ -415,8 +415,8 @@ export const translations = {
     events_deleteConfirm: 'Are you sure you want to delete the event "{title}"? This action cannot be undone.',
 
     // Dashboard
-    dashboard_title: 'Overview',
-    dashboard_subtitle: 'Overview of your tasks and schedule',
+    dashboard_title: 'Statistics',
+    dashboard_subtitle: 'Statistics about your tasks and schedule',
     dashboard_completionRate: 'On-time completion rate',
     dashboard_vsLastWeek: '+5% vs last week',
     dashboard_freeTime: 'Free time this week',
