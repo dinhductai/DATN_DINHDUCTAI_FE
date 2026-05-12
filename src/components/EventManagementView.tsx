@@ -384,10 +384,10 @@ export function EventManagementView() {
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
                   <div className="flex items-center gap-2 mb-1">
                     <User className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-medium text-blue-700">{t('events_personal')}</span>
+                    <span className="text-xs font-medium text-black">{t('events_personal')}</span>
                   </div>
-                  <p className="text-2xl font-bold text-blue-600">{stats?.personalEvents || 0}</p>
-                  <p className="text-xs text-blue-500 mt-0.5">
+                  <p className="text-2xl font-bold text-black">{stats?.personalEvents || 0}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {stats && stats.totalEvents > 0
                       ? `${((stats.personalEvents / stats.totalEvents) * 100).toFixed(0)}%`
                       : '0%'}
@@ -397,10 +397,10 @@ export function EventManagementView() {
                 <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
                   <div className="flex items-center gap-2 mb-1">
                     <Users className="w-4 h-4 text-purple-600" />
-                    <span className="text-xs font-medium text-purple-700">{t('events_group')}</span>
+                    <span className="text-xs font-medium text-black">{t('events_group')}</span>
                   </div>
-                  <p className="text-2xl font-bold text-purple-600">{stats?.groupEvents || 0}</p>
-                  <p className="text-xs text-purple-500 mt-0.5">
+                  <p className="text-2xl font-bold text-black">{stats?.groupEvents || 0}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {stats && stats.totalEvents > 0
                       ? `${((stats.groupEvents / stats.totalEvents) * 100).toFixed(0)}%`
                       : '0%'}
@@ -408,8 +408,8 @@ export function EventManagementView() {
                 </div>
 
                 <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                  <span className="text-xs text-gray-500">Tổng sự kiện</span>
-                  <p className="text-xl font-bold text-gray-700">{stats?.totalEvents || 0}</p>
+                  <span className="text-xs text-gray-500 font-medium">Tổng sự kiện</span>
+                  <p className="text-2xl font-bold text-gray-700 mt-1">{stats?.totalEvents || 0}</p>
                 </div>
               </div>
             </div>

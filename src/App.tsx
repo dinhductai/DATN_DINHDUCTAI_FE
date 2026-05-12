@@ -30,7 +30,7 @@ function UserLayout() {
   const location = useLocation();
   const [activeView, setActiveView] = useState<"schedule" | "stats" | "notifications">(
     location.pathname === "/stats" ? "stats" : 
-    location.pathname === "/notifications" ? "notifications" : "schedule"
+    location.pathname === "/event" ? "notifications" : "schedule"
   );
   const [isAIChatOpen, setIsAIChatOpen] = useState(false);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
@@ -240,7 +240,7 @@ function UserLayout() {
     } else if (view === "stats") {
       navigate("/stats");
     } else {
-      navigate("/notifications");
+      navigate("/event");
     }
   };
 
@@ -406,7 +406,7 @@ export default function App() {
         <Route path="/register" element={<RegisterWrapper />} />
         <Route path="/schedule" element={<UserLayout />} />
         <Route path="/stats" element={<UserLayout />} />
-        <Route path="/notifications" element={<UserLayout />} />
+        <Route path="/event" element={<UserLayout />} />
         <Route path="/profile" element={<ProfileWrapper />} />
         <Route path="/admin/dashboard" element={<AdminLayout />} />
         <Route path="/admin/users" element={<AdminLayout />} />
