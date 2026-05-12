@@ -147,6 +147,15 @@ export interface MonthlyEventCountResponse {
   events: number;
 }
 
+export interface MonthlyCreationResponse {
+  thisMonthEvents: number;
+  thisMonthTasks: number;
+  lastMonthEvents: number;
+  lastMonthTasks: number;
+  eventsChange: number;
+  tasksChange: number;
+}
+
 export const taskService = {
   // Lấy tỷ lệ hoàn thành trước deadline
   getCompletionBeforeDeadlineRate: async (): Promise<number> => {
@@ -676,6 +685,36 @@ export const taskService = {
     } catch (error) {
       console.error('Error fetching recent tasks:', error);
       return [];
+    }
+  },
+
+  getMonthlyCreationStats: async (): Promise<MonthlyCreationResponse> => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log('[API] Fetching monthly creation stats, token:', token ? 'present' : 'missing');
+
+      const response = await fetch('/api/tasks/statistics/monthly-creation', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      console.log('[API] Monthly creation stats response status:', response.status, response.statusText);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[API] Monthly creation stats error:', response.status, errorText);
+        throw new Error(`Failed to fetch monthly creation stats: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('[API] Monthly creation stats data:', data);
+      return data;
+    } catch (error) {
+      console.error('Error fetching monthly creation stats:', error);
+      throw error;
     }
   }
 };

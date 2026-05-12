@@ -3,29 +3,7 @@ import { Users, UserPlus, Activity, Briefcase } from 'lucide-react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useEffect, useState } from 'react'
 import { userService } from '../services/userService'
-import { taskService, DailyCompletedTasksResponse, TaskPriorityCountResponse } from '../services/taskService'
-
-// Fake data for monthly events (last 12 months)
-const FAKE_MONTHLY_EVENTS = [
-  { month: 'T6/25', events: 45 },
-  { month: 'T7/25', events: 62 },
-  { month: 'T8/25', events: 38 },
-  { month: 'T9/25', events: 71 },
-  { month: 'T10/25', events: 55 },
-  { month: 'T11/25', events: 83 },
-  { month: 'T12/25', events: 97 },
-  { month: 'T1/26', events: 64 },
-  { month: 'T2/26', events: 78 },
-  { month: 'T3/26', events: 91 },
-  { month: 'T4/26', events: 56 },
-  { month: 'T5/26', events: 73 },
-]
-
-// Fake data for this month creation
-const FAKE_THIS_MONTH_DATA = [
-  { name: 'Sự kiện', value: 73, color: '#3b82f6' },
-  { name: 'Công việc', value: 127, color: '#10b981' },
-]
+import { taskService, DailyCompletedTasksResponse, TaskPriorityCountResponse, MonthlyEventCountResponse, MonthlyCreationResponse } from '../services/taskService'
 
 export function AdminStatsView() {
   const [totalUsers, setTotalUsers] = useState<number>(0)
@@ -34,6 +12,8 @@ export function AdminStatsView() {
   const [tasksCreatedThisWeek, setTasksCreatedThisWeek] = useState<number>(0)
   const [completedTasksData, setCompletedTasksData] = useState<DailyCompletedTasksResponse[]>([])
   const [priorityTasksData, setPriorityTasksData] = useState<TaskPriorityCountResponse[]>([])
+  const [monthlyChartData, setMonthlyChartData] = useState<MonthlyEventCountResponse[]>([])
+  const [monthlyCreation, setMonthlyCreation] = useState<MonthlyCreationResponse | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -82,6 +62,22 @@ export function AdminStatsView() {
           return []
         })
         setPriorityTasksData(Array.isArray(priority) ? priority : [])
+
+        // Fetch monthly event counts (12 months)
+        const monthly = await taskService.getEventCountsByMonth().catch(err => {
+          console.warn('Monthly event counts fetch failed:', err)
+          return []
+        })
+        setMonthlyChartData(Array.isArray(monthly) ? monthly : [])
+
+        // Fetch monthly creation stats (events & tasks this month vs last month)
+        const creation = await taskService.getMonthlyCreationStats().catch(err => {
+          console.warn('Monthly creation stats fetch failed:', err)
+          return null
+        })
+        if (creation) {
+          setMonthlyCreation(creation)
+        }
 
       } catch (error) {
         console.error('Error fetching admin stats:', error)
@@ -154,6 +150,16 @@ export function AdminStatsView() {
       ? '#eab308' 
       : '#22c55e'
   }))
+
+  // Pie chart data for events vs tasks this month
+  const thisMonthPieData = monthlyCreation ? [
+    { name: 'Sự kiện', value: monthlyCreation.thisMonthEvents, color: '#3b82f6' },
+    { name: 'Công việc', value: monthlyCreation.thisMonthTasks, color: '#10b981' },
+  ] : []
+
+  const thisMonthTotal = monthlyCreation
+    ? monthlyCreation.thisMonthEvents + monthlyCreation.thisMonthTasks
+    : 0
 
   return (
     <div className="p-6 space-y-6">
@@ -267,33 +273,39 @@ export function AdminStatsView() {
           <h3 className="text-lg font-semibold">Sự kiện 12 tháng gần nhất</h3>
           <p className="text-sm text-gray-500">Tổng số sự kiện được tạo theo tháng</p>
         </div>
-        <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={FAKE_MONTHLY_EVENTS}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-            <XAxis
-              dataKey="month"
-              stroke="#888888"
-              fontSize={12}
-            />
-            <YAxis
-              stroke="#888888"
-              fontSize={12}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px'
-              }}
-              cursor={{ fill: '#f3f4f6' }}
-            />
-            <Bar
-              dataKey="events"
-              fill="#8b5cf6"
-              radius={[6, 6, 0, 0]}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        {monthlyChartData.length > 0 ? (
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={monthlyChartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+              <XAxis
+                dataKey="month"
+                stroke="#888888"
+                fontSize={12}
+              />
+              <YAxis
+                stroke="#888888"
+                fontSize={12}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
+                  borderRadius: '8px'
+                }}
+                cursor={{ fill: '#f3f4f6' }}
+              />
+              <Bar
+                dataKey="events"
+                fill="#8b5cf6"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <div className="h-[250px] flex items-center justify-center text-gray-400">
+            Không có dữ liệu
+          </div>
+        )}
       </Card>
 
       {/* Bottom Charts Row */}
@@ -304,74 +316,88 @@ export function AdminStatsView() {
             <h3 className="text-lg font-semibold">Sự kiện & công việc tạo trong tháng</h3>
             <p className="text-sm text-gray-500">Tỷ lệ phân bổ tháng này</p>
           </div>
-          <div className="flex items-center justify-between">
-            <ResponsiveContainer width="60%" height={250}>
-              <PieChart>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'white',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px'
-                  }}
-                  formatter={(value: number) => [`${value} (${((value / (FAKE_THIS_MONTH_DATA[0].value + FAKE_THIS_MONTH_DATA[1].value)) * 100).toFixed(1)}%)`, 'Số lượng']}
-                />
-                <Pie
-                  data={FAKE_THIS_MONTH_DATA}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={100}
-                  paddingAngle={4}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                  labelLine={{ stroke: '#888', strokeWidth: 1 }}
-                >
-                  {FAKE_THIS_MONTH_DATA.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="flex flex-col gap-4 pr-8">
-              {/* Decline stats */}
-              <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg border border-red-100">
-                <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
-                <div>
-                  <p className="text-sm text-gray-500">Sự kiện</p>
-                  <p className="text-lg font-semibold text-red-500">-15.8%</p>
+          {thisMonthPieData.length > 0 && thisMonthTotal > 0 ? (
+            <div className="flex items-center justify-between">
+              <ResponsiveContainer width="60%" height={250}>
+                <PieChart>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '8px'
+                    }}
+                    formatter={(value: number) => [`${value} (${((value / thisMonthTotal) * 100).toFixed(1)}%)`, 'Số lượng']}
+                  />
+                  <Pie
+                    data={thisMonthPieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={4}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                    labelLine={{ stroke: '#888', strokeWidth: 1 }}
+                  >
+                    {thisMonthPieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-col gap-4 pr-8">
+                {/* Events change */}
+                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                  <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+                  <div>
+                    <p className="text-sm text-gray-500">Sự kiện</p>
+                    <p className={`text-lg font-semibold ${(monthlyCreation?.eventsChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {(monthlyCreation?.eventsChange ?? 0) >= 0 ? '+' : ''}{monthlyCreation?.eventsChange}%
+                    </p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                <div className="w-3 h-3 rounded-full bg-[#10b981]" />
-                <div>
-                  <p className="text-sm text-gray-500">Công việc</p>
-                  <p className="text-lg font-semibold text-red-500">-8.3%</p>
+                <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                  <div className="w-3 h-3 rounded-full bg-[#10b981]" />
+                  <div>
+                    <p className="text-sm text-gray-500">Công việc</p>
+                    <p className={`text-lg font-semibold ${(monthlyCreation?.tasksChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                      {(monthlyCreation?.tasksChange ?? 0) >= 0 ? '+' : ''}{monthlyCreation?.tasksChange}%
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="h-[250px] flex items-center justify-center text-gray-400">
+              Không có dữ liệu
+            </div>
+          )}
         </Card>
 
-        {/* Empty placeholder or summary card */}
+        {/* Tổng kết tháng */}
         <Card className="p-6">
           <div className="mb-4">
             <h3 className="text-lg font-semibold">Tổng kết tháng</h3>
             <p className="text-sm text-gray-500">So với tháng trước</p>
           </div>
           <div className="space-y-4">
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-blue-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Tổng sự kiện</p>
-              <p className="text-2xl font-bold text-[#3b82f6]">73</p>
-              <p className="text-xs text-red-500 mt-1">-15.8% so với tháng trước</p>
+              <p className="text-2xl font-bold text-[#3b82f6]">{monthlyCreation?.thisMonthEvents ?? 0}</p>
+              <p className={`text-xs mt-1 ${(monthlyCreation?.eventsChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {(monthlyCreation?.eventsChange ?? 0) >= 0 ? '+' : ''}{monthlyCreation?.eventsChange}% so với tháng trước
+              </p>
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
+            <div className="p-4 bg-emerald-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Tổng công việc</p>
-              <p className="text-2xl font-bold text-[#10b981]">127</p>
-              <p className="text-xs text-red-500 mt-1">-8.3% so với tháng trước</p>
+              <p className="text-2xl font-bold text-[#10b981]">{monthlyCreation?.thisMonthTasks ?? 0}</p>
+              <p className={`text-xs mt-1 ${(monthlyCreation?.tasksChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
+                {(monthlyCreation?.tasksChange ?? 0) >= 0 ? '+' : ''}{monthlyCreation?.tasksChange}% so với tháng trước
+              </p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <p className="text-sm text-gray-500 mb-1">Tổng cộng</p>
-              <p className="text-2xl font-bold text-gray-700">200</p>
+              <p className="text-2xl font-bold text-gray-700">{thisMonthTotal}</p>
               <p className="text-xs text-gray-400 mt-1">Sự kiện & công việc</p>
             </div>
           </div>
