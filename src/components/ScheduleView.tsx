@@ -127,7 +127,7 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
   // ── Derived data per day ──────────────────────────────────────────────────
   const daysDiff    = Math.ceil((selectedDateRange.end.getTime() - selectedDateRange.start.getTime()) / (1000 * 60 * 60 * 24))
-  const numberOfDays = Math.min(Math.max(daysDiff, 3), 15)
+  const numberOfDays = Math.min(Math.max(daysDiff + 1, 3), 15)
 
   const days = Array.from({ length: numberOfDays }, (_, i) => {
     const date = new Date(selectedDateRange.start)
