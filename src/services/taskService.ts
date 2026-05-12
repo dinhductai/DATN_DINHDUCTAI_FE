@@ -579,7 +579,7 @@ export const taskService = {
   getEventCountsByMonth: async (): Promise<MonthlyEventCountResponse[]> => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('/api/tasks/events/statistics/monthly', {
+      const response = await fetch('/api/tasks/events/statistics/monthly/personal', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
