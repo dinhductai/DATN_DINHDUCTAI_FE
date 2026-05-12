@@ -142,7 +142,7 @@ export function EventManagementView() {
   // Bar chart data (events by priority)
   const priorityData = stats?.eventsByPriority.map(item => ({
     name: PRIORITY_LABELS[item.priority] || item.priority,
-    count: Number(item.taskId) || 0,
+    count: Number(item.title) || 0,
     fill: PRIORITY_COLORS[item.priority] || '#94a3b8'
   })) || []
 
