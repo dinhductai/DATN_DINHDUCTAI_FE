@@ -232,38 +232,43 @@ export function EventManagementView() {
         <p className="text-sm text-gray-500">{t('events_subtitle')}</p>
       </div>
 
-      {/* Top row: Recent events + Stats + Upcoming */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Recent Events */}
-        <Card className="p-4 xl:col-span-1 flex flex-col" style={{ maxHeight: '560px' }}>
-          <div className="flex items-center justify-between mb-3 shrink-0">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Calendar className="w-4 h-4 text-purple-600" />
-              {t('events_recent')}
-            </h3>
-            <span className="text-xs text-gray-400">{recentEvents.length} sự kiện</span>
-          </div>
+      {/* Upcoming Events */}
+      <Card className="p-4 flex flex-col" style={{ maxHeight: '420px' }}>
+        <div className="flex items-center justify-between mb-3 shrink-0">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Clock className="w-4 h-4 text-green-600" />
+            {t('events_upcoming')}
+          </h3>
+          <span className="text-xs text-gray-400">{upcomingEvents.length} sự kiện</span>
+        </div>
 
-          {/* Search */}
-          <div className="relative mb-3 shrink-0">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
-            <Input
-              placeholder={t('events_searchPlaceholder')}
-              value={searchKeyword}
-              onChange={e => setSearchKeyword(e.target.value)}
-              className="pl-8 h-8 text-xs"
-            />
+        {upcomingEvents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Calendar className="w-10 h-10 text-gray-200 mb-2" />
+            <p className="text-sm text-gray-400 text-center">{t('events_noUpcoming')}</p>
           </div>
-
-          {/* Scrollable list */}
+        ) : (
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {filteredEvents.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-8">{t('events_none')}</p>
-            ) : (
-              filteredEvents.map(event => (
+            {upcomingEvents.map(event => {
+              const now = new Date().getTime()
+              const start = new Date(event.startTime).getTime()
+              const diffMs = start - now
+              const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+              const diffDays = Math.floor(diffHours / 24)
+
+              let timeLabel = ''
+              if (diffDays > 0) {
+                timeLabel = t('events_daysLeft').replace('{days}', String(diffDays))
+              } else if (diffHours > 0) {
+                timeLabel = t('events_hoursLeft').replace('{hours}', String(diffHours))
+              } else {
+                timeLabel = t('events_aboutToStart')
+              }
+
+              return (
                 <div
                   key={event.eventId}
-                  className="p-3 rounded-lg border border-gray-100 bg-white hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer group"
+                  className="p-3 rounded-lg border border-green-100 bg-white hover:border-green-300 hover:bg-green-50/30 transition-all group"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
@@ -272,11 +277,16 @@ export function EventManagementView() {
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{event.eventDescription}</p>
                       )}
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className={`text-xs px-2 py-1 rounded-lg font-medium ${STATUS_COLORS[event.status] || ''}`}>
-                          {STATUS_LABELS[event.status] || event.status}
+                        <span className={`text-xs px-2 py-1 rounded-lg font-medium ${
+                          diffDays === 0 && diffHours < 2
+                            ? 'bg-red-100 text-red-700'
+                            : diffDays === 0
+                            ? 'bg-orange-100 text-orange-700'
+                            : 'bg-green-100 text-green-700'
+                        }`}>
+                          {timeLabel}
                         </span>
-                        <span className="text-xs text-gray-400 flex items-center gap-0.5">
-                          <Clock className="w-3 h-3" />
+                        <span className="text-xs text-gray-400">
                           {formatDateTime(event.startTime)}
                         </span>
                       </div>
@@ -292,7 +302,7 @@ export function EventManagementView() {
                         ) : null}
                         {event.invitedEmails && event.invitedEmails.length > 0 && (
                           <span className="text-xs text-purple-600 flex items-center gap-0.5">
-                            <Users className="w-3 h-3" /> {event.invitedEmails.length} {t('events_people')}
+                            <Users className="w-3 h-3" /> {event.invitedEmails.length}
                           </span>
                         )}
                       </div>
@@ -315,245 +325,233 @@ export function EventManagementView() {
                     </div>
                   </div>
                 </div>
-              ))
-            )}
+              )
+            })}
           </div>
-        </Card>
+        )}
+      </Card>
 
-        {/* Center: Pie Chart + Bar Chart stacked */}
-        <div className="xl:col-span-1 flex flex-col gap-6">
-          {/* Pie Chart + Stats */}
-          <Card className="p-4">
-            <h3 className="font-semibold flex items-center gap-2 mb-3">
-              <Calendar className="w-4 h-4 text-purple-600" />
-              Sự kiện trong năm {new Date().getFullYear()}
-            </h3>
-
-            {/* Pie + Side stats */}
-            <div className="flex items-center gap-4">
-              <div className="flex-1">
-                {stats && (stats.totalEvents > 0) ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        innerRadius={50}
-                        dataKey="value"
-                        label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
-                          const RADIAN = Math.PI / 180
-                          const radius = innerRadius + (outerRadius - innerRadius) * 0.5
-                          const x = cx + radius * Math.cos(-midAngle * RADIAN)
-                          const y = cy + radius * Math.sin(-midAngle * RADIAN)
-                          return (
-                            <text
-                              x={x}
-                              y={y}
-                              fill="white"
-                              textAnchor="middle"
-                              dominantBaseline="central"
-                              style={{ fontSize: 14, fontWeight: 700 }}
-                            >
-                              {`${(percent * 100).toFixed(0)}%`}
-                            </text>
-                          )
-                        }}
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value: number) => `${value} sự kiện`} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="h-[200px] flex items-center justify-center">
-                    <div className="text-center">
-                      <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-2" />
-                      <p className="text-sm text-gray-400">{t('events_noEvents')}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Side stats */}
-              <div className="flex flex-col gap-4 shrink-0 min-w-[140px]">
-                <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
-                  <div className="flex items-center gap-2 mb-1">
-                    <User className="w-4 h-4 text-blue-600" />
-                    <span className="text-xs font-medium text-black">{t('events_personal')}</span>
-                  </div>
-                  <p className="text-2xl font-bold text-black">{stats?.personalEvents || 0}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {stats && stats.totalEvents > 0
-                      ? `${((stats.personalEvents / stats.totalEvents) * 100).toFixed(0)}%`
-                      : '0%'}
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Users className="w-4 h-4 text-purple-600" />
-                    <span className="text-xs font-medium text-black">{t('events_group')}</span>
-                  </div>
-                  <p className="text-2xl font-bold text-black">{stats?.groupEvents || 0}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
-                    {stats && stats.totalEvents > 0
-                      ? `${((stats.groupEvents / stats.totalEvents) * 100).toFixed(0)}%`
-                      : '0%'}
-                  </p>
-                </div>
-
-                <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
-                  <span className="text-xs text-gray-500 font-medium">Tổng sự kiện</span>
-                  <p className="text-2xl font-bold text-gray-700 mt-1">{stats?.totalEvents || 0}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Legend */}
-            {stats && stats.totalEvents > 0 && (
-              <div className="flex items-center justify-center gap-6 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-blue-500" />
-                  <span className="text-xs text-gray-600">{t('events_personal')}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-purple-500" />
-                  <span className="text-xs text-gray-600">{t('events_group')}</span>
-                </div>
-              </div>
-            )}
-          </Card>
-
-          {/* Bar Chart: Events by Priority */}
-          <Card className="p-4">
-            <h3 className="font-semibold flex items-center gap-2 mb-3">
-              <BarChart3 className="w-4 h-4 text-orange-600" />
-              {t('events_byPriority')}
-            </h3>
-            {priorityData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={200}>
-                <BarChart data={priorityData} layout="vertical">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis type="number" allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" width={80} />
-                  <Tooltip formatter={(value: number) => `${value} sự kiện`} />
-                  <Bar dataKey="count" radius={[0, 6, 6, 0]}>
-                    {priorityData.map((entry, index) => (
-                      <Cell key={`bar-${index}`} fill={entry.fill} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[200px] flex items-center justify-center">
-                <p className="text-sm text-gray-400">{t('events_noPriorityData')}</p>
-              </div>
-            )}
-          </Card>
+      {/* Recent Events */}
+      <Card className="p-4 flex flex-col" style={{ maxHeight: '420px' }}>
+        <div className="flex items-center justify-between mb-3 shrink-0">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-purple-600" />
+            {t('events_recent')}
+          </h3>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">{recentEvents.length} sự kiện</span>
+          </div>
         </div>
 
-        {/* Upcoming Events */}
-        <Card className="p-4 xl:col-span-1 flex flex-col" style={{ maxHeight: '560px' }}>
-          <div className="flex items-center justify-between mb-3 shrink-0">
-            <h3 className="font-semibold flex items-center gap-2">
-              <Clock className="w-4 h-4 text-green-600" />
-              {t('events_upcoming')}
-            </h3>
-            <span className="text-xs text-gray-400">{upcomingEvents.length} sự kiện</span>
+        {/* Search */}
+        <div className="relative mb-3 shrink-0">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+          <Input
+            placeholder={t('events_searchPlaceholder')}
+            value={searchKeyword}
+            onChange={e => setSearchKeyword(e.target.value)}
+            className="pl-8 h-8 text-xs"
+          />
+        </div>
+
+        {filteredEvents.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-8">
+            <Calendar className="w-10 h-10 text-gray-200 mb-2" />
+            <p className="text-sm text-gray-400 text-center">{t('events_none')}</p>
           </div>
-
+        ) : (
           <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-            {upcomingEvents.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Calendar className="w-12 h-12 text-gray-200 mb-2" />
-                <p className="text-sm text-gray-400 text-center">{t('events_noUpcoming')}</p>
-              </div>
-            ) : (
-              upcomingEvents.map(event => {
-                const now = new Date().getTime()
-                const start = new Date(event.startTime).getTime()
-                const diffMs = start - now
-                const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
-                const diffDays = Math.floor(diffHours / 24)
-
-                let timeLabel = ''
-                if (diffDays > 0) {
-                  timeLabel = t('events_daysLeft').replace('{days}', String(diffDays))
-                } else if (diffHours > 0) {
-                  timeLabel = t('events_hoursLeft').replace('{hours}', String(diffHours))
-                } else {
-                  timeLabel = t('events_aboutToStart')
-                }
-
-                return (
-                  <div
-                    key={event.eventId}
-                    className="p-3 rounded-lg border border-green-100 bg-white hover:border-green-300 hover:bg-green-50/30 transition-all group"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{event.title}</p>
-                        {event.eventDescription && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{event.eventDescription}</p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span className={`text-xs px-2 py-1 rounded-lg font-medium ${
-                            diffDays === 0 && diffHours < 2
-                              ? 'bg-red-100 text-red-700'
-                              : diffDays === 0
-                              ? 'bg-orange-100 text-orange-700'
-                              : 'bg-green-100 text-green-700'
-                          }`}>
-                            {timeLabel}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {formatDateTime(event.startTime)}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          {event.isOnline ? (
-                            <span className="text-xs text-blue-600 flex items-center gap-0.5">
-                              <Video className="w-3 h-3" /> {t('events_online')}
-                            </span>
-                          ) : event.location ? (
-                            <span className="text-xs text-gray-500 flex items-center gap-0.5">
-                              <MapPin className="w-3 h-3" /> {event.location}
-                            </span>
-                          ) : null}
-                          {event.invitedEmails && event.invitedEmails.length > 0 && (
-                            <span className="text-xs text-purple-600 flex items-center gap-0.5">
-                              <Users className="w-3 h-3" /> {event.invitedEmails.length}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleOpenEdit(event) }}
-                          className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
-                          title={t('common_update')}
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setDeletingEvent(event) }}
-                          className="p-1.5 rounded-md text-red-500 hover:bg-red-50 transition-colors"
-                          title={t('common_delete')}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+            {filteredEvents.map(event => (
+              <div
+                key={event.eventId}
+                className="p-3 rounded-lg border border-gray-100 bg-white hover:border-purple-200 hover:bg-purple-50/30 transition-all cursor-pointer group"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-900 truncate">{event.title}</p>
+                    {event.eventDescription && (
+                      <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{event.eventDescription}</p>
+                    )}
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      <span className={`text-xs px-2 py-1 rounded-lg font-medium ${STATUS_COLORS[event.status] || ''}`}>
+                        {STATUS_LABELS[event.status] || event.status}
+                      </span>
+                      <span className="text-xs text-gray-400 flex items-center gap-0.5">
+                        <Clock className="w-3 h-3" />
+                        {formatDateTime(event.startTime)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      {event.isOnline ? (
+                        <span className="text-xs text-blue-600 flex items-center gap-0.5">
+                          <Video className="w-3 h-3" /> {t('events_online')}
+                        </span>
+                      ) : event.location ? (
+                        <span className="text-xs text-gray-500 flex items-center gap-0.5">
+                          <MapPin className="w-3 h-3" /> {event.location}
+                        </span>
+                      ) : null}
+                      {event.invitedEmails && event.invitedEmails.length > 0 && (
+                        <span className="text-xs text-purple-600 flex items-center gap-0.5">
+                          <Users className="w-3 h-3" /> {event.invitedEmails.length} {t('events_people')}
+                        </span>
+                      )}
                     </div>
                   </div>
-                )
-              })
-            )}
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleOpenEdit(event) }}
+                      className="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition-colors"
+                      title={t('common_update')}
+                    >
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeletingEvent(event) }}
+                      className="p-1.5 rounded-md text-red-500 hover:bg-red-50 transition-colors"
+                      title={t('common_delete')}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+        )}
+      </Card>
+
+      {/* Stats row: Events in year + Events by priority */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Pie Chart: Events in year */}
+        <Card className="p-4">
+          <h3 className="font-semibold flex items-center gap-2 mb-3">
+            <Calendar className="w-4 h-4 text-purple-600" />
+            Sự kiện trong năm {new Date().getFullYear()}
+          </h3>
+
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              {stats && (stats.totalEvents > 0) ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={pieData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={90}
+                      innerRadius={55}
+                      dataKey="value"
+                      label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                        const RADIAN = Math.PI / 180
+                        const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                        const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                        const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                        return (
+                          <text
+                            x={x}
+                            y={y}
+                            fill="white"
+                            textAnchor="middle"
+                            dominantBaseline="central"
+                            style={{ fontSize: 14, fontWeight: 700 }}
+                          >
+                            {`${(percent * 100).toFixed(0)}%`}
+                          </text>
+                        )
+                      }}
+                    >
+                      {pieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => `${value} sự kiện`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-[220px] flex items-center justify-center">
+                  <div className="text-center">
+                    <Calendar className="w-12 h-12 text-gray-200 mx-auto mb-2" />
+                    <p className="text-sm text-gray-400">{t('events_noEvents')}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-3 shrink-0 min-w-[140px]">
+              <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <User className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-medium text-black">{t('events_personal')}</span>
+                </div>
+                <p className="text-2xl font-bold text-black">{stats?.personalEvents || 0}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {stats && stats.totalEvents > 0
+                    ? `${((stats.personalEvents / stats.totalEvents) * 100).toFixed(0)}%`
+                    : '0%'}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-4 h-4 text-purple-600" />
+                  <span className="text-xs font-medium text-black">{t('events_group')}</span>
+                </div>
+                <p className="text-2xl font-bold text-black">{stats?.groupEvents || 0}</p>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {stats && stats.totalEvents > 0
+                    ? `${((stats.groupEvents / stats.totalEvents) * 100).toFixed(0)}%`
+                    : '0%'}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+                <span className="text-xs text-gray-500 font-medium">Tổng sự kiện</span>
+                <p className="text-2xl font-bold text-gray-700 mt-1">{stats?.totalEvents || 0}</p>
+              </div>
+            </div>
+          </div>
+
+          {stats && stats.totalEvents > 0 && (
+            <div className="flex items-center justify-center gap-6 mt-3">
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-blue-500" />
+                <span className="text-xs text-gray-600">{t('events_personal')}</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-purple-500" />
+                <span className="text-xs text-gray-600">{t('events_group')}</span>
+              </div>
+            </div>
+          )}
+        </Card>
+
+        {/* Bar Chart: Events by Priority */}
+        <Card className="p-4">
+          <h3 className="font-semibold flex items-center gap-2 mb-3">
+            <BarChart3 className="w-4 h-4 text-orange-600" />
+            {t('events_byPriority')}
+          </h3>
+          {priorityData.length > 0 ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={priorityData} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis type="category" dataKey="name" width={100} />
+                <Tooltip formatter={(value: number) => `${value} sự kiện`} />
+                <Bar dataKey="count" radius={[0, 6, 6, 0]}>
+                  {priorityData.map((entry, index) => (
+                    <Cell key={`bar-${index}`} fill={entry.fill} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[280px] flex items-center justify-center">
+              <p className="text-sm text-gray-400">{t('events_noPriorityData')}</p>
+            </div>
+          )}
         </Card>
       </div>
 
