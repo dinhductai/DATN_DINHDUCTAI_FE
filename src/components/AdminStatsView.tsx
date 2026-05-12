@@ -317,38 +317,43 @@ export function AdminStatsView() {
             <p className="text-sm text-gray-500">Tỷ lệ phân bổ tháng này</p>
           </div>
           {thisMonthPieData.length > 0 && thisMonthTotal > 0 ? (
-            <div className="flex items-center justify-between">
-              <ResponsiveContainer width="60%" height={250}>
-                <PieChart>
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e5e7eb',
-                      borderRadius: '8px'
-                    }}
-                    formatter={(value: number) => [`${value} (${((value / thisMonthTotal) * 100).toFixed(1)}%)`, 'Số lượng']}
-                  />
-                  <Pie
-                    data={thisMonthPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={4}
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                    labelLine={{ stroke: '#888', strokeWidth: 1 }}
-                  >
-                    {thisMonthPieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-col gap-4 pr-8">
+            <div className="flex items-stretch gap-8">
+              {/* Pie chart */}
+              <div className="flex-1 flex justify-center items-center">
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #e5e7eb',
+                        borderRadius: '8px'
+                      }}
+                      formatter={(value: number) => [`${value} (${((value / thisMonthTotal) * 100).toFixed(1)}%)`, 'Số lượng']}
+                    />
+                    <Pie
+                      data={thisMonthPieData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={4}
+                      dataKey="value"
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                      labelLine={{ stroke: '#888', strokeWidth: 1 }}
+                    >
+                      {thisMonthPieData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Legend + stats */}
+              <div className="flex flex-col justify-center gap-4 w-48 flex-shrink-0">
                 {/* Events change */}
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="w-3 h-3 rounded-full bg-[#3b82f6]" />
+                  <div className="w-3 h-3 rounded-full bg-[#3b82f6] flex-shrink-0" />
                   <div>
                     <p className="text-sm text-gray-500">Sự kiện</p>
                     <p className={`text-lg font-semibold ${(monthlyCreation?.eventsChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
@@ -357,7 +362,7 @@ export function AdminStatsView() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
-                  <div className="w-3 h-3 rounded-full bg-[#10b981]" />
+                  <div className="w-3 h-3 rounded-full bg-[#10b981] flex-shrink-0" />
                   <div>
                     <p className="text-sm text-gray-500">Công việc</p>
                     <p className={`text-lg font-semibold ${(monthlyCreation?.tasksChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-500'}`}>
