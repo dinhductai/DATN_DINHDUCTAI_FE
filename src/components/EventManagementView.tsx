@@ -272,7 +272,7 @@ export function EventManagementView() {
                         <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{event.eventDescription}</p>
                       )}
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${STATUS_COLORS[event.status] || ''}`}>
+                        <span className={`text-xs px-2 py-1 rounded-lg font-medium ${STATUS_COLORS[event.status] || ''}`}>
                           {STATUS_LABELS[event.status] || event.status}
                         </span>
                         <span className="text-xs text-gray-400 flex items-center gap-0.5">
@@ -502,7 +502,7 @@ export function EventManagementView() {
                           <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{event.eventDescription}</p>
                         )}
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                          <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                          <span className={`text-xs px-2 py-1 rounded-lg font-medium ${
                             diffDays === 0 && diffHours < 2
                               ? 'bg-red-100 text-red-700'
                               : diffDays === 0
