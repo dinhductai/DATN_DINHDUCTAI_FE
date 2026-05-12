@@ -20,7 +20,7 @@ interface ScheduleHeaderProps {
 export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [currentUser, setCurrentUser] = useState<{ userName: string; profile?: string } | null>(null)
+  const [currentUser, setCurrentUser] = useState<{ userName: string; email?: string; profile?: string } | null>(null)
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -36,6 +36,10 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
   const [notifTotalPages, setNotifTotalPages] = useState(1)
   const [notifLoading, setNotifLoading] = useState(false)
   const notifRef = useRef<HTMLDivElement>(null)
+
+  // User menu state
+  const [showUserMenu, setShowUserMenu] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetchCurrentUser()
@@ -65,6 +69,9 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setShowNotifications(false)
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false)
+      }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -73,7 +80,7 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
   const fetchCurrentUser = async () => {
     try {
       const user = await userService.getMe()
-      setCurrentUser({ userName: user.userName, profile: user.profile })
+      setCurrentUser({ userName: user.userName, email: user.email, profile: user.profile })
     } catch (error) {
       console.error('Error fetching current user:', error)
     }
@@ -271,15 +278,17 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               <Button
                 variant="ghost"
                 size="icon"
-                className="relative text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                className="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
                 onClick={() => setShowNotifications((v) => !v)}
               >
-                <Bell className="w-5 h-5" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
-                )}
+                <div className="relative inline-block">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 translate-x-px -translate-y-px min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
               </Button>
 
               {showNotifications && (
@@ -371,17 +380,45 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
               )}
             </div>
 
-            <Avatar
-              className="w-9 h-9 cursor-pointer hover:ring-2 hover:ring-blue-200 dark:hover:ring-blue-700 transition-all"
-              onClick={() => navigate('/profile')}
-            >
-              <ImageWithFallback
-                src={currentUser?.profile || '/profile_picture.png'}
-                alt={currentUser?.userName || 'User'}
-              />
-              <AvatarFallback>{currentUser?.userName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-            </Avatar>
-            <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+            <div className="relative" ref={userMenuRef}>
+              <button
+                onClick={() => setShowUserMenu((v) => !v)}
+                className="flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg px-2 py-1 transition-colors"
+              >
+                <Avatar className="w-9 h-9">
+                  <ImageWithFallback
+                    src={currentUser?.profile || '/profile_picture.png'}
+                    alt={currentUser?.userName || 'User'}
+                  />
+                  <AvatarFallback>{currentUser?.userName?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                </Avatar>
+                <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />
+              </button>
+
+              {showUserMenu && (
+                <div className="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                  style={{ right: '0', left: '-250px' }}>
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Tài khoản</span>
+                  </div>
+                  {/* User info */}
+                  <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{currentUser?.userName || 'User'}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{currentUser?.email || ''}</p>
+                  </div>
+                  {/* Actions */}
+                  <div className="py-1">
+                    <button
+                      onClick={() => { navigate('/profile'); setShowUserMenu(false) }}
+                      className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                    >
+                      {t('header_profile') || 'Hồ sơ cá nhân'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -165,9 +165,11 @@ export function ProfilePage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative">
-              <Bell className="w-5 h-5 text-gray-600" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
+            <button className="relative p-1">
+              <div className="relative">
+                <Bell className="w-5 h-5 text-gray-600" />
+                <span className="absolute -top-1 -right-1 translate-x-px -translate-y-px w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
+              </div>
             </button>
             <button
               onClick={() => setShowLogoutConfirm(true)}
