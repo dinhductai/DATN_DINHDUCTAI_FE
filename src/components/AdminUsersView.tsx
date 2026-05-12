@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -9,24 +9,41 @@ import { ConfirmDialog } from './ConfirmDialog'
 import { userService } from '../services/userService'
 
 export function AdminUsersView() {
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(0)
   const [editingUser, setEditingUser] = useState<User | null>(null)
   const [creatingUser, setCreatingUser] = useState(false)
   const [deletingUserId, setDeletingUserId] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [users, setUsers] = useState<User[]>([])
+  const [totalElements, setTotalElements] = useState(0)
+  const [totalPages, setTotalPages] = useState(0)
   const [searchKeyword, setSearchKeyword] = useState('')
-  const [isSearching, setIsSearching] = useState(false)
 
   const usersPerPage = 10
 
-  // Fetch users từ API
-  const fetchUsers = async () => {
+  // Build page numbers with ellipsis for large page counts
+  const getPageNumbers = () => {
+    const pages: (number | 'ellipsis')[] = []
+    if (totalPages <= 7) {
+      for (let i = 0; i < totalPages; i++) pages.push(i)
+    } else {
+      pages.push(0)
+      if (currentPage > 2) pages.push('ellipsis')
+      const start = Math.max(1, currentPage - 1)
+      const end = Math.min(totalPages - 2, currentPage + 1)
+      for (let i = start; i <= end; i++) pages.push(i)
+      if (currentPage < totalPages - 3) pages.push('ellipsis')
+      pages.push(totalPages - 1)
+    }
+    return pages
+  }
+
+  // Fetch users từ API theo page
+  const fetchUsers = useCallback(async (page: number) => {
     try {
       setLoading(true)
-      const data = await userService.getAllUsers()
-      const filteredData = data.filter((u: any) => u.email?.toLowerCase() !== 'admin@gmail.com')
-      const mappedUsers: User[] = filteredData.map((u: any) => ({
+      const data = await userService.getAllUsers(page, usersPerPage)
+      const mappedUsers: User[] = (data.users || []).map((u: any) => ({
         userId: u.userId,
         userName: u.userName,
         email: u.email,
@@ -35,24 +52,32 @@ export function AdminUsersView() {
         roles: u.roles || []
       }))
       setUsers(mappedUsers)
+      setTotalElements(data.totalElements)
+      setTotalPages(data.totalPages)
     } catch (error) {
       console.error('Error fetching users:', error)
       setUsers([])
+      setTotalElements(0)
+      setTotalPages(0)
     } finally {
       setLoading(false)
     }
-  }
+  }, [usersPerPage])
 
-  // Search users by keyword
-  const searchUsers = async (keyword: string) => {
-    if (!keyword.trim()) {
-      fetchUsers()
+  // Page change: fetch users (only when not searching)
+  useEffect(() => {
+    if (!searchKeyword) {
+      fetchUsers(currentPage)
+    }
+  }, [currentPage, searchKeyword, fetchUsers])
+
+  // Debounce search: only trigger on keyword changes
+  useEffect(() => {
+    if (!searchKeyword.trim()) {
       return
     }
-
-    try {
-      setIsSearching(true)
-      const data = await userService.searchUsers(keyword)
+    const timer = setTimeout(async () => {
+      const data = await userService.searchUsers(searchKeyword)
       const mappedUsers: User[] = data.map((u: any) => ({
         userId: u.userId,
         userName: u.userName,
@@ -62,39 +87,15 @@ export function AdminUsersView() {
         roles: u.roles || []
       }))
       setUsers(mappedUsers)
-      setCurrentPage(1) // Reset to first page
-    } catch (error) {
-      console.error('Error searching users:', error)
-      setUsers([])
-    } finally {
-      setIsSearching(false)
-    }
-  }
-
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      searchUsers(searchKeyword)
-    }, 500) // Wait 500ms after user stops typing
-
+      setTotalElements(mappedUsers.length)
+      setTotalPages(Math.max(1, Math.ceil(mappedUsers.length / usersPerPage)))
+      setCurrentPage(0)
+    }, 500)
     return () => clearTimeout(timer)
   }, [searchKeyword])
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
-
-  const totalPages = Math.ceil(users.length / usersPerPage)
-  const startIndex = (currentPage - 1) * usersPerPage
-  const currentUsers = users.slice(startIndex, startIndex + usersPerPage)
-
-  const handleUpdateClick = (user: User) => {
-    setEditingUser(user)
-  }
-
   const handleSaveUser = async () => {
-    // Refresh user list after save
-    await fetchUsers()
+    await fetchUsers(currentPage)
     setEditingUser(null)
     setCreatingUser(false)
   }
@@ -107,12 +108,22 @@ export function AdminUsersView() {
     if (deletingUserId) {
       try {
         await userService.deleteUser(deletingUserId)
-        await fetchUsers()
+        await fetchUsers(currentPage)
         setDeletingUserId(null)
       } catch (error) {
         console.error('Error deleting user:', error)
       }
     }
+  }
+
+  const handleUpdateClick = (user: User) => {
+    setEditingUser(user)
+  }
+
+  const startIndex = currentPage * usersPerPage
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
   }
 
   return (
@@ -142,11 +153,6 @@ export function AdminUsersView() {
             onChange={(e) => setSearchKeyword(e.target.value)}
             className="pl-10"
           />
-          {isSearching && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
-            </div>
-          )}
         </div>
       </Card>
 
@@ -176,7 +182,7 @@ export function AdminUsersView() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {currentUsers.map((user) => (
+                  {users.map((user) => (
                     <TableRow key={user.userId}>
                       <TableCell className="font-medium">{user.userId}</TableCell>
                       <TableCell>
@@ -244,35 +250,39 @@ export function AdminUsersView() {
         {/* Pagination */}
         <div className="flex items-center justify-between border-t px-6 py-4">
           <div className="text-sm text-gray-500">
-            Hiển thị {startIndex + 1} đến {Math.min(startIndex + usersPerPage, users.length)} của {users.length} người dùng
+            Hiển thị {users.length > 0 ? startIndex + 1 : 0}–{Math.min(startIndex + usersPerPage, totalElements)} của {totalElements} người dùng
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-1 overflow-x-auto max-w-full">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 0}
             >
               <ChevronLeft className="w-4 h-4" />
             </Button>
             <div className="flex items-center space-x-1">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setCurrentPage(page)}
-                  className={currentPage === page ? 'bg-purple-600 hover:bg-purple-700' : ''}
-                >
-                  {page}
-                </Button>
-              ))}
+              {getPageNumbers().map((p, idx) =>
+                p === 'ellipsis' ? (
+                  <span key={`ellipsis-${idx}`} className="px-1 text-gray-400 select-none">…</span>
+                ) : (
+                  <Button
+                    key={p}
+                    variant={currentPage === p ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => handlePageChange(p as number)}
+                    className={currentPage === p ? 'bg-purple-600 hover:bg-purple-700 min-w-[2rem]' : 'min-w-[2rem]'}
+                  >
+                    {(p as number) + 1}
+                  </Button>
+                )
+              )}
             </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages - 1}
             >
               <ChevronRight className="w-4 h-4" />
             </Button>

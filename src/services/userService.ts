@@ -64,13 +64,13 @@ export const userService = {
     }
   },
 
-  // Lấy tất cả users
-  getAllUsers: async (): Promise<any[]> => {
+  // Lấy users có phân trang
+  getAllUsers: async (page: number = 0, size: number = 10): Promise<{ users: any[]; totalElements: number; totalPages: number }> => {
     try {
       const token = localStorage.getItem('token');
-      console.log('[API] Fetching all users, token:', token ? 'present' : 'missing');
-      
-      const response = await fetch('/api/users', {
+      console.log('[API] Fetching users page', page, 'size', size, 'token:', token ? 'present' : 'missing');
+
+      const response = await fetch(`/api/users?page=${page}&size=${size}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -78,20 +78,24 @@ export const userService = {
         }
       });
 
-      console.log('[API] All users response status:', response.status, response.statusText);
+      console.log('[API] Users page response status:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('[API] All users error:', response.status, errorText);
-        throw new Error(`Failed to fetch all users: ${response.status} ${errorText}`);
+        console.error('[API] Users page error:', response.status, errorText);
+        throw new Error(`Failed to fetch users: ${response.status} ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('[API] All users data:', data);
-      return Array.isArray(data) ? data : [];
+      console.log('[API] Users page data:', data);
+      return {
+        users: Array.isArray(data.content) ? data.content : [],
+        totalElements: data.totalElements || 0,
+        totalPages: data.totalPages || 0
+      };
     } catch (error) {
-      console.error('Error fetching all users:', error);
-      return [];
+      console.error('Error fetching users:', error);
+      return { users: [], totalElements: 0, totalPages: 0 };
     }
   },
 
