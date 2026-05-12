@@ -340,9 +340,27 @@ export function EventManagementView() {
                         cx="50%"
                         cy="50%"
                         labelLine={false}
-                        label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
+                        innerRadius={50}
                         dataKey="value"
+                        label={({ cx, cy, midAngle, innerRadius, outerRadius, percent }) => {
+                          const RADIAN = Math.PI / 180
+                          const radius = innerRadius + (outerRadius - innerRadius) * 0.5
+                          const x = cx + radius * Math.cos(-midAngle * RADIAN)
+                          const y = cy + radius * Math.sin(-midAngle * RADIAN)
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill="white"
+                              textAnchor="middle"
+                              dominantBaseline="central"
+                              style={{ fontSize: 14, fontWeight: 700 }}
+                            >
+                              {`${(percent * 100).toFixed(0)}%`}
+                            </text>
+                          )
+                        }}
                       >
                         {pieData.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
@@ -362,7 +380,7 @@ export function EventManagementView() {
               </div>
 
               {/* Side stats */}
-              <div className="flex flex-col gap-3 shrink-0 min-w-[140px]">
+              <div className="flex flex-col gap-4 shrink-0 min-w-[140px]">
                 <div className="p-3 rounded-lg bg-blue-50 border border-blue-100">
                   <div className="flex items-center gap-2 mb-1">
                     <User className="w-4 h-4 text-blue-600" />
@@ -401,11 +419,11 @@ export function EventManagementView() {
               <div className="flex items-center justify-center gap-6 mt-3">
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-blue-500" />
-                  <span className="text-xs text-gray-600">Cá nhân ({stats.personalEvents})</span>
+                  <span className="text-xs text-gray-600">{t('events_personal')}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <div className="w-3 h-3 rounded-full bg-purple-500" />
-                  <span className="text-xs text-gray-600">Nhóm ({stats.groupEvents})</span>
+                  <span className="text-xs text-gray-600">{t('events_group')}</span>
                 </div>
               </div>
             )}
