@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronLeft, ChevronRight, Circle, Clock, CheckCircle2, Calendar } from 'lucide-react'
 import { Button } from './ui/button'
 import { Task } from './TaskFormDialog'
@@ -8,8 +8,10 @@ import { useTranslation } from '../contexts/LanguageContext'
 // ─── Config ───────────────────────────────────────────────────────────────────
 const PX_PER_MINUTE = 1   // 1px per minute  →  1 hour = 60px
 const HOUR_HEIGHT   = 60  // px per hour (must match grid lines in JSX)
+const VISIBLE_HOURS = 12  // only 12 hours shown, scroll to see more
 const DAY_HEADER_HEIGHT = 56 // px — sticky header height per day column
 const MIN_EVENT_SHOW_TITLE = 30 // minutes — below this, no title displayed
+const TOTAL_GRID_HEIGHT = HOUR_HEIGHT * VISIBLE_HOURS  // 720px total
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface TaskPosition {
@@ -121,6 +123,7 @@ function useCurrentTime(): Date {
 export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRangeChange, onCalendarClick, onTaskClick }: ScheduleViewProps) {
   const { t } = useTranslation()
   const now = useCurrentTime()
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   // ── Derived data per day ──────────────────────────────────────────────────
   const daysDiff    = Math.ceil((selectedDateRange.end.getTime() - selectedDateRange.start.getTime()) / (1000 * 60 * 60 * 24))
@@ -164,6 +167,14 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
       }, null)
     : null
   const currentTop = (now.getHours() * 60 + now.getMinutes()) * PX_PER_MINUTE
+
+  // Auto-scroll to current time on mount
+  useEffect(() => {
+    if (!scrollRef.current) return
+    const container = scrollRef.current
+    const scrollTop = currentTop - container.clientHeight / 2
+    container.scrollTop = Math.max(0, scrollTop)
+  }, [currentTop]) // run once on mount (currentTop is stable after first render)
 
   // Current time label
   const currentTimeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
@@ -341,32 +352,46 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
 
       {/* ── Time grid ───────────────────────────────────────────────────────────
         Layout: [80px time axis] | [flex-1 day columns × N]
-        Total time area: 24 h × 60 px/h = 1440 px.
+        Total time area: 12 h × 60 px/h = TOTAL_GRID_HEIGHT px.
         Each day column is position:relative so its events (position:absolute) are
         positioned relative to it.
       */}
-      <div className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden" style={{ height: 1440 + DAY_HEADER_HEIGHT }}>
-        {/* ── Time axis (left column) ─────────────────────────────── */}
-        <div className="flex-shrink-0 w-20 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col">
+      <div
+        ref={scrollRef}
+        className="flex bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg overflow-y-auto"
+        style={{ height: TOTAL_GRID_HEIGHT + DAY_HEADER_HEIGHT }}
+      >
+        {/* ── Time axis (left column) — scrollable with grid ─────── */}
+        <div
+          className="flex-shrink-0 w-20 bg-gray-50 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden"
+          style={{ height: 1440 + DAY_HEADER_HEIGHT }}
+        >
           {/* Header spacer */}
-          <div style={{ height: DAY_HEADER_HEIGHT, borderBottom: '1px solid var(--color-gray-200)' }} />
+          <div style={{ height: DAY_HEADER_HEIGHT, borderBottom: '1px solid var(--color-gray-200)', flexShrink: 0 }} />
 
           {/* 24 hour labels */}
-          {Array.from({ length: 24 }, (_, h) => (
-            <div
-              key={h}
-              className="text-xs text-gray-400 dark:text-gray-500 pr-2 text-right leading-none"
-              style={{ height: HOUR_HEIGHT }}
-            >
-              <span className="transform -translate-y-1/2 block">
-                {h.toString().padStart(2, '0')}:00
-              </span>
-            </div>
-          ))}
+          <div className="flex flex-col overflow-hidden">
+            {Array.from({ length: 24 }, (_, h) => (
+              <div
+                key={h}
+                className="text-xs text-gray-400 dark:text-gray-500 pr-2 text-right leading-none"
+                style={{ height: HOUR_HEIGHT, flexShrink: 0 }}
+              >
+                <span className="transform -translate-y-1/2 block">
+                  {h.toString().padStart(2, '0')}:00
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* ── Day columns ───────────────────────────────────────── */}
-        {tasksByDay.map(({ day, dayTasks, positions, isToday }, dayIdx) => (
+        {/* ── Day columns — clips overflow, scroll handled by outer ── */}
+        <div
+          className="flex-1 overflow-hidden"
+          style={{ height: 1440 + DAY_HEADER_HEIGHT }}
+        >
+          <div className="flex">
+            {tasksByDay.map(({ day, dayTasks, positions, isToday }, dayIdx) => (
           <div
             key={dayIdx}
             className="flex-1 relative border-r border-gray-200 dark:border-gray-700 last:border-r-0 px-1"
@@ -498,6 +523,8 @@ export function ScheduleView({ tasks, selectedDateRange, currentDate, onDateRang
             </div>
           </div>
         ))}
+          </div>
+        </div>
       </div>
     </div>
   )
