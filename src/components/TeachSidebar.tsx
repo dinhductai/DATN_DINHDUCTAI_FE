@@ -1,4 +1,4 @@
-import { Calendar, BarChart3, LogOut, Plus, Pin, CalendarDays } from 'lucide-react'
+import { Calendar, BarChart3, LogOut, Plus, CalendarDays } from 'lucide-react'
 import { Button } from './ui/button'
 import { useState } from 'react'
 import { ConfirmDialog } from './ConfirmDialog'
@@ -13,7 +13,6 @@ interface TeachSidebarProps {
 
 export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: TeachSidebarProps) {
   const { t } = useTranslation()
-  const [isPinned, setIsPinned] = useState(true)
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const menuItems = [
@@ -33,14 +32,6 @@ export function TeachSidebar({ activeView, onViewChange, onNewTask, onLogout }: 
             </div>
             <span className="font-semibold text-gray-900 dark:text-gray-100">{t('sidebar_appName')}</span>
           </div>
-          <button
-            onClick={() => setIsPinned(!isPinned)}
-            className="transition-colors"
-          >
-            <Pin
-              className={`w-4 h-4 ${isPinned ? 'text-blue-600 fill-blue-600' : 'text-gray-400 dark:text-gray-500'}`}
-            />
-          </button>
         </div>
       </div>
 
