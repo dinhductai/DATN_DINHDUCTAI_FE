@@ -33,7 +33,10 @@ export function ProfilePage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
   const [showSystemSettings, setShowSystemSettings] = useState(false)
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
+  const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
+    const saved = localStorage.getItem('notificationsEnabled')
+    return saved !== null ? saved === 'true' : true
+  })
   const [bannerIndex, setBannerIndex] = useState(0)
 
   const banners = ['/banner1.jpg', '/banner2.jpg']
@@ -353,7 +356,11 @@ export function ProfilePage() {
                           <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{t('profile_pushNotifDesc')}</p>
                         </div>
                         <button
-                          onClick={() => setNotificationsEnabled(!notificationsEnabled)}
+                          onClick={() => {
+                            const newValue = !notificationsEnabled
+                            setNotificationsEnabled(newValue)
+                            localStorage.setItem('notificationsEnabled', String(newValue))
+                          }}
                           style={{
                             position: 'relative',
                             height: '28px',

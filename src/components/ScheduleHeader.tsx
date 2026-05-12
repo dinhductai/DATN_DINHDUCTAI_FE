@@ -53,6 +53,9 @@ export function ScheduleHeader({ onOpenAIChat, onTaskClick }: ScheduleHeaderProp
     if (!token) return
 
     notificationService.connect((incoming) => {
+      // Only display realtime notification if the setting is enabled
+      const notificationsEnabled = localStorage.getItem('notificationsEnabled')
+      if (notificationsEnabled === 'false') return
       // New real-time notif: prepend to page 0 data only if on page 0
       setNotifications((prev) => [incoming, ...prev].slice(0, 5))
       setUnreadCount((c) => c + 1)

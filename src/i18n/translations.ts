@@ -246,7 +246,7 @@ export const translations = {
     profile_notifOff: 'Tắt',
     profile_pushNotif: 'Thông báo thời gian thực',
     profile_pushNotifDesc: 'Thông báo từ trình duyệt',
-    profile_systemSettings: 'Cài đặt hệ thống',
+    profile_systemSettings: 'Cài đặt',
     profile_darkMode: 'Chế độ tối',
     profile_darkModeDesc: 'Chuyển đổi chế độ tối/sáng',
     profile_language: 'Ngôn ngữ',
