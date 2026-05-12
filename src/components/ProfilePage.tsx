@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ArrowLeft, Bell, User, Mail, Image as ImageIcon, Calendar,
-  Settings, ChevronRight, Trash2, Moon, Sun, Globe, LogOut, Edit2
+  Settings, ChevronRight, Trash2, Moon, Sun, Globe, LogOut, Edit2,
+  ChevronLeft
 } from 'lucide-react'
 import { Button } from './ui/button'
 import { userService } from '../services/userService'
@@ -11,6 +12,8 @@ import { DeleteAccountDialog } from './DeleteAccountDialog'
 import { ConfirmDialog } from './ConfirmDialog'
 import { useTheme } from '../contexts/ThemeContext'
 import { useLanguage, useTranslation } from '../contexts/LanguageContext'
+import { NotificationItem } from '../types/notification'
+import { notificationService, formatNotificationTime } from '../services/notificationService'
 
 interface UserProfile {
   userId: number
@@ -31,13 +34,21 @@ export function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
   const [showSystemSettings, setShowSystemSettings] = useState(false)
   const [notificationsEnabled, setNotificationsEnabled] = useState(() => {
     const saved = localStorage.getItem('notificationsEnabled')
     return saved !== null ? saved === 'true' : true
   })
   const [bannerIndex, setBannerIndex] = useState(0)
+
+  // Notification state
+  const [notifications, setNotifications] = useState<NotificationItem[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [showNotifications, setShowNotifications] = useState(false)
+  const [notifPage, setNotifPage] = useState(0)
+  const [notifTotalPages, setNotifTotalPages] = useState(1)
+  const [notifLoading, setNotifLoading] = useState(false)
+  const notifRef = useRef<HTMLDivElement>(null)
 
   const banners = ['/banner1.jpg', '/banner2.jpg']
 
@@ -55,7 +66,67 @@ export function ProfilePage() {
       return;
     }
     loadUserProfile();
+    loadNotifications(0);
+
+    notificationService.connect((incoming) => {
+      const notificationsEnabled = localStorage.getItem('notificationsEnabled')
+      if (notificationsEnabled === 'false') return
+      setNotifications((prev) => [incoming, ...prev].slice(0, 5))
+      setUnreadCount((c) => c + 1)
+    })
+
+    return () => {
+      notificationService.disconnect()
+    }
   }, []);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+        setShowNotifications(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const loadNotifications = async (page: number) => {
+    try {
+      setNotifLoading(true)
+      const data = await notificationService.getNotifications(page, 5)
+      setNotifications(data.notifications)
+      setUnreadCount(data.unreadCount)
+      setNotifTotalPages(data.totalPages)
+      setNotifPage(page)
+    } catch (error) {
+      console.error('Error loading notifications:', error)
+    } finally {
+      setNotifLoading(false)
+    }
+  }
+
+  const handleMarkAsRead = useCallback(async (id: number) => {
+    try {
+      await notificationService.markAsRead(id)
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      )
+      setUnreadCount((c) => Math.max(0, c - 1))
+    } catch (error) {
+      console.error('Error marking as read:', error)
+    }
+  }, [])
+
+  const handleMarkAllAsRead = useCallback(async () => {
+    try {
+      await notificationService.markAllAsRead()
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
+      setUnreadCount(0)
+    } catch (error) {
+      console.error('Error marking all as read:', error)
+    }
+  }, [])
 
   const loadUserProfile = async () => {
     try {
@@ -168,12 +239,109 @@ export function ProfilePage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-1">
-              <div className="relative">
-                <Bell className="w-5 h-5 text-gray-600" />
-                <span className="absolute -top-1 -right-1 translate-x-px -translate-y-px w-4 h-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">1</span>
-              </div>
-            </button>
+            {/* Notification Bell */}
+            <div className="relative" ref={notifRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800"
+                onClick={() => setShowNotifications((v) => !v)}
+              >
+                <div className="relative inline-block">
+                  <Bell className="w-5 h-5" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 translate-x-px -translate-y-px min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </div>
+              </Button>
+
+              {showNotifications && (
+                <div className="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 z-50 overflow-hidden"
+                  style={{ right: '0' }}>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                    <span className="font-semibold text-gray-900 dark:text-gray-100 text-sm">{t('header_notifications')}</span>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={handleMarkAllAsRead}
+                        className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                      >
+                        {t('header_markAllRead')}
+                      </button>
+                    )}
+                  </div>
+
+                  <div
+                    className="overflow-y-auto notif-scroll"
+                    style={{ maxHeight: '24rem' }}
+                  >
+                    {notifLoading && notifications.length === 0 ? (
+                      <div className="py-10 text-center">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto" />
+                      </div>
+                    ) : notifications.length === 0 ? (
+                      <div className="py-10 text-center text-sm text-gray-400 dark:text-gray-500">
+                        {t('header_noNotifications')}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="divide-y divide-gray-50 dark:divide-gray-700/50">
+                          {notifications.map((n) => (
+                            <div
+                              key={n.id}
+                              onClick={() => !n.isRead && handleMarkAsRead(n.id)}
+                              className={`px-4 py-3 cursor-pointer transition-colors ${
+                                n.isRead
+                                  ? 'bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                  : 'bg-blue-50/60 dark:bg-blue-900/20 hover:bg-blue-100/70 dark:hover:bg-blue-900/30'
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <span className={`text-sm font-medium ${n.isRead ? 'text-gray-700 dark:text-gray-300' : 'text-gray-900 dark:text-gray-100'}`}>
+                                  {n.title}
+                                </span>
+                                {!n.isRead && (
+                                  <span className="mt-1 w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                                )}
+                              </div>
+                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 leading-relaxed">{n.content}</p>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 mt-1 block">
+                                {formatNotificationTime(n.createdAt)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {notifTotalPages > 1 && (
+                          <div className="flex items-center justify-between px-4 py-2 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                            <button
+                              onClick={() => loadNotifications(notifPage - 1)}
+                              disabled={notifPage === 0}
+                              className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <ChevronLeft className="w-3.5 h-3.5" />
+                              Trước
+                            </button>
+                            <span className="text-xs text-gray-500 dark:text-gray-400">
+                              {notifPage + 1} / {notifTotalPages}
+                            </span>
+                            <button
+                              onClick={() => loadNotifications(notifPage + 1)}
+                              disabled={notifPage >= notifTotalPages - 1}
+                              className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              Sau
+                              <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
             <button
               onClick={() => setShowLogoutConfirm(true)}
               className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -467,7 +635,7 @@ export function ProfilePage() {
                             <p style={{ fontSize: '14px', color: darkMode ? '#9ca3af' : '#6b7280', margin: 0 }}>{t('profile_languageDesc')}</p>
                           </div>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: darkMode ? '#374151' : 'white', borderRadius: '8px', padding: '4px', border: darkMode ? '1px solid #4b5563' : '1px solid #e5e7eb' }}>
+                        <div style={{ display: 'flex', items: 'center', gap: '8px', background: darkMode ? '#374151' : 'white', borderRadius: '8px', padding: '4px', border: darkMode ? '1px solid #4b5563' : '1px solid #e5e7eb' }}>
                           <button
                             onClick={() => setLanguage('VIE')}
                             style={{
