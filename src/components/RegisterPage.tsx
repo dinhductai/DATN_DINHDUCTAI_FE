@@ -40,23 +40,42 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     e.preventDefault()
     setError('')
 
-    if (!username.trim()) {
+    const trimmedUsername = username.trim()
+    const trimmedEmail = email.trim()
+    const trimmedPassword = password
+
+    if (!trimmedUsername) {
       setError(t('auth_usernameRequired'))
       return
     }
 
-    if (!email.trim()) {
+    if (!/^[a-zA-ZÀ-ỹ\s0-9]+$/.test(trimmedUsername)) {
+      setError(t('auth_usernameInvalidFormat'))
+      return
+    }
+
+    if (!trimmedEmail) {
       setError(t('auth_emailRequired'))
       return
     }
 
-    if (!password.trim()) {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(trimmedEmail)) {
+      setError(t('auth_emailInvalidFormat'))
+      return
+    }
+
+    if (!trimmedPassword) {
       setError(t('auth_passwordRequired'))
       return
     }
 
-    if (password.length < 6) {
-      setError(t('auth_passwordMinLength'))
+    const hasUpper = /[A-Z]/.test(trimmedPassword)
+    const hasLower = /[a-z]/.test(trimmedPassword)
+    const hasDigit = /[0-9]/.test(trimmedPassword)
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(trimmedPassword)
+    if (!hasUpper || !hasLower || !hasDigit || !hasSpecial || trimmedPassword.length < 5) {
+      setError(t('auth_passwordInvalidFormat'))
       return
     }
 
@@ -64,9 +83,9 @@ export function RegisterPage({ onRegister, onSwitchToLogin }: RegisterPageProps)
     setUploadProgress(t('auth_creatingAccount'))
 
     const requestBody = {
-      userName: username.trim(),
-      email: email.trim(),
-      password: password,
+      userName: trimmedUsername,
+      email: trimmedEmail,
+      password: trimmedPassword,
     }
 
     console.log('Registration request:', requestBody)

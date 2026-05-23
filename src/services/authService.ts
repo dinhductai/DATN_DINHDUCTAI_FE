@@ -102,3 +102,23 @@ export const uploadProfile = async (userId: number, file: File): Promise<UploadP
     throw error;
   }
 };
+
+export const forgotPassword = async (email: string): Promise<void> => {
+  try {
+    const response = await fetch('/api/users/reset-password', {
+      method: 'POST',
+      credentials: 'omit',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send reset password request');
+    }
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    throw error;
+  }
+};

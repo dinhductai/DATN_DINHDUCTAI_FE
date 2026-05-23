@@ -3,8 +3,8 @@ import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Checkbox } from './ui/checkbox'
-import { Eye, EyeOff } from 'lucide-react'
-import { login } from '../services/authService'
+import { Eye, EyeOff, X } from 'lucide-react'
+import { login, forgotPassword } from '../services/authService'
 import { useTranslation } from '../contexts/LanguageContext'
 
 interface LoginPageProps {
@@ -19,10 +19,20 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotStatus, setForgotStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [forgotEmailError, setForgotEmailError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(email.trim())) {
+      setError(t('auth_emailInvalidFormat'))
+      return
+    }
 
     try {
       const response = await login({ email, password })
@@ -39,6 +49,41 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
     } catch (error) {
       setError(t('auth_loginFailed'))
     }
+  }
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setForgotEmailError('')
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+    if (!emailRegex.test(forgotEmail.trim())) {
+      setForgotEmailError(t('auth_emailInvalidFormat'))
+      return
+    }
+    setForgotStatus('sending')
+    setError('')
+
+    try {
+      await forgotPassword(forgotEmail)
+      setForgotStatus('success')
+    } catch (err) {
+      setForgotStatus('error')
+    }
+  }
+
+  const openForgotPassword = () => {
+    setShowForgotPassword(true)
+    setForgotStatus('idle')
+    setForgotEmail('')
+    setForgotEmailError('')
+    setError('')
+  }
+
+  const closeForgotPassword = () => {
+    setShowForgotPassword(false)
+    setForgotStatus('idle')
+    setForgotEmail('')
+    setForgotEmailError('')
+    setError('')
   }
 
   return (
@@ -118,6 +163,7 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
               </div>
               <button
                 type="button"
+                onClick={openForgotPassword}
                 className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 {t('auth_forgotPassword')}
@@ -144,6 +190,97 @@ export function LoginPage({ onLogin, onSwitchToRegister }: LoginPageProps) {
           </form>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div className="bg-blue-600 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-semibold text-white">{t('auth_forgotPasswordTitle')}</h2>
+              <button
+                onClick={closeForgotPassword}
+                className="text-white/80 hover:text-white transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              {forgotStatus === 'success' ? (
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">{t('auth_forgotPasswordSuccess')}</h3>
+                  <p className="text-gray-500 mb-4">{t('auth_forgotPasswordBack')}</p>
+                  <Button
+                    onClick={closeForgotPassword}
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    {t('auth_loginBtn')}
+                  </Button>
+                </div>
+              ) : (
+                <>
+                  <p className="text-gray-600 mb-6 text-center">
+                    {t('auth_forgotPasswordDesc')}
+                  </p>
+
+                  {forgotStatus === 'error' && (
+                    <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
+                      {t('auth_forgotPasswordError')}
+                    </div>
+                  )}
+
+                  {forgotEmailError && (
+                    <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm mb-4">
+                      {forgotEmailError}
+                    </div>
+                  )}
+
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="forgotEmail">{t('auth_email')}</Label>
+                      <Input
+                        id="forgotEmail"
+                        type="email"
+                        placeholder={t('auth_forgotPasswordEmailPlaceholder')}
+                        value={forgotEmail}
+                        onChange={(e) => {
+                          setForgotEmail(e.target.value)
+                          setForgotEmailError('')
+                          setForgotStatus('idle')
+                        }}
+                        className="h-12 bg-gray-50 border-gray-200"
+                        required
+                      />
+                    </div>
+
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        type="button"
+                        onClick={closeForgotPassword}
+                        className="flex-1 h-12 bg-gray-100 hover:bg-gray-200 text-gray-700"
+                      >
+                        {t('common_cancel')}
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={forgotStatus === 'sending'}
+                        className="flex-1 h-12 bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                      >
+                        {forgotStatus === 'sending' ? t('auth_forgotPasswordSending') : t('auth_forgotPasswordBtn')}
+                      </Button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

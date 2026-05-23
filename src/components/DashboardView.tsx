@@ -1,6 +1,6 @@
 import { Card } from './ui/card'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LineChart, Line } from 'recharts'
-import { CheckCircle, Clock, Circle, TrendingUp, Calendar } from 'lucide-react'
+import { CheckCircle, Clock, Circle, Calendar } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { taskService, StatusTaskWeekResponse, DailyTaskCountResponse, TaskTimelineResponse, RecentTaskResponse, MonthlyEventCountResponse } from '../services/taskService'
 import { useTranslation } from '../contexts/LanguageContext'
@@ -137,10 +137,6 @@ export function DashboardView() {
             <div>
               <p className="text-sm text-gray-500 mb-1">{t('dashboard_completionRate')}</p>
               <p className="text-3xl font-semibold text-gray-900">{completionRate}%</p>
-              <div className="flex items-center space-x-1 mt-2">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">{t('dashboard_vsLastWeek')}</span>
-              </div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <CheckCircle className="w-6 h-6 text-green-600" />

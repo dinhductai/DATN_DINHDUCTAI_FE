@@ -215,8 +215,20 @@ export const translations = {
     auth_usernameRequired: 'Tên người dùng là bắt buộc',
     auth_emailRequired: 'Email là bắt buộc',
     auth_passwordRequired: 'Mật khẩu là bắt buộc',
-    auth_passwordMinLength: 'Mật khẩu phải có ít nhất 6 ký tự',
+    auth_usernameInvalidFormat: 'Tên người dùng sai định dạng',
+    auth_emailInvalidFormat: 'Email sai định dạng',
+    auth_passwordInvalidFormat: 'Mật khẩu sai định dạng',
     auth_registerFailed: 'Đăng ký thất bại. Vui lòng thử lại.',
+
+    // Forgot Password
+    auth_forgotPasswordTitle: 'Quên mật khẩu?',
+    auth_forgotPasswordDesc: 'Nhập địa chỉ email của bạn để khôi phục mật khẩu',
+    auth_forgotPasswordEmailPlaceholder: 'Nhập email của bạn',
+    auth_forgotPasswordBtn: 'Gửi yêu cầu',
+    auth_forgotPasswordSending: 'Đang gửi...',
+    auth_forgotPasswordSuccess: 'Mật khẩu mới đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.',
+    auth_forgotPasswordError: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+    auth_forgotPasswordBack: ' Quay lại đăng nhập',
 
     // Profile
     profile_backHome: 'Quay lại trang chủ',
@@ -476,8 +488,20 @@ export const translations = {
     auth_usernameRequired: 'Username is required',
     auth_emailRequired: 'Email is required',
     auth_passwordRequired: 'Password is required',
-    auth_passwordMinLength: 'Password must be at least 6 characters',
+    auth_usernameInvalidFormat: 'Username is in an invalid format',
+    auth_emailInvalidFormat: 'Email is in an invalid format',
+    auth_passwordInvalidFormat: 'Password is in an invalid format',
     auth_registerFailed: 'Registration failed. Please try again.',
+
+    // Forgot Password
+    auth_forgotPasswordTitle: 'Forgot Password?',
+    auth_forgotPasswordDesc: 'Enter your email address to recover your password',
+    auth_forgotPasswordEmailPlaceholder: 'Enter your email',
+    auth_forgotPasswordBtn: 'Send Request',
+    auth_forgotPasswordSending: 'Sending...',
+    auth_forgotPasswordSuccess: 'A new password has been sent to your email. Please check your inbox.',
+    auth_forgotPasswordError: 'An error occurred. Please try again.',
+    auth_forgotPasswordBack: ' Back to login',
 
     // Profile
     profile_backHome: 'Back to home',
